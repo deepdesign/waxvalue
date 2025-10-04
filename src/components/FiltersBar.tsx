@@ -91,10 +91,14 @@ export function FiltersBar({
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
       <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 mb-4">
-        <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
+        <div className="flex items-center space-x-4">
+          <span className="text-sm text-gray-500">
+            Showing {filteredItems} of {totalItems} items
+          </span>
+          
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 w-full sm:w-auto justify-center sm:justify-start"
+            className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-gray-900"
           >
             <FunnelIcon className="h-4 w-4 mr-2" />
             Filters
@@ -104,16 +108,12 @@ export function FiltersBar({
               </span>
             )}
           </button>
-          
-          <span className="text-sm text-gray-500 text-center sm:text-left">
-            Showing {filteredItems} of {totalItems} items
-          </span>
         </div>
 
         {hasActiveFilters && (
           <button
             onClick={onClearFilters}
-            className="inline-flex items-center justify-center text-sm text-gray-500 hover:text-gray-700 w-full sm:w-auto"
+            className="inline-flex items-center justify-center text-sm text-gray-500 hover:text-gray-700"
           >
             <XMarkIcon className="h-4 w-4 mr-1" />
             Clear all
