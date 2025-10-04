@@ -51,21 +51,25 @@ export function StrategyForm({ onSave, onPreview, onCancel, initialData, isLoadi
     register,
     handleSubmit,
     formState: { errors },
-    watch,
-    setValue,
   } = useForm<StrategyFormData>({
     resolver: zodResolver(strategySchema),
     defaultValues: {
       name: '',
       anchor: 'median',
       offsetType: 'percentage',
-      offsetValue: 10,
+      offsetValue: 0,
       conditionWeights: {
         media: 0.7,
         sleeve: 0.3,
       },
-      rounding: 0.50,
-      maxChangePercent: 25,
+      scarcityBoost: {
+        threshold: 5,
+        boostPercent: 20,
+      },
+      floor: 1,
+      ceiling: 1000,
+      rounding: 0.25,
+      maxChangePercent: 50,
       isActive: true,
       ...initialData,
     },
@@ -76,8 +80,8 @@ export function StrategyForm({ onSave, onPreview, onCancel, initialData, isLoadi
       await onSave(data)
       toast.success('Strategy saved successfully!')
     } catch (error) {
+      console.error('Save error:', error)
       toast.error('Failed to save strategy')
-      console.error('Strategy save error:', error)
     }
   }
 
@@ -87,244 +91,252 @@ export function StrategyForm({ onSave, onPreview, onCancel, initialData, isLoadi
       setShowPreview(true)
       toast.success('Preview generated!')
     } catch (error) {
-      toast.error('Failed to generate preview')
       console.error('Preview error:', error)
     }
   }
 
+  const inputClasses = "block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
+  const labelClasses = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+  const errorClasses = "mt-1 text-sm text-red-600 dark:text-red-400"
+
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
       <div className="mb-6">
-        <h3 className="text-lg font-medium text-gray-900">Pricing Strategy</h3>
-        <p className="text-sm text-gray-500">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Pricing Strategy</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           Configure how prices are calculated based on market data
         </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Basic Settings */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Strategy Name
-            </label>
-            <input
-              {...register('name')}
-              type="text"
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-              placeholder="e.g., Conservative Pricing"
-            />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-            )}
-          </div>
+        <div className="space-y-4">
+          <h4 className="text-md font-medium text-gray-900 dark:text-gray-100">Basic Settings</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="name" className={labelClasses}>
+                Strategy Name
+              </label>
+              <input
+                {...register('name')}
+                type="text"
+                className={inputClasses}
+                placeholder="e.g., Conservative Pricing"
+              />
+              {errors.name && (
+                <p className={errorClasses}>{errors.name.message}</p>
+              )}
+            </div>
 
-          <div>
-            <label htmlFor="anchor" className="block text-sm font-medium text-gray-700 mb-1">
-              Market Anchor
-            </label>
-            <select {...register('anchor')} className="input-field">
-              <option value="median">Median Price</option>
-              <option value="mean">Average Price</option>
-              <option value="cheapest">Cheapest Available</option>
-              <option value="most_expensive">Most Expensive</option>
-              <option value="percentile">Custom Percentile</option>
-            </select>
-            {errors.anchor && (
-              <p className="mt-1 text-sm text-red-600">{errors.anchor.message}</p>
-            )}
+            <div>
+              <label htmlFor="anchor" className={labelClasses}>
+                Market Anchor
+              </label>
+              <select {...register('anchor')} className={inputClasses}>
+                <option value="median">Median Price</option>
+                <option value="mean">Average Price</option>
+                <option value="cheapest">Cheapest Available</option>
+                <option value="most_expensive">Most Expensive</option>
+                <option value="percentile">Percentile</option>
+              </select>
+              {errors.anchor && (
+                <p className={errorClasses}>{errors.anchor.message}</p>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Offset Settings */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="offsetType" className="block text-sm font-medium text-gray-700 mb-1">
-              Offset Type
-            </label>
-            <select {...register('offsetType')} className="input-field">
-              <option value="percentage">Percentage</option>
-              <option value="fixed">Fixed Amount</option>
-            </select>
-            {errors.offsetType && (
-              <p className="mt-1 text-sm text-red-600">{errors.offsetType.message}</p>
-            )}
-          </div>
+        <div className="space-y-4">
+          <h4 className="text-md font-medium text-gray-900 dark:text-gray-100">Offset Settings</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="offsetType" className={labelClasses}>
+                Offset Type
+              </label>
+              <select {...register('offsetType')} className={inputClasses}>
+                <option value="percentage">Percentage</option>
+                <option value="fixed">Fixed Amount</option>
+              </select>
+              {errors.offsetType && (
+                <p className={errorClasses}>{errors.offsetType.message}</p>
+              )}
+            </div>
 
-          <div>
-            <label htmlFor="offsetValue" className="block text-sm font-medium text-gray-700 mb-1">
-              Offset Value
-            </label>
-            <div className="relative">
+            <div>
+              <label htmlFor="offsetValue" className={labelClasses}>
+                Offset Value
+              </label>
               <input
                 {...register('offsetValue', { valueAsNumber: true })}
                 type="number"
-                step="0.1"
-                className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                placeholder="10"
+                step="0.01"
+                className={inputClasses}
+                placeholder="0.00"
               />
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <span className="text-gray-500 text-sm">
-                  {watch('offsetType') === 'percentage' ? '%' : '$'}
-                </span>
-              </div>
+              {errors.offsetValue && (
+                <p className={errorClasses}>{errors.offsetValue.message}</p>
+              )}
             </div>
-            {errors.offsetValue && (
-              <p className="mt-1 text-sm text-red-600">{errors.offsetValue.message}</p>
-            )}
           </div>
         </div>
 
         {/* Condition Weights */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Condition Importance
-          </label>
+        <div className="space-y-4">
+          <h4 className="text-md font-medium text-gray-900 dark:text-gray-100">Condition Weights</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="mediaWeight" className="block text-xs text-gray-500 mb-1">
+              <label htmlFor="mediaWeight" className={labelClasses}>
                 Media Condition Weight
               </label>
               <input
                 {...register('conditionWeights.media', { valueAsNumber: true })}
-                type="range"
+                type="number"
+                step="0.1"
                 min="0"
                 max="1"
-                step="0.1"
-                className="w-full"
+                className={inputClasses}
+                placeholder="0.7"
               />
-              <div className="text-xs text-gray-500 mt-1">
-                {watch('conditionWeights.media')}
-              </div>
+              {errors.conditionWeights?.media && (
+                <p className={errorClasses}>{errors.conditionWeights.media.message}</p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="sleeveWeight" className="block text-xs text-gray-500 mb-1">
+              <label htmlFor="sleeveWeight" className={labelClasses}>
                 Sleeve Condition Weight
               </label>
               <input
                 {...register('conditionWeights.sleeve', { valueAsNumber: true })}
-                type="range"
+                type="number"
+                step="0.1"
                 min="0"
                 max="1"
-                step="0.1"
-                className="w-full"
+                className={inputClasses}
+                placeholder="0.3"
               />
-              <div className="text-xs text-gray-500 mt-1">
-                {watch('conditionWeights.sleeve')}
-              </div>
+              {errors.conditionWeights?.sleeve && (
+                <p className={errorClasses}>{errors.conditionWeights.sleeve.message}</p>
+              )}
             </div>
           </div>
         </div>
 
         {/* Scarcity Boost */}
-        <div className="border border-gray-200 rounded-lg p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-sm font-medium text-gray-900">Scarcity Boost</h4>
-            <input
-              type="checkbox"
-              {...register('scarcityBoost.threshold')}
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-            />
-          </div>
-          
+        <div className="space-y-4">
+          <h4 className="text-md font-medium text-gray-900 dark:text-gray-100">Scarcity Boost</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="scarcityThreshold" className="block text-xs text-gray-500 mb-1">
-                Minimum Listings for Boost
+              <label htmlFor="scarcityThreshold" className={labelClasses}>
+                Threshold (items)
               </label>
               <input
                 {...register('scarcityBoost.threshold', { valueAsNumber: true })}
                 type="number"
-                className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                min="0"
+                className={inputClasses}
                 placeholder="5"
               />
+              {errors.scarcityBoost?.threshold && (
+                <p className={errorClasses}>{errors.scarcityBoost.threshold.message}</p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="boostPercent" className="block text-xs text-gray-500 mb-1">
+              <label htmlFor="scarcityBoost" className={labelClasses}>
                 Boost Percentage
               </label>
               <input
                 {...register('scarcityBoost.boostPercent', { valueAsNumber: true })}
                 type="number"
-                step="0.1"
-                className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                placeholder="15"
+                min="0"
+                className={inputClasses}
+                placeholder="20"
               />
+              {errors.scarcityBoost?.boostPercent && (
+                <p className={errorClasses}>{errors.scarcityBoost.boostPercent.message}</p>
+              )}
             </div>
           </div>
         </div>
 
         {/* Price Limits */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label htmlFor="floor" className="block text-sm font-medium text-gray-700 mb-1">
-              Minimum Price
-            </label>
-            <input
-              {...register('floor', { valueAsNumber: true })}
-              type="number"
-              step="0.01"
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-              placeholder="No minimum"
-            />
-            {errors.floor && (
-              <p className="mt-1 text-sm text-red-600">{errors.floor.message}</p>
-            )}
-          </div>
+        <div className="space-y-4">
+          <h4 className="text-md font-medium text-gray-900 dark:text-gray-100">Price Limits</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label htmlFor="floor" className={labelClasses}>
+                Minimum Price
+              </label>
+              <input
+                {...register('floor', { valueAsNumber: true })}
+                type="number"
+                step="0.01"
+                min="0"
+                className={inputClasses}
+                placeholder="1.00"
+              />
+              {errors.floor && (
+                <p className={errorClasses}>{errors.floor.message}</p>
+              )}
+            </div>
 
-          <div>
-            <label htmlFor="ceiling" className="block text-sm font-medium text-gray-700 mb-1">
-              Maximum Price
-            </label>
-            <input
-              {...register('ceiling', { valueAsNumber: true })}
-              type="number"
-              step="0.01"
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-              placeholder="No maximum"
-            />
-            {errors.ceiling && (
-              <p className="mt-1 text-sm text-red-600">{errors.ceiling.message}</p>
-            )}
-          </div>
+            <div>
+              <label htmlFor="ceiling" className={labelClasses}>
+                Maximum Price
+              </label>
+              <input
+                {...register('ceiling', { valueAsNumber: true })}
+                type="number"
+                step="0.01"
+                min="0"
+                className={inputClasses}
+                placeholder="1000.00"
+              />
+              {errors.ceiling && (
+                <p className={errorClasses}>{errors.ceiling.message}</p>
+              )}
+            </div>
 
-          <div>
-            <label htmlFor="rounding" className="block text-sm font-medium text-gray-700 mb-1">
-              Rounding Increment
-            </label>
-            <input
-              {...register('rounding', { valueAsNumber: true })}
-              type="number"
-              step="0.01"
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-              placeholder="0.50"
-            />
-            {errors.rounding && (
-              <p className="mt-1 text-sm text-red-600">{errors.rounding.message}</p>
-            )}
+            <div>
+              <label htmlFor="rounding" className={labelClasses}>
+                Rounding Increment
+              </label>
+              <input
+                {...register('rounding', { valueAsNumber: true })}
+                type="number"
+                step="0.01"
+                min="0.01"
+                className={inputClasses}
+                placeholder="0.25"
+              />
+              {errors.rounding && (
+                <p className={errorClasses}>{errors.rounding.message}</p>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Advanced Settings */}
-        <div>
-          <label htmlFor="maxChangePercent" className="block text-sm font-medium text-gray-700 mb-1">
-            Maximum Change Percentage
-          </label>
-          <input
-            {...register('maxChangePercent', { valueAsNumber: true })}
-            type="number"
-            step="1"
-            className="input-field"
-            placeholder="25"
-          />
-          <p className="mt-1 text-xs text-gray-500">
-            Maximum percentage a price can change in a single update
-          </p>
-          {errors.maxChangePercent && (
-            <p className="mt-1 text-sm text-red-600">{errors.maxChangePercent.message}</p>
-          )}
+        {/* Safety Settings */}
+        <div className="space-y-4">
+          <h4 className="text-md font-medium text-gray-900 dark:text-gray-100">Safety Settings</h4>
+          <div>
+            <label htmlFor="maxChangePercent" className={labelClasses}>
+              Maximum Price Change Percentage
+            </label>
+            <input
+              {...register('maxChangePercent', { valueAsNumber: true })}
+              type="number"
+              min="1"
+              max="100"
+              className={inputClasses}
+              placeholder="50"
+            />
+            {errors.maxChangePercent && (
+              <p className={errorClasses}>{errors.maxChangePercent.message}</p>
+            )}
+          </div>
         </div>
 
         {/* Active Toggle */}
@@ -332,15 +344,15 @@ export function StrategyForm({ onSave, onPreview, onCancel, initialData, isLoadi
           <input
             {...register('isActive')}
             type="checkbox"
-            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+            className="h-4 w-4 text-primary-600 dark:text-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
           />
-          <label htmlFor="isActive" className="ml-2 text-sm text-gray-700">
+          <label htmlFor="isActive" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
             Set as active strategy
           </label>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+        <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
           <Button
             type="button"
             variant="outline"
@@ -363,30 +375,32 @@ export function StrategyForm({ onSave, onPreview, onCancel, initialData, isLoadi
 
       {/* Preview Panel */}
       {showPreview && previewData.length > 0 && (
-        <div className="mt-6 border-t border-gray-200 pt-6">
-          <h4 className="text-lg font-medium text-gray-900 mb-4">Strategy Preview</h4>
-          <p className="text-sm text-gray-600 mb-4">
+        <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-6">
+          <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Strategy Preview</h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             Here&apos;s how this strategy would price sample items from your inventory:
           </p>
           
-          <div className="bg-gray-50 rounded-lg p-4">
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
             <div className="space-y-3">
               {previewData.map((item, index) => (
-                <div key={index} className="flex items-center justify-between py-2 border-b border-gray-200 last:border-b-0">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{item.title}</p>
-                    <p className="text-xs text-gray-500">{item.artist}</p>
+                <div key={index} className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-600 last:border-b-0">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.title}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{item.artist}</p>
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="text-sm text-gray-600">
-                      <span className="line-through">${item.currentPrice.toFixed(2)}</span>
-                    </div>
-                    <div className="text-sm font-medium text-gray-900">
-                      ${item.suggestedPrice.toFixed(2)}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {item.basis}
-                    </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">${item.suggestedPrice}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {item.currentPrice !== item.suggestedPrice ? (
+                        <span className={item.suggestedPrice > item.currentPrice ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+                          {item.suggestedPrice > item.currentPrice ? '+' : ''}
+                          {(((item.suggestedPrice - item.currentPrice) / item.currentPrice) * 100).toFixed(1)}%
+                        </span>
+                      ) : (
+                        'No change'
+                      )}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -396,7 +410,7 @@ export function StrategyForm({ onSave, onPreview, onCancel, initialData, isLoadi
           <div className="mt-4 flex justify-end">
             <button
               onClick={() => setShowPreview(false)}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 dark:focus:border-primary-400 transition-colors"
             >
               Close Preview
             </button>

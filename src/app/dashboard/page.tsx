@@ -51,9 +51,9 @@ export default function DashboardPage() {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Page Header */}
-        <div className="border-b border-gray-200 pb-6">
-          <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Dashboard</h1>
-          <p className="mt-2 text-lg text-gray-600">Review and manage your Discogs pricing suggestions</p>
+        <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
+          <h1 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">Dashboard</h1>
+          <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">Review and manage your Discogs pricing suggestions</p>
         </div>
 
         {/* Discogs Connection Status */}
@@ -63,10 +63,10 @@ export default function DashboardPage() {
         <RunSummaryCards />
 
         {/* Pricing Suggestions Section */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">Pricing Suggestions</h2>
-            <p className="mt-1 text-sm text-gray-600">Review and manage suggested price changes for your inventory</p>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Pricing Suggestions</h2>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Review and manage suggested price changes for your inventory</p>
           </div>
           <div className="p-6">
             <FiltersBar

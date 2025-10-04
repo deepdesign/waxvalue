@@ -16,17 +16,17 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const getVariantClasses = (variant: ButtonVariant) => {
   switch (variant) {
     case 'primary':
-      return 'bg-primary-600 text-white hover:bg-primary-700 focus-visible:ring-primary-500'
+      return 'bg-primary-600 dark:bg-primary-500 text-white hover:bg-primary-700 dark:hover:bg-primary-600 active:bg-primary-800 dark:active:bg-primary-700 focus-visible:ring-primary-500 dark:focus-visible:ring-primary-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900'
     case 'secondary':
-      return 'bg-secondary-100 text-secondary-900 hover:bg-secondary-200 focus-visible:ring-secondary-500'
+      return 'bg-secondary-100 dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 hover:bg-secondary-200 dark:hover:bg-secondary-700 active:bg-secondary-300 dark:active:bg-secondary-600 focus-visible:ring-secondary-500 dark:focus-visible:ring-secondary-400'
     case 'outline':
-      return 'border border-secondary-300 bg-transparent hover:bg-secondary-50 hover:border-secondary-400 text-secondary-700 focus-visible:ring-secondary-500'
+      return 'border border-secondary-300 dark:border-secondary-600 bg-transparent hover:bg-secondary-50 dark:hover:bg-secondary-800 hover:border-secondary-400 dark:hover:border-secondary-500 active:bg-secondary-100 dark:active:bg-secondary-700 text-secondary-700 dark:text-secondary-300 focus-visible:ring-secondary-500 dark:focus-visible:ring-secondary-400'
     case 'ghost':
-      return 'hover:bg-secondary-100 hover:text-secondary-900 focus-visible:ring-secondary-500'
+      return 'hover:bg-secondary-100 dark:hover:bg-secondary-800 hover:text-secondary-900 dark:hover:text-secondary-100 active:bg-secondary-200 dark:active:bg-secondary-700 focus-visible:ring-secondary-500 dark:focus-visible:ring-secondary-400'
     case 'destructive':
-      return 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500'
+      return 'bg-red-600 dark:bg-red-500 text-white hover:bg-red-700 dark:hover:bg-red-600 active:bg-red-800 dark:active:bg-red-700 focus-visible:ring-red-500 dark:focus-visible:ring-red-400'
     default:
-      return 'bg-primary-600 text-white hover:bg-primary-700 focus-visible:ring-primary-500'
+      return 'bg-primary-600 dark:bg-primary-500 text-white hover:bg-primary-700 dark:hover:bg-primary-600 active:bg-primary-800 dark:active:bg-primary-700 focus-visible:ring-primary-500 dark:focus-visible:ring-primary-400'
   }
 }
 
