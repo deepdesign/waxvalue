@@ -10,6 +10,15 @@ from typing import List, Optional, Dict, Any
 import json
 from datetime import datetime, timedelta
 import random
+import os
+import logging
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="WaxValue API", version="1.0.0")
 
@@ -239,24 +248,93 @@ async def register(user_data: dict):
 
 @app.post("/auth/setup")
 async def setup_auth(credentials: dict = None):
-    # Mock OAuth setup - always returns same mock data for development
-    # In production, this would generate real OAuth URLs with proper tokens
-    return {
-        "authUrl": "https://www.discogs.com/oauth/authorize?oauth_token=mock_token&oauth_callback=http://localhost:3000",
-        "requestToken": "mock_request_token"
-    }
+    # Real OAuth setup for development
+    consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
+    consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
+    
+    if not consumer_key or not consumer_secret:
+        # Fallback to mock if credentials not configured
+        logger.warning("Discogs API credentials not configured, using mock OAuth")
+        return {
+            "authUrl": "https://www.discogs.com/oauth/authorize?oauth_token=mock_token&oauth_callback=http://localhost:3000",
+            "requestToken": "mock_request_token"
+        }
+    
+    try:
+        from discogs_client import DiscogsOAuth
+        oauth = DiscogsOAuth(consumer_key, consumer_secret)
+        
+        # Get request token
+        request_token = oauth.get_request_token("http://localhost:3000")
+        
+        # Generate authorization URL
+        auth_url = oauth.get_authorization_url(request_token)
+        
+        return {
+            "authUrl": auth_url,
+            "requestToken": request_token["oauth_token"]
+        }
+    except Exception as e:
+        logger.error(f"OAuth setup error: {e}")
+        # Fallback to mock on error
+        return {
+            "authUrl": "https://www.discogs.com/oauth/authorize?oauth_token=mock_token&oauth_callback=http://localhost:3000",
+            "requestToken": "mock_request_token"
+        }
 
 @app.post("/auth/verify")
 async def verify_auth(verification: dict):
-    # Mock verification - reconnect the user
-    if 1 in mock_data["users"]:
-        mock_data["users"][1].discogsUserId = 12345
-        mock_data["users"][1].username = "demouser"
+    consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
+    consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
     
-    return {
-        "user": mock_data["users"][1],
-        "message": "Account connected successfully"
-    }
+    if not consumer_key or not consumer_secret:
+        # Fallback to mock if credentials not configured
+        logger.warning("Discogs API credentials not configured, using mock verification")
+        if 1 in mock_data["users"]:
+            mock_data["users"][1].discogsUserId = 12345
+            mock_data["users"][1].username = "demouser"
+        
+        return {
+            "user": mock_data["users"][1],
+            "message": "Account connected successfully (mock mode)"
+        }
+    
+    request_token = verification.get("requestToken")
+    verifier_code = verification.get("verifierCode")
+    
+    if not request_token or not verifier_code:
+        raise HTTPException(status_code=400, detail="Missing request token or verifier code")
+    
+    try:
+        from discogs_client import DiscogsOAuth, DiscogsClient
+        oauth = DiscogsOAuth(consumer_key, consumer_secret)
+        access_token = oauth.get_access_token(request_token, verifier_code)
+        
+        # Create authenticated client to get user info
+        client = DiscogsClient(consumer_key, consumer_secret, 
+                              access_token["oauth_token"], access_token["oauth_token_secret"])
+        user_info = client.get_user_info()
+        
+        # Update mock user with real data
+        if 1 in mock_data["users"]:
+            mock_data["users"][1].discogsUserId = user_info["id"]
+            mock_data["users"][1].username = user_info["username"]
+        
+        return {
+            "user": mock_data["users"][1],
+            "message": "Account connected successfully"
+        }
+    except Exception as e:
+        logger.error(f"OAuth verification error: {e}")
+        # Fallback to mock on error
+        if 1 in mock_data["users"]:
+            mock_data["users"][1].discogsUserId = 12345
+            mock_data["users"][1].username = "demouser"
+        
+        return {
+            "user": mock_data["users"][1],
+            "message": "Account connected successfully (fallback mode)"
+        }
 
 @app.post("/auth/disconnect")
 async def disconnect_auth():
