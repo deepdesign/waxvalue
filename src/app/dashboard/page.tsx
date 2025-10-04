@@ -49,10 +49,11 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">Review and manage your Discogs pricing suggestions</p>
+      <div className="space-y-8">
+        {/* Page Header */}
+        <div className="border-b border-gray-200 pb-6">
+          <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Dashboard</h1>
+          <p className="mt-2 text-lg text-gray-600">Review and manage your Discogs pricing suggestions</p>
         </div>
 
         {/* Discogs Connection Status */}
@@ -61,17 +62,25 @@ export default function DashboardPage() {
         {/* Summary Cards */}
         <RunSummaryCards />
 
-        {/* Filters Bar */}
-        <FiltersBar
-          filters={filters}
-          onFiltersChange={setFilters}
-          onClearFilters={handleClearFilters}
-          totalItems={150} // This would come from API
-          filteredItems={120} // This would be calculated based on filters
-        />
-
-        {/* Inventory Review Table */}
-        <InventoryReviewTable filters={filters} />
+        {/* Pricing Suggestions Section */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900">Pricing Suggestions</h2>
+            <p className="mt-1 text-sm text-gray-600">Review and manage suggested price changes for your inventory</p>
+          </div>
+          <div className="p-6">
+            <FiltersBar
+              filters={filters}
+              onFiltersChange={setFilters}
+              onClearFilters={handleClearFilters}
+              totalItems={150} // This would come from API
+              filteredItems={120} // This would be calculated based on filters
+            />
+            <div className="mt-6">
+              <InventoryReviewTable filters={filters} />
+            </div>
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   )

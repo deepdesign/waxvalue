@@ -23,7 +23,7 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
         <div className="p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500" role="img" aria-label="Connected status">
                 <CheckCircleIcon className="h-6 w-6 text-white" aria-hidden="true" />
               </div>
             </div>
@@ -78,11 +78,11 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
     <div className="overflow-hidden rounded-lg bg-white shadow">
       <div className="p-6">
         <div className="flex items-center">
-          <div className="flex-shrink-0">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500">
-              <ExclamationCircleIcon className="h-6 w-6 text-white" aria-hidden="true" />
+            <div className="flex-shrink-0">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500" role="img" aria-label="Disconnected status">
+                <ExclamationCircleIcon className="h-6 w-6 text-white" aria-hidden="true" />
+              </div>
             </div>
-          </div>
           <div className="ml-4 flex-1">
             <div className="flex items-center justify-between">
               <div>

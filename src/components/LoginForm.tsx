@@ -73,7 +73,7 @@ export function LoginForm({ onSwitchToRegister, onLoginSuccess }: LoginFormProps
   }
 
   return (
-    <div className="card max-w-md mx-auto">
+    <div className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6 max-w-md mx-auto">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
         <p className="text-gray-600 mt-2">Sign in to your WaxValue account</p>

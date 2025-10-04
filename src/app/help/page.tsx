@@ -67,16 +67,17 @@ export default function HelpPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Help & Support</h1>
-          <p className="text-gray-600">Get help with WaxValue and find answers to common questions</p>
+      <div className="space-y-8">
+        {/* Page Header */}
+        <div className="border-b border-gray-200 pb-6">
+          <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Help & Support</h1>
+          <p className="mt-2 text-lg text-gray-600">Get help with WaxValue and find answers to common questions</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* FAQ Section */}
           <div className="lg:col-span-2">
-            <div className="card">
+            <div className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6">
               <div className="flex items-center mb-6">
                 <QuestionMarkCircleIcon className="h-6 w-6 text-gray-400 mr-3" />
                 <h2 className="text-lg font-medium text-gray-900">Frequently Asked Questions</h2>
@@ -95,7 +96,7 @@ export default function HelpPage() {
 
           {/* Detailed Guides */}
           <div className="space-y-6">
-            <div className="card">
+            <div className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">Detailed Guides</h2>
               
               <div className="space-y-6">
@@ -158,7 +159,7 @@ export default function HelpPage() {
 
           {/* Support Section */}
           <div className="space-y-6">
-            <div className="card">
+            <div className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">Get Support</h2>
               
               <div className="space-y-4">
@@ -202,7 +203,7 @@ export default function HelpPage() {
             </div>
 
             {/* Quick Links */}
-            <div className="card">
+            <div className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Links</h2>
               
               <div className="space-y-2">
@@ -234,7 +235,7 @@ export default function HelpPage() {
             </div>
 
             {/* System Status */}
-            <div className="card">
+            <div className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">System Status</h2>
               
               <div className="space-y-3">

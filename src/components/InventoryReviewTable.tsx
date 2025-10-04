@@ -11,10 +11,12 @@ import {
   PencilIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
+  ChartBarIcon,
 } from '@heroicons/react/24/outline'
 import { PriceSuggestion, FilterState } from '@/types'
 import { FilterState as TableFilterState } from './FiltersBar'
 import { ApiClient, RepriceResponse, RepriceItemResult, Decision } from '@/lib/apiClient'
+import { Button } from '@/components/ui/Button'
 import toast from 'react-hot-toast'
 
 interface InventoryReviewTableProps {
@@ -396,41 +398,49 @@ export function InventoryReviewTable({ filters }: InventoryReviewTableProps) {
         </div>
         
         <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
-          <button
+          <Button
             onClick={() => setShowFilters(!showFilters)}
-            className="btn-outline inline-flex items-center justify-center w-full sm:w-auto"
+            variant="outline"
+            className="w-full sm:w-auto"
           >
             <FunnelIcon className="h-4 w-4 mr-2" />
             Filters
-          </button>
+          </Button>
           
-          <button
+          <Button
             onClick={handleSimulateSelection}
             disabled={isLoading}
-            className="btn-secondary inline-flex items-center justify-center w-full sm:w-auto"
+            variant="secondary"
+            loading={isLoading}
+            loadingText="Simulating..."
+            className="w-full sm:w-auto"
           >
             <EyeIcon className="h-4 w-4 mr-2" />
-            {isLoading ? 'Simulating...' : 'Simulate'}
-          </button>
+            Simulate
+          </Button>
           
           {selectedItems.size > 0 && (
             <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3">
-              <button
+              <Button
                 onClick={handleBulkApply}
                 disabled={isApplying}
-                className="btn-primary inline-flex items-center justify-center w-full sm:w-auto"
+                variant="primary"
+                loading={isApplying}
+                loadingText={`Applying...`}
+                className="w-full sm:w-auto"
               >
                 <CheckIcon className="h-4 w-4 mr-2" />
-                {isApplying ? 'Applying...' : `Apply Selected (${selectedItems.size})`}
-              </button>
-              <button
+                Apply Selected ({selectedItems.size})
+              </Button>
+              <Button
                 onClick={handleBulkDecline}
                 disabled={isApplying}
-                className="btn-secondary inline-flex items-center justify-center w-full sm:w-auto"
+                variant="secondary"
+                className="w-full sm:w-auto"
               >
                 <XMarkIcon className="h-4 w-4 mr-2" />
                 Decline Selected
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -600,14 +610,29 @@ export function InventoryReviewTable({ filters }: InventoryReviewTableProps) {
 
         {filteredSuggestions.length === 0 && (
           <div className="text-center py-12">
-            <EyeSlashIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No suggestions found</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-4 text-lg font-medium text-gray-900">
+              {suggestions.length === 0 ? "No pricing suggestions available" : "No suggestions found"}
+            </h3>
+            <p className="mt-2 text-sm text-gray-500 max-w-sm mx-auto">
               {suggestions.length === 0 
-                ? "Run a simulation to see pricing suggestions for your inventory."
+                ? "Run a pricing analysis to see recommendations for your Discogs inventory. We'll analyze market data and suggest optimal prices."
                 : "Try adjusting your filters to see more results."
               }
             </p>
+            {suggestions.length === 0 && (
+              <div className="mt-6">
+                <Button 
+                  variant="primary" 
+                  onClick={() => {
+                    // Trigger analysis - this would need to be implemented
+                    console.log('Run analysis')
+                  }}
+                >
+                  Run Pricing Analysis
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -616,14 +641,29 @@ export function InventoryReviewTable({ filters }: InventoryReviewTableProps) {
       <div className="lg:hidden space-y-4">
         {filteredSuggestions.length === 0 ? (
           <div className="card text-center py-12">
-            <EyeSlashIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No suggestions found</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-4 text-lg font-medium text-gray-900">
+              {suggestions.length === 0 ? "No pricing suggestions available" : "No suggestions found"}
+            </h3>
+            <p className="mt-2 text-sm text-gray-500">
               {suggestions.length === 0 
-                ? "Run a simulation to see pricing suggestions for your inventory."
+                ? "Run a pricing analysis to see recommendations for your Discogs inventory."
                 : "Try adjusting your filters to see more results."
               }
             </p>
+            {suggestions.length === 0 && (
+              <div className="mt-6">
+                <Button 
+                  variant="primary" 
+                  onClick={() => {
+                    // Trigger analysis - this would need to be implemented
+                    console.log('Run analysis')
+                  }}
+                >
+                  Run Pricing Analysis
+                </Button>
+              </div>
+            )}
           </div>
         ) : (
           filteredSuggestions.map((suggestion) => (

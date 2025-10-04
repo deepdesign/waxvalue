@@ -7,6 +7,7 @@ import { DashboardLayout } from '@/components/DashboardLayout'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { SettingsDiscogs } from '@/components/SettingsDiscogs'
 import { AutomationSettingsForm } from '@/components/AutomationSettingsForm'
+import { Button } from '@/components/ui/Button'
 import {
   UserIcon,
   CurrencyDollarIcon,
@@ -92,10 +93,11 @@ export default function SettingsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-          <p className="text-gray-600">Manage your account and application preferences</p>
+      <div className="space-y-8">
+        {/* Page Header */}
+        <div className="border-b border-gray-200 pb-6">
+          <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Settings</h1>
+          <p className="mt-2 text-lg text-gray-600">Manage your account and application preferences</p>
         </div>
 
         <div className="space-y-6">
@@ -123,7 +125,7 @@ export default function SettingsPage() {
           />
 
           {/* General Settings */}
-          <div className="card">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center mb-4">
               <CogIcon className="h-6 w-6 text-gray-400 mr-3" />
               <h2 className="text-lg font-medium text-gray-900">General</h2>
@@ -137,7 +139,7 @@ export default function SettingsPage() {
                 <select
                   value={settings.currency}
                   onChange={(e) => setSettings(prev => ({ ...prev, currency: e.target.value }))}
-                  className="input-field"
+                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                 >
                   <option value="USD">USD ($)</option>
                   <option value="EUR">EUR (€)</option>
@@ -154,7 +156,7 @@ export default function SettingsPage() {
                   type="time"
                   value={settings.dailySchedule}
                   onChange={(e) => setSettings(prev => ({ ...prev, dailySchedule: e.target.value }))}
-                  className="input-field"
+                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                 />
               </div>
 
@@ -174,7 +176,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Safeguards */}
-          <div className="card">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center mb-4">
               <ShieldCheckIcon className="h-6 w-6 text-gray-400 mr-3" />
               <h2 className="text-lg font-medium text-gray-900">Safeguards</h2>
@@ -225,7 +227,7 @@ export default function SettingsPage() {
                   type="number"
                   value={settings.maxChangePercent}
                   onChange={(e) => setSettings(prev => ({ ...prev, maxChangePercent: Number(e.target.value) }))}
-                  className="input-field"
+                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                   placeholder="25"
                 />
                 <p className="text-xs text-gray-500 mt-1">Maximum price change percentage in a single run</p>
@@ -234,7 +236,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Advanced Settings */}
-          <div className="card">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center mb-4">
               <CogIcon className="h-6 w-6 text-gray-400 mr-3" />
               <h2 className="text-lg font-medium text-gray-900">Advanced</h2>
@@ -250,7 +252,7 @@ export default function SettingsPage() {
                   step="0.1"
                   value={settings.apiRateLimitSeconds}
                   onChange={(e) => setSettings(prev => ({ ...prev, apiRateLimitSeconds: Number(e.target.value) }))}
-                  className="input-field"
+                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                   placeholder="1.2"
                 />
                 <p className="text-xs text-gray-500 mt-1">Delay between API calls to respect Discogs limits</p>
@@ -264,7 +266,7 @@ export default function SettingsPage() {
                   type="number"
                   value={settings.logRetentionDays}
                   onChange={(e) => setSettings(prev => ({ ...prev, logRetentionDays: Number(e.target.value) }))}
-                  className="input-field"
+                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                   placeholder="90"
                 />
                 <p className="text-xs text-gray-500 mt-1">How long to keep run logs and history</p>
@@ -275,12 +277,13 @@ export default function SettingsPage() {
 
         {/* Save Button */}
         <div className="flex justify-end">
-          <button
+          <Button
             onClick={handleSaveSettings}
-            className="btn-primary px-8 py-2"
+            variant="primary"
+            size="lg"
           >
             Save Settings
-          </button>
+          </Button>
         </div>
       </div>
     </DashboardLayout>

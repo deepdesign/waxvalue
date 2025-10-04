@@ -7,6 +7,7 @@ import { DashboardLayout } from '@/components/DashboardLayout'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { LogsTable } from '@/components/LogsTable'
 import { DocumentTextIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import { Button } from '@/components/ui/Button'
 
 export default function LogsPage() {
   const { user, isLoading } = useApp()
@@ -28,20 +29,32 @@ export default function LogsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Run History</h1>
-            <p className="text-gray-600">View detailed logs of all pricing simulations and updates</p>
+      <div className="space-y-8">
+        {/* Page Header */}
+        <div className="border-b border-gray-200 pb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Run History</h1>
+              <p className="mt-2 text-lg text-gray-600">View detailed logs of all pricing simulations and updates</p>
+            </div>
+            
+            <Button variant="outline" size="sm">
+              <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
           </div>
-          
-          <button className="btn-outline inline-flex items-center">
-            <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
-            Export CSV
-          </button>
         </div>
 
-        <LogsTable />
+        {/* Logs Section */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900">Activity Logs</h2>
+            <p className="mt-1 text-sm text-gray-600">Complete history of all pricing runs and changes</p>
+          </div>
+          <div className="p-6">
+            <LogsTable />
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   )
