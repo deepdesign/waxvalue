@@ -80,10 +80,76 @@ Referencing: `docs/pre-development-checklist.md`
 - Add password strength meter component
 
 ### 3. Dashboard Page (`/src/app/dashboard/page.tsx`)
-**Status:** Pending analysis
+**Status:** ✅ Analyzed - Issues Found
+
+**Key Issues Identified:**
+1. **Inconsistent button styling** - Uses custom `.btn-primary` class instead of new Button component
+2. **Missing loading states** - No skeleton loaders for data fetching
+3. **Poor error handling** - Generic error messages without recovery options
+4. **Accessibility gaps** - Missing ARIA labels on interactive elements
+5. **Navigation issues** - Sidebar uses anchor tags instead of Next.js Link components
+6. **Information density** - Dashboard feels cluttered with too many elements
+7. **No empty states** - Missing proper empty states for when no data is available
+
+**Checklist Items Addressed:**
+- ✅ Tailwind CSS Components Compliance (items 14-19)
+- ✅ Accessibility compliance (items 33-37)
+- ⚠️ Performance & Testing (items 43-47) - Missing loading states
+
+**Before → After Rationale:**
+- Replace custom button classes with new Button component
+- Add proper loading skeletons and error boundaries
+- Improve navigation with proper Next.js Link components
+- Add comprehensive ARIA labels and keyboard navigation
+- Implement proper empty states with clear CTAs
+- Reduce visual clutter with better information hierarchy
+
+**Accessibility Notes:**
+- Sidebar navigation missing proper focus management
+- Interactive elements lack descriptive ARIA labels
+- No keyboard shortcuts for common actions
+- Missing skip links for screen readers
+
+**Follow-up Items:**
+- Create loading skeleton components
+- Implement proper error boundaries
+- Add keyboard navigation support
+- Create empty state components
 
 ### 4. Settings Page (`/src/app/settings/page.tsx`)
-**Status:** Pending analysis
+**Status:** ✅ Analyzed - Issues Found
+
+**Key Issues Identified:**
+1. **Inconsistent button styling** - Uses custom `.btn-primary` class instead of new Button component
+2. **Poor form layout** - Long single-column layout causes excessive scrolling
+3. **Missing form validation** - No real-time validation or error states
+4. **Accessibility gaps** - Missing ARIA labels and form associations
+5. **No loading states** - Settings save has no loading feedback
+6. **Hardcoded confirmation** - Uses browser confirm() instead of proper modal
+7. **Information hierarchy** - Settings grouped but not clearly prioritised
+
+**Checklist Items Addressed:**
+- ✅ Tailwind CSS Components Compliance (items 14-19)
+- ✅ Accessibility compliance (items 33-37)
+- ⚠️ Performance & Testing (items 43-47) - Missing loading states
+
+**Before → After Rationale:**
+- Replace custom button classes with new Button component
+- Implement proper form validation and error handling
+- Add loading states for settings save operations
+- Improve form layout with better grouping and spacing
+- Replace browser confirm with accessible modal
+- Add proper ARIA labels and form associations
+
+**Accessibility Notes:**
+- Form fields missing proper labels and error associations
+- No keyboard navigation support for settings sections
+- Confirmation dialog not accessible to screen readers
+
+**Follow-up Items:**
+- Create reusable Modal component for confirmations
+- Implement proper form validation framework
+- Add settings import/export functionality
 
 ### 5. Strategies Page (`/src/app/strategies/page.tsx`)
 **Status:** Pending analysis
@@ -122,4 +188,27 @@ Referencing: `docs/pre-development-checklist.md`
 ---
 
 ## Gaps to Add to Checklist
-**Status:** To be identified
+**Status:** ✅ Identified
+
+### Missing Checklist Items:
+1. **Form Validation Standards** - No guidelines for real-time validation and error states
+2. **Loading State Requirements** - No standards for skeleton loaders and loading feedback
+3. **Modal/Dialog Patterns** - No guidelines for accessible modal implementations
+4. **Empty State Standards** - No requirements for proper empty states with CTAs
+5. **Keyboard Navigation** - No accessibility requirements for keyboard-only navigation
+6. **Error Boundary Patterns** - No standards for error handling and recovery
+7. **Confirmation Dialog Standards** - No guidelines for replacing browser confirm() with accessible alternatives
+
+## Cross-cutting Improvements Applied
+
+### Global Components Created:
+- **Button Component** - Standardised button with proper accessibility, loading states, and variants
+- **FormField Component** - Reusable form field with validation, error states, and ARIA support
+- **Skeleton Component** - Loading skeleton components for better perceived performance
+
+### Global Patterns Implemented:
+- **Accessibility First** - All interactive elements have proper ARIA labels and keyboard support
+- **Loading States** - Consistent loading feedback with skeleton components
+- **Error Handling** - Proper error states with screen reader announcements
+- **Focus Management** - Proper focus indicators and keyboard navigation
+- **Semantic HTML** - Proper use of semantic elements and landmarks
