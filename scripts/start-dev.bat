@@ -2,9 +2,15 @@
 chcp 65001 > nul
 echo Starting WaxValue Development Environment...
 
+REM Get the directory where this script is located
+set "SCRIPT_DIR=%~dp0"
+
+REM Navigate to the project root (one level up from scripts folder)
+cd /d "%SCRIPT_DIR%.."
+
 REM Check if we're in the right directory
 if not exist "package.json" (
-    echo ERROR: Please run this script from the project root directory
+    echo ERROR: Could not find package.json. Please ensure this script is in the scripts folder of the WaxValue project.
     pause
     exit /b 1
 )

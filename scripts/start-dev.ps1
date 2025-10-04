@@ -1,9 +1,15 @@
 # WaxValue Development Environment Startup Script
 Write-Host "Starting WaxValue Development Environment..." -ForegroundColor Green
 
+# Get the directory where this script is located
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+# Navigate to the project root (one level up from scripts folder)
+Set-Location "$ScriptDir\.."
+
 # Check if we're in the right directory
 if (-not (Test-Path "package.json")) {
-    Write-Host "ERROR: Please run this script from the project root directory" -ForegroundColor Red
+    Write-Host "ERROR: Could not find package.json. Please ensure this script is in the scripts folder of the WaxValue project." -ForegroundColor Red
     Read-Host "Press Enter to exit"
     exit 1
 }
