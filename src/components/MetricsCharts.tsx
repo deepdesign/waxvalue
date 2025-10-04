@@ -339,9 +339,9 @@ export function MetricsCharts({ className = '' }: MetricsChartsProps) {
 
         {/* Item-Level Drilldown */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-900">Item Performance</h3>
-            <p className="mt-1 text-sm text-gray-600">Detailed analysis of individual listings</p>
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Item Performance</h3>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Detailed analysis of individual listings</p>
           </div>
           <div className="p-6">
           
@@ -351,8 +351,8 @@ export function MetricsCharts({ className = '' }: MetricsChartsProps) {
                 <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <h4 className="text-sm font-medium text-gray-900">{item.title}</h4>
-                      <p className="text-xs text-gray-500">{item.artist}</p>
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.title}</h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{item.artist}</p>
                     </div>
                     
                     <div className="flex items-center space-x-4">
@@ -367,7 +367,7 @@ export function MetricsCharts({ className = '' }: MetricsChartsProps) {
                       </div>
                       
                       <div className="text-sm">
-                        <span className="text-gray-600">Rank: </span>
+                        <span className="text-gray-600 dark:text-gray-400">Rank: </span>
                         <span className="font-medium">#{item.rank} of {item.totalListings}</span>
                       </div>
                       
@@ -407,8 +407,8 @@ export function MetricsCharts({ className = '' }: MetricsChartsProps) {
             ) : (
               <div className="text-center py-8">
                 <MagnifyingGlassIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No item data available</h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No item data available</h3>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   Run a simulation to see detailed item performance metrics.
                 </p>
               </div>
