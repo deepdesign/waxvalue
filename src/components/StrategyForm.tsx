@@ -10,6 +10,7 @@ import {
   CheckIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline'
+import { Button } from '@/components/ui/Button'
 import toast from 'react-hot-toast'
 
 const strategySchema = z.object({
@@ -37,12 +38,13 @@ type StrategyFormData = z.infer<typeof strategySchema>
 interface StrategyFormProps {
   onSave: (data: StrategyFormData) => void
   onPreview: (data: StrategyFormData) => void
+  onCancel: () => void
   initialData?: Partial<StrategyFormData>
   isLoading?: boolean
   previewData?: any[]
 }
 
-export function StrategyForm({ onSave, onPreview, initialData, isLoading = false, previewData = [] }: StrategyFormProps) {
+export function StrategyForm({ onSave, onPreview, onCancel, initialData, isLoading = false, previewData = [] }: StrategyFormProps) {
   const [showPreview, setShowPreview] = useState(false)
 
   const {
@@ -91,7 +93,7 @@ export function StrategyForm({ onSave, onPreview, initialData, isLoading = false
   }
 
   return (
-    <div className="card">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="mb-6">
         <h3 className="text-lg font-medium text-gray-900">Pricing Strategy</h3>
         <p className="text-sm text-gray-500">
@@ -109,7 +111,7 @@ export function StrategyForm({ onSave, onPreview, initialData, isLoading = false
             <input
               {...register('name')}
               type="text"
-              className="input-field"
+              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               placeholder="e.g., Conservative Pricing"
             />
             {errors.name && (
@@ -158,7 +160,7 @@ export function StrategyForm({ onSave, onPreview, initialData, isLoading = false
                 {...register('offsetValue', { valueAsNumber: true })}
                 type="number"
                 step="0.1"
-                className="input-field"
+                className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                 placeholder="10"
               />
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -234,7 +236,7 @@ export function StrategyForm({ onSave, onPreview, initialData, isLoading = false
               <input
                 {...register('scarcityBoost.threshold', { valueAsNumber: true })}
                 type="number"
-                className="input-field"
+                className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                 placeholder="5"
               />
             </div>
@@ -247,7 +249,7 @@ export function StrategyForm({ onSave, onPreview, initialData, isLoading = false
                 {...register('scarcityBoost.boostPercent', { valueAsNumber: true })}
                 type="number"
                 step="0.1"
-                className="input-field"
+                className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                 placeholder="15"
               />
             </div>
@@ -264,7 +266,7 @@ export function StrategyForm({ onSave, onPreview, initialData, isLoading = false
               {...register('floor', { valueAsNumber: true })}
               type="number"
               step="0.01"
-              className="input-field"
+              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               placeholder="No minimum"
             />
             {errors.floor && (
@@ -280,7 +282,7 @@ export function StrategyForm({ onSave, onPreview, initialData, isLoading = false
               {...register('ceiling', { valueAsNumber: true })}
               type="number"
               step="0.01"
-              className="input-field"
+              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               placeholder="No maximum"
             />
             {errors.ceiling && (
@@ -296,7 +298,7 @@ export function StrategyForm({ onSave, onPreview, initialData, isLoading = false
               {...register('rounding', { valueAsNumber: true })}
               type="number"
               step="0.01"
-              className="input-field"
+              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               placeholder="0.50"
             />
             {errors.rounding && (
@@ -338,41 +340,24 @@ export function StrategyForm({ onSave, onPreview, initialData, isLoading = false
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-          <button
+        <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+          <Button
             type="button"
-            onClick={handleSubmit(handlePreview)}
-            className="btn-outline inline-flex items-center"
+            variant="outline"
+            onClick={onCancel}
           >
-            <EyeIcon className="h-4 w-4 mr-2" />
-            Preview
-          </button>
-
-          <div className="flex items-center space-x-3">
-            <button
-              type="button"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn-primary inline-flex items-center"
-            >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <CheckIcon className="h-4 w-4 mr-2" />
-                  Save Strategy
-                </>
-              )}
-            </button>
-          </div>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={isLoading}
+            loading={isLoading}
+            loadingText="Saving..."
+          >
+            <CheckIcon className="h-4 w-4 mr-2" />
+            Save Strategy
+          </Button>
         </div>
       </form>
 
@@ -411,7 +396,7 @@ export function StrategyForm({ onSave, onPreview, initialData, isLoading = false
           <div className="mt-4 flex justify-end">
             <button
               onClick={() => setShowPreview(false)}
-              className="btn-outline"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             >
               Close Preview
             </button>

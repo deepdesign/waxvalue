@@ -134,18 +134,9 @@ export default function StrategiesPage() {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Page Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 pb-6">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Pricing Strategies</h1>
-            <p className="mt-2 text-lg text-gray-600">Configure how WaxValue calculates suggested prices for your inventory</p>
-          </div>
-          <Button
-            onClick={() => setShowForm(true)}
-            variant="primary"
-            size="default"
-          >
-            Create Strategy
-          </Button>
+        <div className="border-b border-gray-200 pb-6">
+          <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Pricing Strategies</h1>
+          <p className="mt-2 text-lg text-gray-600">Configure how WaxValue calculates suggested prices for your inventory</p>
         </div>
 
         {/* Active Strategy */}
@@ -177,22 +168,13 @@ export default function StrategiesPage() {
             <StrategyForm
               onSave={handleSaveStrategy}
               onPreview={handlePreviewStrategy}
+              onCancel={() => {
+                setShowForm(false)
+                setSelectedPreset(null)
+              }}
               initialData={selectedPreset?.strategy}
               isLoading={isFormLoading}
             />
-            
-            <div className="flex justify-end">
-              <Button
-                onClick={() => {
-                  setShowForm(false)
-                  setSelectedPreset(null)
-                }}
-                variant="outline"
-                size="sm"
-              >
-                Cancel
-              </Button>
-            </div>
           </div>
         )}
 
