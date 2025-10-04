@@ -182,8 +182,8 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
               </div>
             </div>
             
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Complete Your Connection</h3>
-            <p className="text-sm text-gray-600 mb-6 max-w-md mx-auto">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Complete Your Connection</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
               Great! You've authorized WaxValue on Discogs. Enter the verification code below to complete the connection.
             </p>
             
@@ -217,7 +217,7 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
               
               <button
                 onClick={() => setShowVerification(false)}
-                className="text-sm text-gray-500 hover:text-gray-700"
+                className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               >
                 Start over
               </button>
@@ -231,8 +231,8 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
               </div>
             </div>
             
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Connect Your Discogs Account</h3>
-            <p className="text-sm text-gray-600 mb-6 max-w-md mx-auto">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Connect Your Discogs Account</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
               Link your Discogs account to unlock automated pricing suggestions and market analysis. 
               You'll be redirected to Discogs to authorize WaxValue access to your account.
             </p>
@@ -259,7 +259,7 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
                 )}
               </Button>
               
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 dark:text-gray-400">
                 <p>After connecting, you'll receive an authorization code to complete the setup.</p>
               </div>
             </div>

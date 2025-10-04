@@ -70,8 +70,8 @@ export default function HelpPage() {
       <div className="space-y-8">
         {/* Page Header */}
         <div className="border-b border-gray-200 pb-6">
-          <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Help & Support</h1>
-          <p className="mt-2 text-lg text-gray-600">Get help with WaxValue and find answers to common questions</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">Help & Support</h1>
+          <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">Get help with WaxValue and find answers to common questions</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -80,14 +80,14 @@ export default function HelpPage() {
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-600 p-6">
               <div className="flex items-center mb-6">
                 <QuestionMarkCircleIcon className="h-6 w-6 text-gray-400 mr-3" />
-                <h2 className="text-lg font-medium text-gray-900">Frequently Asked Questions</h2>
+                <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Frequently Asked Questions</h2>
               </div>
 
               <div className="space-y-6">
                 {faqs.map((faq, index) => (
                   <div key={index} className="border-b border-gray-200 pb-6 last:border-b-0">
-                    <h3 className="text-sm font-medium text-gray-900 mb-2">{faq.question}</h3>
-                    <p className="text-sm text-gray-600">{faq.answer}</p>
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">{faq.question}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{faq.answer}</p>
                   </div>
                 ))}
               </div>
@@ -97,13 +97,13 @@ export default function HelpPage() {
           {/* Detailed Guides */}
           <div className="space-y-6">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-600 p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Detailed Guides</h2>
+              <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Detailed Guides</h2>
               
               <div className="space-y-6">
                 <div className="border border-gray-200 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">How Auto-Update Works</h3>
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">How Auto-Update Works</h3>
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       WaxValue can automatically apply safe price increases while keeping you in control.
                     </p>
                     <div className="bg-green-50 border border-green-200 rounded p-3 text-xs text-green-800">
@@ -119,9 +119,9 @@ export default function HelpPage() {
                 </div>
 
                 <div className="border border-gray-200 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">Why Large Increases Need Approval</h3>
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Why Large Increases Need Approval</h3>
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       Consumer protection is our priority. Large price changes could indicate market anomalies or errors.
                     </p>
                     <div className="bg-yellow-50 border border-yellow-200 rounded p-3 text-xs text-yellow-800">
@@ -137,9 +137,9 @@ export default function HelpPage() {
                 </div>
 
                 <div className="border border-gray-200 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">How to Disconnect</h3>
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">How to Disconnect</h3>
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       You can disconnect your Discogs account at any time from the Settings page.
                     </p>
                     <div className="bg-red-50 border border-red-200 rounded p-3 text-xs text-red-800">
@@ -160,7 +160,7 @@ export default function HelpPage() {
           {/* Support Section */}
           <div className="space-y-6">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-600 p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Get Support</h2>
+              <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Get Support</h2>
               
               <div className="space-y-4">
                 <a
@@ -169,8 +169,8 @@ export default function HelpPage() {
                 >
                   <EnvelopeIcon className="h-5 w-5 text-gray-400 mr-3" />
                   <div>
-                    <div className="text-sm font-medium text-gray-900">Email Support</div>
-                    <div className="text-xs text-gray-500">support@waxvalue.com</div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">Email Support</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">support@waxvalue.com</div>
                   </div>
                 </a>
 
@@ -182,8 +182,8 @@ export default function HelpPage() {
                 >
                   <ChatBubbleLeftRightIcon className="h-5 w-5 text-gray-400 mr-3" />
                   <div>
-                    <div className="text-sm font-medium text-gray-900">Discord Community</div>
-                    <div className="text-xs text-gray-500">Join our Discord server</div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">Discord Community</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Join our Discord server</div>
                   </div>
                 </a>
 
@@ -195,8 +195,8 @@ export default function HelpPage() {
                 >
                   <LinkIcon className="h-5 w-5 text-gray-400 mr-3" />
                   <div>
-                    <div className="text-sm font-medium text-gray-900">Documentation</div>
-                    <div className="text-xs text-gray-500">Read the full docs</div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">Documentation</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Read the full docs</div>
                   </div>
                 </a>
               </div>
@@ -204,7 +204,7 @@ export default function HelpPage() {
 
             {/* Quick Links */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-600 p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Links</h2>
+              <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Quick Links</h2>
               
               <div className="space-y-2">
                 <a
@@ -236,25 +236,25 @@ export default function HelpPage() {
 
             {/* System Status */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-600 p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">System Status</h2>
+              <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">System Status</h2>
               
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">WaxValue API</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">WaxValue API</span>
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     Operational
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Discogs API</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Discogs API</span>
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     Operational
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Database</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Database</span>
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     Operational
                   </span>
