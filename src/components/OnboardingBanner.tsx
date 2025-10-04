@@ -5,6 +5,7 @@ import {
   ExclamationTriangleIcon, 
   ArrowRightIcon
 } from '@heroicons/react/24/outline'
+import { Button } from '@/components/ui/Button'
 
 interface OnboardingBannerProps {
   onDismiss?: () => void
@@ -14,7 +15,7 @@ export function OnboardingBanner({ onDismiss }: OnboardingBannerProps) {
   const router = useRouter()
 
   const handleConnect = () => {
-    router.push('/setup')
+    router.push('/settings')
   }
 
   return (
@@ -32,13 +33,15 @@ export function OnboardingBanner({ onDismiss }: OnboardingBannerProps) {
             This is the only way to access the app&apos;s core functionality.
           </p>
           <div className="mt-3">
-            <button
+            <Button
               onClick={handleConnect}
-              className="btn-primary inline-flex items-center text-sm"
+              size="sm"
+              className="inline-flex items-center"
+              aria-label="Connect your Discogs account to get started"
             >
               Connect Discogs
-              <ArrowRightIcon className="ml-1 h-4 w-4" />
-            </button>
+              <ArrowRightIcon className="ml-1 h-4 w-4" aria-hidden="true" />
+            </Button>
           </div>
         </div>
       </div>

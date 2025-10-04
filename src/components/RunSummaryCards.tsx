@@ -11,6 +11,8 @@ import {
 } from '@heroicons/react/24/outline'
 import { RunLog, SimulationResult } from '@/types'
 import toast from 'react-hot-toast'
+import { Button } from '@/components/ui/Button'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 interface SummaryData {
   totalListings: number
@@ -146,63 +148,70 @@ export function RunSummaryCards() {
               Dry Run Mode
             </label>
           </div>
-          <button
+          <Button
             onClick={handleRunSimulation}
-            disabled={summaryData.isRunning}
-            className="btn-primary inline-flex items-center justify-center w-full sm:w-auto"
+            loading={summaryData.isRunning}
+            loadingText="Running..."
+            className="w-full sm:w-auto"
+            aria-label="Run pricing simulation"
           >
-            {summaryData.isRunning ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Running...
-              </>
-            ) : (
-              <>
-                <PlayIcon className="h-4 w-4 mr-2" />
-                Run Simulation
-              </>
-            )}
-          </button>
+            <PlayIcon className="h-4 w-4 mr-2" aria-hidden="true" />
+            Run Simulation
+          </Button>
         </div>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map((card, index) => (
-          <div key={index} className="card hover:shadow-md transition-shadow duration-200">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className={`w-8 h-8 ${card.color} rounded-lg flex items-center justify-center`}>
-                  <card.icon className="h-5 w-5 text-white" />
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="card">
+              <div className="flex items-center">
+                <Skeleton className="w-8 h-8 rounded-lg" />
+                <div className="ml-5 w-0 flex-1">
+                  <Skeleton className="h-4 w-24 mb-2" />
+                  <Skeleton className="h-6 w-16" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    {card.title}
-                  </dt>
-                  <dd className="flex items-baseline">
-                    <div className="text-lg font-medium text-gray-900">
-                      {card.value}
-                    </div>
-                    {card.change && (
-                      <div className={`ml-2 flex items-baseline text-sm font-semibold ${
-                        card.change.includes('positive') ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {card.change.includes('positive') ? (
-                          <ArrowTrendingUpIcon className="h-3 w-3 mr-1" />
-                        ) : (
-                          <ArrowTrendingDownIcon className="h-3 w-3 mr-1" />
-                        )}
-                        {card.change.includes('positive') ? 'Up' : 'Down'}
+            </div>
+          ))
+        ) : (
+          cards.map((card, index) => (
+            <div key={index} className="card hover:shadow-md transition-shadow duration-200">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className={`w-8 h-8 ${card.color} rounded-lg flex items-center justify-center`}>
+                    <card.icon className="h-5 w-5 text-white" aria-hidden="true" />
+                  </div>
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      {card.title}
+                    </dt>
+                    <dd className="flex items-baseline">
+                      <div className="text-lg font-medium text-gray-900">
+                        {card.value}
                       </div>
-                    )}
-                  </dd>
-                </dl>
+                      {card.change && (
+                        <div className={`ml-2 flex items-baseline text-sm font-semibold ${
+                          card.change.includes('positive') ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {card.change.includes('positive') ? (
+                            <ArrowTrendingUpIcon className="h-3 w-3 mr-1" aria-hidden="true" />
+                          ) : (
+                            <ArrowTrendingDownIcon className="h-3 w-3 mr-1" aria-hidden="true" />
+                          )}
+                          {card.change.includes('positive') ? 'Up' : 'Down'}
+                        </div>
+                      )}
+                    </dd>
+                  </dl>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Quick Stats */}

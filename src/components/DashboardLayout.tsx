@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+import Link from 'next/link'
 import { useApp } from './Providers'
 import {
   HomeIcon,
@@ -61,26 +62,28 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <XMarkIcon className="h-6 w-6" />
             </button>
           </div>
-          <nav className="flex-1 px-4 py-4 space-y-1">
+          <nav className="flex-1 px-4 py-4 space-y-1" role="navigation" aria-label="Main navigation">
             {navigation.map((item) => {
               const isActive = pathname === item.href
               return (
-                <a
+                <Link
                   key={item.name}
                   href={item.href}
-                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
                     isActive
                       ? 'bg-primary-100 text-primary-900'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
+                  aria-current={isActive ? 'page' : undefined}
                 >
                   <item.icon
                     className={`mr-3 h-5 w-5 flex-shrink-0 ${
                       isActive ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
                     }`}
+                    aria-hidden="true"
                   />
                   {item.name}
-                </a>
+                </Link>
               )
             })}
           </nav>
@@ -123,26 +126,28 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <span className="ml-2 text-xl font-semibold text-gray-900">WaxValue</span>
             </div>
           </div>
-          <nav className="flex-1 px-4 py-4 space-y-1">
+          <nav className="flex-1 px-4 py-4 space-y-1" role="navigation" aria-label="Main navigation">
             {navigation.map((item) => {
               const isActive = pathname === item.href
               return (
-                <a
+                <Link
                   key={item.name}
                   href={item.href}
-                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
                     isActive
                       ? 'bg-primary-100 text-primary-900'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
+                  aria-current={isActive ? 'page' : undefined}
                 >
                   <item.icon
                     className={`mr-3 h-5 w-5 flex-shrink-0 ${
                       isActive ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
                     }`}
+                    aria-hidden="true"
                   />
                   {item.name}
-                </a>
+                </Link>
               )
             })}
           </nav>
