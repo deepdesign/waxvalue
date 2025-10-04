@@ -4,7 +4,7 @@ export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
     
-    const response = await fetch(`${process.env.BACKEND_URL || 'http://localhost:8000'}/simulate`, {
+    const response = await fetch(`${process.env.BACKEND_URL || 'http://127.0.0.1:8000'}/simulate`, {
       method: 'POST',
       headers: {
         'Authorization': authHeader || '',

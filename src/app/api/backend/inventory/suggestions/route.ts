@@ -4,7 +4,7 @@ export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
     
-    const response = await fetch(`${process.env.BACKEND_URL || 'http://localhost:8000'}/inventory/suggestions`, {
+    const response = await fetch(`${process.env.BACKEND_URL || 'http://127.0.0.1:8000'}/inventory/suggestions`, {
       method: 'GET',
       headers: {
         'Authorization': authHeader || '',

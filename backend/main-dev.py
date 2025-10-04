@@ -238,8 +238,8 @@ async def register(user_data: dict):
     }
 
 @app.post("/auth/setup")
-async def setup_auth(credentials: dict):
-    # Mock OAuth setup
+async def setup_auth(credentials: dict = None):
+    # Mock OAuth setup - always returns same mock data for development
     return {
         "authUrl": "https://discogs.com/oauth/authorize?oauth_token=mock_token",
         "requestToken": "mock_request_token"
@@ -247,7 +247,11 @@ async def setup_auth(credentials: dict):
 
 @app.post("/auth/verify")
 async def verify_auth(verification: dict):
-    # Mock verification
+    # Mock verification - reconnect the user
+    if 1 in mock_data["users"]:
+        mock_data["users"][1].discogsUserId = 12345
+        mock_data["users"][1].username = "demouser"
+    
     return {
         "user": mock_data["users"][1],
         "message": "Account connected successfully"
@@ -255,6 +259,10 @@ async def verify_auth(verification: dict):
 
 @app.post("/auth/disconnect")
 async def disconnect_auth():
+    # Reset the mock user to disconnected state
+    if 1 in mock_data["users"]:
+        mock_data["users"][1].discogsUserId = None
+        mock_data["users"][1].username = "demouser"  # Keep basic username
     return {"message": "Account disconnected successfully"}
 
 # Dashboard endpoints

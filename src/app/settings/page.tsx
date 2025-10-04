@@ -71,8 +71,8 @@ export default function SettingsPage() {
 
       if (response.ok) {
         toast.success('Account disconnected successfully')
-        // Redirect to setup page
-        router.push('/setup')
+        // Refresh the page to show disconnected state
+        window.location.reload()
       } else {
         throw new Error('Failed to disconnect account')
       }

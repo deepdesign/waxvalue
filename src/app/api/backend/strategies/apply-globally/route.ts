@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
     const authHeader = request.headers.get('authorization')
     const body = await request.json()
     
-    const response = await fetch(`${process.env.BACKEND_URL || 'http://localhost:8000'}/strategies/apply-globally`, {
+    const response = await fetch(`${process.env.BACKEND_URL || 'http://127.0.0.1:8000'}/strategies/apply-globally`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

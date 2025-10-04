@@ -5,7 +5,7 @@ export async function PUT(request: NextRequest) {
     const authHeader = request.headers.get('authorization')
     const body = await request.json()
     
-    const response = await fetch(`${process.env.BACKEND_URL || 'http://localhost:8000'}/settings`, {
+    const response = await fetch(`${process.env.BACKEND_URL || 'http://127.0.0.1:8000'}/settings`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

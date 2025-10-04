@@ -10,6 +10,7 @@ import { InventoryReviewTable } from '@/components/InventoryReviewTable'
 import { OnboardingBanner } from '@/components/OnboardingBanner'
 import { FiltersBar, FilterState } from '@/components/FiltersBar'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
+import { DiscogsConnectionCard } from '@/components/DiscogsConnectionCard'
 
 export default function DashboardPage() {
   const { user, isLoading } = useApp()
@@ -54,10 +55,8 @@ export default function DashboardPage() {
           <p className="text-gray-600">Review and manage your Discogs pricing suggestions</p>
         </div>
 
-        {/* Onboarding Banner - Show if user is not connected to Discogs */}
-        {user && !user.discogsUserId && (
-          <OnboardingBanner />
-        )}
+        {/* Discogs Connection Status */}
+        <DiscogsConnectionCard user={user} />
 
         {/* Summary Cards */}
         <RunSummaryCards />

@@ -11,6 +11,7 @@ import {
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
+import { useApp } from './Providers'
 
 const discogsSchema = z.object({
   verifierCode: z.string().optional(),
@@ -24,6 +25,7 @@ interface SettingsDiscogsProps {
 }
 
 export function SettingsDiscogs({ user, onConnectionChange }: SettingsDiscogsProps) {
+  const { setUser } = useApp()
   const [isConnected, setIsConnected] = useState(!!user?.discogsUserId)
   const [isLoading, setIsLoading] = useState(false)
   const [authUrl, setAuthUrl] = useState('')
@@ -44,25 +46,40 @@ export function SettingsDiscogs({ user, onConnectionChange }: SettingsDiscogsPro
   const handleGetAuthLink = async () => {
     setIsLoading(true)
     try {
+      console.log('SettingsDiscogs: Starting auth setup')
+      const token = localStorage.getItem('waxvalue_token')
+      console.log('SettingsDiscogs: Token found:', !!token)
+      
       const response = await fetch('/api/backend/auth/setup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
+        body: JSON.stringify({}),
       })
+      
+      console.log('SettingsDiscogs: Response status:', response.status)
 
       if (!response.ok) {
+        const errorText = await response.text()
+        console.log('SettingsDiscogs: Error response:', errorText)
         throw new Error('Failed to setup authentication')
       }
 
-      const result = await response.json()
+      const responseText = await response.text()
+      console.log('SettingsDiscogs: Raw response:', responseText)
+      
+      const result = JSON.parse(responseText)
+      console.log('SettingsDiscogs: Parsed result:', result)
+      
       setAuthUrl(result.authUrl)
       setRequestToken(result.requestToken)
       setStep('authorize')
       toast.success('Ready to authorize with Discogs!')
     } catch (error) {
       toast.error('Failed to setup authentication. Please try again.')
-      console.error('Auth setup error:', error)
+      console.error('Auth setup error details:', error)
     } finally {
       setIsLoading(false)
     }
@@ -101,11 +118,15 @@ export function SettingsDiscogs({ user, onConnectionChange }: SettingsDiscogsPro
 
       const result = await response.json()
       
-      // Store user data in context/localStorage
+      // Update global user state
+      setUser(result.user)
       localStorage.setItem('waxvalue_user', JSON.stringify(result.user))
       
+      // Update local state
       setIsConnected(true)
       setStep('connected')
+      
+      // Notify parent component
       onConnectionChange?.(true)
       toast.success('Account linked successfully!')
     } catch (error) {
@@ -127,9 +148,20 @@ export function SettingsDiscogs({ user, onConnectionChange }: SettingsDiscogsPro
       })
 
       if (response.ok) {
+        // Clear localStorage
         localStorage.removeItem('waxvalue_user')
+        localStorage.removeItem('waxvalue_token')
+        
+        // Update local state
         setIsConnected(false)
         setStep('authorize')
+        
+        // Update global user state with disconnected user
+        const disconnectedUser = { ...user, discogsUserId: null }
+        setUser(disconnectedUser)
+        localStorage.setItem('waxvalue_user', JSON.stringify(disconnectedUser))
+        
+        // Notify parent component
         onConnectionChange?.(false)
         toast.success('Account disconnected successfully')
       } else {
