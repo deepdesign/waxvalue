@@ -124,25 +124,25 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
             <div className="ml-4 flex-1">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Discogs Account</p>
-                  <p className="text-2xl font-bold text-gray-900">Connected</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Discogs Account</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">Connected</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-500">Connected as</p>
-                  <p className="text-sm font-semibold text-green-600">{user.username}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Connected as</p>
+                  <p className="text-sm font-semibold text-green-600 dark:text-green-400">{user.username}</p>
                 </div>
               </div>
             </div>
           </div>
           <div className="mt-6">
-            <div className="rounded-md bg-green-50 p-4">
+            <div className="rounded-md bg-green-50 dark:bg-green-900/20 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <CheckCircleIcon className="h-5 w-5 text-green-400" aria-hidden="true" />
+                  <CheckCircleIcon className="h-5 w-5 text-green-400 dark:text-green-300" aria-hidden="true" />
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-green-800">Status: Active</h3>
-                  <div className="mt-2 text-sm text-green-700">
+                  <h3 className="text-sm font-medium text-green-800 dark:text-green-200">Status: Active</h3>
+                  <div className="mt-2 text-sm text-green-700 dark:text-green-300">
                     <ul role="list" className="list-disc space-y-1 pl-5">
                       <li>Automated pricing suggestions enabled</li>
                       <li>Real-time market data access active</li>

@@ -154,35 +154,35 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? (
-                <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                <EyeSlashIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400" />
               ) : (
-                <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                <EyeIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400" />
               )}
             </button>
           </div>
           {password && (
             <div className="mt-2 space-y-1" role="status" aria-live="polite">
               <div className="flex items-center text-xs">
-                <CheckCircleIcon className={`h-3 w-3 mr-1 ${password.length >= 8 ? 'text-green-500' : 'text-gray-300'}`} aria-hidden="true" />
-                <span className={password.length >= 8 ? 'text-green-600' : 'text-gray-500'}>
+                <CheckCircleIcon className={`h-3 w-3 mr-1 ${password.length >= 8 ? 'text-green-500 dark:text-green-400' : 'text-gray-300 dark:text-gray-600'}`} aria-hidden="true" />
+                <span className={password.length >= 8 ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}>
                   At least 8 characters
                 </span>
               </div>
               <div className="flex items-center text-xs">
-                <CheckCircleIcon className={`h-3 w-3 mr-1 ${/[A-Z]/.test(password) ? 'text-green-500' : 'text-gray-300'}`} aria-hidden="true" />
-                <span className={/[A-Z]/.test(password) ? 'text-green-600' : 'text-gray-500'}>
+                <CheckCircleIcon className={`h-3 w-3 mr-1 ${/[A-Z]/.test(password) ? 'text-green-500 dark:text-green-400' : 'text-gray-300 dark:text-gray-600'}`} aria-hidden="true" />
+                <span className={/[A-Z]/.test(password) ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}>
                   One uppercase letter
                 </span>
               </div>
               <div className="flex items-center text-xs">
-                <CheckCircleIcon className={`h-3 w-3 mr-1 ${/[a-z]/.test(password) ? 'text-green-500' : 'text-gray-300'}`} aria-hidden="true" />
-                <span className={/[a-z]/.test(password) ? 'text-green-600' : 'text-gray-500'}>
+                <CheckCircleIcon className={`h-3 w-3 mr-1 ${/[a-z]/.test(password) ? 'text-green-500 dark:text-green-400' : 'text-gray-300 dark:text-gray-600'}`} aria-hidden="true" />
+                <span className={/[a-z]/.test(password) ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}>
                   One lowercase letter
                 </span>
               </div>
               <div className="flex items-center text-xs">
-                <CheckCircleIcon className={`h-3 w-3 mr-1 ${/\d/.test(password) ? 'text-green-500' : 'text-gray-300'}`} aria-hidden="true" />
-                <span className={/\d/.test(password) ? 'text-green-600' : 'text-gray-500'}>
+                <CheckCircleIcon className={`h-3 w-3 mr-1 ${/\d/.test(password) ? 'text-green-500 dark:text-green-400' : 'text-gray-300 dark:text-gray-600'}`} aria-hidden="true" />
+                <span className={/\d/.test(password) ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}>
                   One number
                 </span>
               </div>
@@ -210,9 +210,9 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
               aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
             >
               {showConfirmPassword ? (
-                <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                <EyeSlashIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400" />
               ) : (
-                <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                <EyeIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400" />
               )}
             </button>
           </div>
@@ -229,13 +229,13 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
               />
             </div>
             <div className="ml-3 text-sm">
-              <label htmlFor="agreeToTerms" className="text-gray-700">
+              <label htmlFor="agreeToTerms" className="text-gray-700 dark:text-gray-300">
                 I agree to the{' '}
-                <a href="#" className="text-primary-600 hover:text-primary-500">
+                <a href="#" className="text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300">
                   Terms of Service
                 </a>{' '}
                 and{' '}
-                <a href="#" className="text-primary-600 hover:text-primary-500">
+                <a href="#" className="text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300">
                   Privacy Policy
                 </a>
               </label>
@@ -262,7 +262,7 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
             <div className="w-full border-t border-gray-300" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">Already have an account?</span>
+            <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Already have an account?</span>
           </div>
         </div>
 
