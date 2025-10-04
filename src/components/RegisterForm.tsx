@@ -93,10 +93,10 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6 max-w-md mx-auto">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-600 p-6 max-w-md mx-auto">
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
-        <p className="text-gray-600 mt-2">Join WaxValue and start optimizing your Discogs pricing</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Create Account</h2>
+        <p className="text-gray-600 dark:text-gray-400 mt-2">Join WaxValue and start optimizing your Discogs pricing</p>
       </div>
 
       <form onSubmit={handleSubmit(handleRegister)} className="space-y-6">

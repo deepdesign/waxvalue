@@ -141,11 +141,11 @@ export default function StrategiesPage() {
 
         {/* Active Strategy */}
         {activeStrategy && (
-          <div className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6 border-l-4 border-l-green-500">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-600 p-6 border-l-4 border-l-green-500 dark:border-l-green-400">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Active Strategy</h3>
-                <p className="text-sm text-gray-500">{activeStrategy.name}</p>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Active Strategy</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{activeStrategy.name}</p>
               </div>
               <Button
                 onClick={() => handleApplyGlobally(activeStrategy.id)}
@@ -180,10 +180,10 @@ export default function StrategiesPage() {
 
         {/* Existing Strategies */}
         {!showForm && strategies.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-600 p-6">
             <div className="mb-4">
-              <h3 className="text-lg font-medium text-gray-900">Existing Strategies</h3>
-              <p className="text-sm text-gray-500">Manage your pricing strategies</p>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Existing Strategies</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Manage your pricing strategies</p>
             </div>
             
             <div className="space-y-4">
@@ -222,9 +222,9 @@ export default function StrategiesPage() {
 
         {/* Empty State */}
         {!showForm && strategies.length === 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center py-12">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No strategies yet</h3>
-            <p className="text-gray-500 mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No strategies yet</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">
               Create your first pricing strategy to get started with automated pricing.
             </p>
             <Button

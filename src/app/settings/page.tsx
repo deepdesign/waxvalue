@@ -120,10 +120,10 @@ export default function SettingsPage() {
           />
 
           {/* General Settings */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center mb-4">
               <CogIcon className="h-6 w-6 text-gray-400 mr-3" />
-              <h2 className="text-lg font-medium text-gray-900">General</h2>
+              <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">General</h2>
             </div>
             
             <div className="space-y-4">
@@ -171,10 +171,10 @@ export default function SettingsPage() {
           </div>
 
           {/* Safeguards */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center mb-4">
               <ShieldCheckIcon className="h-6 w-6 text-gray-400 mr-3" />
-              <h2 className="text-lg font-medium text-gray-900">Safeguards</h2>
+              <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Safeguards</h2>
             </div>
             
             <div className="space-y-4">
@@ -231,10 +231,10 @@ export default function SettingsPage() {
           </div>
 
           {/* Advanced Settings */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center mb-4">
               <CogIcon className="h-6 w-6 text-gray-400 mr-3" />
-              <h2 className="text-lg font-medium text-gray-900">Advanced</h2>
+              <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Advanced</h2>
             </div>
             
             <div className="space-y-4">

@@ -77,7 +77,7 @@ export default function HelpPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* FAQ Section */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-600 p-6">
               <div className="flex items-center mb-6">
                 <QuestionMarkCircleIcon className="h-6 w-6 text-gray-400 mr-3" />
                 <h2 className="text-lg font-medium text-gray-900">Frequently Asked Questions</h2>
@@ -96,7 +96,7 @@ export default function HelpPage() {
 
           {/* Detailed Guides */}
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-600 p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">Detailed Guides</h2>
               
               <div className="space-y-6">
@@ -159,7 +159,7 @@ export default function HelpPage() {
 
           {/* Support Section */}
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-600 p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">Get Support</h2>
               
               <div className="space-y-4">
@@ -203,7 +203,7 @@ export default function HelpPage() {
             </div>
 
             {/* Quick Links */}
-            <div className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-600 p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Links</h2>
               
               <div className="space-y-2">
@@ -235,7 +235,7 @@ export default function HelpPage() {
             </div>
 
             {/* System Status */}
-            <div className="bg-white rounded-lg shadow-sm border border-secondary-200 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-600 p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">System Status</h2>
               
               <div className="space-y-3">

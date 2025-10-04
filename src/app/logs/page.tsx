@@ -46,10 +46,10 @@ export default function LogsPage() {
         </div>
 
         {/* Logs Section */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">Activity Logs</h2>
-            <p className="mt-1 text-sm text-gray-600">Complete history of all pricing runs and changes</p>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Activity Logs</h2>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Complete history of all pricing runs and changes</p>
           </div>
           <div className="p-6">
             <LogsTable />

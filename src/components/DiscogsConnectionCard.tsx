@@ -109,10 +109,10 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
 
   if (isConnected) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Discogs Connection</h2>
-          <p className="mt-1 text-sm text-gray-600">Manage your Discogs account integration</p>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Discogs Connection</h2>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage your Discogs account integration</p>
         </div>
         <div className="p-6">
           <div className="flex items-center">
@@ -168,10 +168,10 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-      <div className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900">Discogs Connection</h2>
-        <p className="mt-1 text-sm text-gray-600">Connect your Discogs account to enable automated pricing</p>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Discogs Connection</h2>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Connect your Discogs account to enable automated pricing</p>
       </div>
       <div className="p-6">
         {showVerification ? (

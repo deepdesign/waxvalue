@@ -27,7 +27,7 @@ export default function MetricsPage() {
 
   const MetricsCharts = dynamic(() => import('@/components/MetricsCharts').then(m => m.MetricsCharts), {
     ssr: false,
-    loading: () => <div className="space-y-6"><div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse h-64" /><div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse h-64" /></div>,
+    loading: () => <div className="space-y-6"><div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse h-64" /><div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse h-64" /></div>,
   })
 
   return (
@@ -35,15 +35,15 @@ export default function MetricsPage() {
       <div className="space-y-8">
         {/* Page Header */}
         <div className="border-b border-gray-200 pb-6">
-          <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Metrics & Analytics</h1>
-          <p className="mt-2 text-lg text-gray-600">Analyze your pricing performance and market positioning</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">Metrics & Analytics</h1>
+          <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">Analyze your pricing performance and market positioning</p>
         </div>
 
         {/* Analytics Section */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">Performance Analytics</h2>
-            <p className="mt-1 text-sm text-gray-600">Charts and insights about your pricing strategy effectiveness</p>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Performance Analytics</h2>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Charts and insights about your pricing strategy effectiveness</p>
           </div>
           <div className="p-6">
             <MetricsCharts />

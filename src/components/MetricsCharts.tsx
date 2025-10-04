@@ -89,7 +89,7 @@ export function MetricsCharts({ className = '' }: MetricsChartsProps) {
         
         {/* Charts Loading */}
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse">
+          <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
             <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
             <div className="h-64 bg-gray-200 rounded"></div>
           </div>
@@ -101,10 +101,10 @@ export function MetricsCharts({ className = '' }: MetricsChartsProps) {
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Portfolio Overview Section */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-xl font-semibold text-gray-900">Portfolio Overview</h3>
-          <p className="mt-1 text-sm text-gray-600">Key metrics about your inventory pricing</p>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Portfolio Overview</h3>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Key metrics about your inventory pricing</p>
         </div>
         <div className="p-6">
           {portfolioMetrics && (
@@ -188,10 +188,10 @@ export function MetricsCharts({ className = '' }: MetricsChartsProps) {
 
       {/* Price Trend Chart */}
       {trendData.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-900">Price Trends</h3>
-            <p className="mt-1 text-sm text-gray-600">Your average prices vs market median over time</p>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Price Trends</h3>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Your average prices vs market median over time</p>
           </div>
           <div className="p-6">
             <div className="h-64">
@@ -230,10 +230,10 @@ export function MetricsCharts({ className = '' }: MetricsChartsProps) {
 
       {/* Price Distribution Section */}
       {distributionData.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-900">Price Distribution Analysis</h3>
-            <p className="mt-1 text-sm text-gray-600">Compare your listings against market distribution</p>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Price Distribution Analysis</h3>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Compare your listings against market distribution</p>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -296,7 +296,7 @@ export function MetricsCharts({ className = '' }: MetricsChartsProps) {
 
         {/* Portfolio Summary */}
         {portfolioMetrics && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="p-6 border-b border-gray-200">
               <h3 className="text-xl font-semibold text-gray-900">Portfolio Summary</h3>
               <p className="mt-1 text-sm text-gray-600">Key insights about your pricing strategy</p>
@@ -338,7 +338,7 @@ export function MetricsCharts({ className = '' }: MetricsChartsProps) {
         )}
 
         {/* Item-Level Drilldown */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-xl font-semibold text-gray-900">Item Performance</h3>
             <p className="mt-1 text-sm text-gray-600">Detailed analysis of individual listings</p>
