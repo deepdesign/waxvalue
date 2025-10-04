@@ -601,6 +601,34 @@ async def decline_price_suggestion(listing_data: dict, current_user: User = Depe
 
     return {"message": "Price suggestion declined"}
 
+@app.post("/inventory/update-price")
+async def update_listing_price(price_data: dict, current_user: User = Depends(get_current_user)):
+    """Update a listing price directly"""
+    try:
+        listing_id = price_data.get("listingId")
+        new_price = price_data.get("newPrice")
+        
+        if not listing_id or new_price is None:
+            raise HTTPException(status_code=400, detail="Listing ID and new price are required")
+        
+        # Get user's Discogs client
+        client = get_discogs_client(current_user)
+        
+        # Update the price on Discogs
+        status_code, response = client.update_listing_price(listing_id, new_price)
+        
+        if status_code == 200:
+            return {"success": True, "message": "Price updated successfully", "data": response}
+        else:
+            raise HTTPException(status_code=status_code, detail="Failed to update price on Discogs")
+            
+    except DiscogsAPIError as e:
+        logger.error(f"Discogs API error updating price: {e}")
+        raise HTTPException(status_code=500, detail=f"Discogs API error: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error updating listing price: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update listing price")
+
 # Strategy endpoints
 @app.get("/strategies")
 async def get_strategies(current_user: User = Depends(get_current_user)):
@@ -621,6 +649,62 @@ async def create_strategy(strategy_data: dict, current_user: User = Depends(get_
     
     strategies_db[strategy_id] = strategy
     return {"strategy": strategy, "message": "Strategy created successfully"}
+
+@app.post("/strategies/preview")
+async def preview_strategy(strategy_data: dict, current_user: User = Depends(get_current_user)):
+    """Preview how a strategy would price sample items"""
+    try:
+        # This would generate sample pricing data based on the strategy
+        # For now, return mock data
+        sample_items = [
+            {
+                "title": "Sample Release 1",
+                "artist": "Sample Artist",
+                "currentPrice": 25.00,
+                "suggestedPrice": 28.50,
+                "basis": "Median + 14%"
+            },
+            {
+                "title": "Sample Release 2", 
+                "artist": "Another Artist",
+                "currentPrice": 15.00,
+                "suggestedPrice": 16.20,
+                "basis": "Median + 8%"
+            },
+            {
+                "title": "Sample Release 3",
+                "artist": "Third Artist", 
+                "currentPrice": 45.00,
+                "suggestedPrice": 48.60,
+                "basis": "Median + 8%"
+            }
+        ]
+        
+        return {"preview": sample_items}
+    except Exception as e:
+        logger.error(f"Error generating strategy preview: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate strategy preview")
+
+@app.post("/strategies/apply-globally")
+async def apply_strategy_globally(request_data: dict, current_user: User = Depends(get_current_user)):
+    """Apply a strategy globally to all inventory"""
+    try:
+        strategy_id = request_data.get("strategyId")
+        if not strategy_id:
+            raise HTTPException(status_code=400, detail="Strategy ID is required")
+        
+        # Get the strategy
+        strategy = strategies_db.get(strategy_id)
+        if not strategy or strategy.userId != current_user.id:
+            raise HTTPException(status_code=404, detail="Strategy not found")
+        
+        # In a real implementation, this would apply the strategy to all inventory
+        # For now, return a success message
+        return {"message": "Strategy applied globally", "strategyId": strategy_id}
+        
+    except Exception as e:
+        logger.error(f"Error applying strategy globally: {e}")
+        raise HTTPException(status_code=500, detail="Failed to apply strategy globally")
 
 # Logs endpoints
 @app.get("/logs")

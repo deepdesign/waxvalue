@@ -67,13 +67,13 @@ Added npm scripts for easy compliance checking:
 
 ## 📊 Compliance Areas Covered
 
-### Tailwind CSS Components
-- ✅ Use Tailwind utility classes for components
+### Tailwind CSS
+- ✅ Use official Tailwind components (Tabs, etc.)
 - ✅ Follow Tailwind's design system
 - ✅ Implement proper responsive design
 - ✅ Ensure accessibility compliance
-- ✅ Reference: https://tailwindcss.com/docs
-
+- ✅ Reference: https://tailwindcss.com/docs/installation/using-vite
+COMPLIANCE_SYSTEM_SUMMARY.md
 ### Discogs API Integration  
 - ✅ OAuth 1.0a authentication flow
 - ✅ Rate limiting (60 requests/minute)

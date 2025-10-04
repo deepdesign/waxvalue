@@ -381,7 +381,7 @@ export function StrategyForm({ onSave, onPreview, initialData, isLoading = false
         <div className="mt-6 border-t border-gray-200 pt-6">
           <h4 className="text-lg font-medium text-gray-900 mb-4">Strategy Preview</h4>
           <p className="text-sm text-gray-600 mb-4">
-            Here's how this strategy would price sample items from your inventory:
+            Here&apos;s how this strategy would price sample items from your inventory:
           </p>
           
           <div className="bg-gray-50 rounded-lg p-4">

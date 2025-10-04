@@ -201,7 +201,7 @@ export function SettingsDiscogs({ user, onConnectionChange }: SettingsDiscogsPro
               <CheckCircleIcon className="h-5 w-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" />
               <div className="text-sm text-green-800">
                 <p className="font-medium mb-1">Ready to connect to Discogs!</p>
-                <p>Click the button below to start the authorization process. You'll be redirected to Discogs to authorize WaxValue to access your account.</p>
+                <p>Click the button below to start the authorization process. You&apos;ll be redirected to Discogs to authorize WaxValue to access your account.</p>
               </div>
             </div>
           </div>
