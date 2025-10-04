@@ -14,6 +14,8 @@ import {
   CheckCircleIcon,
 } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
+import { Button } from '@/components/ui/Button'
+import { FormField } from '@/components/ui/FormField'
 
 const registerSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
@@ -99,84 +101,57 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
 
       <form onSubmit={handleSubmit(handleRegister)} className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-              First Name
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <UserIcon className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                {...register('firstName')}
-                type="text"
-                autoComplete="given-name"
-                className="input-field pl-10"
-                placeholder="First name"
-              />
-            </div>
-            {errors.firstName && (
-              <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
-            )}
-          </div>
+          <FormField
+            {...register('firstName')}
+            label="First Name"
+            type="text"
+            autoComplete="given-name"
+            placeholder="First name"
+            error={errors.firstName?.message}
+            icon={<UserIcon />}
+            required
+          />
 
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-              Last Name
-            </label>
-            <input
-              {...register('lastName')}
-              type="text"
-              autoComplete="family-name"
-              className="input-field"
-              placeholder="Last name"
-            />
-            {errors.lastName && (
-              <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
-            )}
-          </div>
+          <FormField
+            {...register('lastName')}
+            label="Last Name"
+            type="text"
+            autoComplete="family-name"
+            placeholder="Last name"
+            error={errors.lastName?.message}
+            required
+          />
         </div>
 
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email Address
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <EnvelopeIcon className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              {...register('email')}
-              type="email"
-              autoComplete="email"
-              className="input-field pl-10"
-              placeholder="Enter your email"
-            />
-          </div>
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-          )}
-        </div>
+        <FormField
+          {...register('email')}
+          label="Email Address"
+          type="email"
+          autoComplete="email"
+          placeholder="Enter your email"
+          error={errors.email?.message}
+          icon={<EnvelopeIcon />}
+          required
+        />
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            Password
-          </label>
+        <div className="space-y-1">
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <LockClosedIcon className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
+            <FormField
               {...register('password')}
+              label="Password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
-              className="input-field pl-10 pr-10"
               placeholder="Create a password"
+              error={errors.password?.message}
+              icon={<LockClosedIcon />}
+              required
+              className="pr-10"
             />
             <button
               type="button"
-              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center top-7"
               onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? (
                 <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -185,31 +160,28 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
               )}
             </button>
           </div>
-          {errors.password && (
-            <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-          )}
           {password && (
-            <div className="mt-2 space-y-1">
+            <div className="mt-2 space-y-1" role="status" aria-live="polite">
               <div className="flex items-center text-xs">
-                <CheckCircleIcon className={`h-3 w-3 mr-1 ${password.length >= 8 ? 'text-green-500' : 'text-gray-300'}`} />
+                <CheckCircleIcon className={`h-3 w-3 mr-1 ${password.length >= 8 ? 'text-green-500' : 'text-gray-300'}`} aria-hidden="true" />
                 <span className={password.length >= 8 ? 'text-green-600' : 'text-gray-500'}>
                   At least 8 characters
                 </span>
               </div>
               <div className="flex items-center text-xs">
-                <CheckCircleIcon className={`h-3 w-3 mr-1 ${/[A-Z]/.test(password) ? 'text-green-500' : 'text-gray-300'}`} />
+                <CheckCircleIcon className={`h-3 w-3 mr-1 ${/[A-Z]/.test(password) ? 'text-green-500' : 'text-gray-300'}`} aria-hidden="true" />
                 <span className={/[A-Z]/.test(password) ? 'text-green-600' : 'text-gray-500'}>
                   One uppercase letter
                 </span>
               </div>
               <div className="flex items-center text-xs">
-                <CheckCircleIcon className={`h-3 w-3 mr-1 ${/[a-z]/.test(password) ? 'text-green-500' : 'text-gray-300'}`} />
+                <CheckCircleIcon className={`h-3 w-3 mr-1 ${/[a-z]/.test(password) ? 'text-green-500' : 'text-gray-300'}`} aria-hidden="true" />
                 <span className={/[a-z]/.test(password) ? 'text-green-600' : 'text-gray-500'}>
                   One lowercase letter
                 </span>
               </div>
               <div className="flex items-center text-xs">
-                <CheckCircleIcon className={`h-3 w-3 mr-1 ${/\d/.test(password) ? 'text-green-500' : 'text-gray-300'}`} />
+                <CheckCircleIcon className={`h-3 w-3 mr-1 ${/\d/.test(password) ? 'text-green-500' : 'text-gray-300'}`} aria-hidden="true" />
                 <span className={/\d/.test(password) ? 'text-green-600' : 'text-gray-500'}>
                   One number
                 </span>
@@ -218,25 +190,24 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
           )}
         </div>
 
-        <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-            Confirm Password
-          </label>
+        <div className="space-y-1">
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <LockClosedIcon className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
+            <FormField
               {...register('confirmPassword')}
+              label="Confirm Password"
               type={showConfirmPassword ? 'text' : 'password'}
               autoComplete="new-password"
-              className="input-field pl-10 pr-10"
               placeholder="Confirm your password"
+              error={errors.confirmPassword?.message}
+              icon={<LockClosedIcon />}
+              required
+              className="pr-10"
             />
             <button
               type="button"
-              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center top-7"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
             >
               {showConfirmPassword ? (
                 <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -245,9 +216,6 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
               )}
             </button>
           </div>
-          {errors.confirmPassword && (
-            <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
-          )}
         </div>
 
         <div>
@@ -278,20 +246,14 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
           )}
         </div>
 
-        <button
+        <Button
           type="submit"
-          disabled={isLoading}
-          className="btn-primary w-full"
+          loading={isLoading}
+          loadingText="Creating account..."
+          className="w-full"
         >
-          {isLoading ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Creating account...
-            </>
-          ) : (
-            'Create Account'
-          )}
-        </button>
+          Create Account
+        </Button>
       </form>
 
       <div className="mt-6">
@@ -305,13 +267,14 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
         </div>
 
         <div className="mt-6">
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={onSwitchToLogin}
-            className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            className="w-full"
           >
             Sign in instead
-          </button>
+          </Button>
         </div>
       </div>
     </div>

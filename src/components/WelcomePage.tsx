@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRightIcon, ShieldCheckIcon, ChartBarIcon, CogIcon } from '@heroicons/react/24/outline'
+import { Button } from '@/components/ui/Button'
 
 export function WelcomePage() {
   const [isStarting, setIsStarting] = useState(false)
@@ -39,23 +40,17 @@ export function WelcomePage() {
               A consumer-friendly web app that checks your Discogs listings against wider marketplace data 
               and suggests price changes. You stay in control, but prices can be updated automatically.
             </p>
-            <button
+            <Button
               onClick={handleGetStarted}
-              disabled={isStarting}
-              className="btn-primary text-lg px-8 py-3 inline-flex items-center"
+              loading={isStarting}
+              loadingText="Starting..."
+              size="lg"
+              className="inline-flex items-center"
+              aria-label="Get started with WaxValue"
             >
-              {isStarting ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Starting...
-                </>
-              ) : (
-                <>
-                  Get Started
-                  <ArrowRightIcon className="ml-2 h-5 w-5" />
-                </>
-              )}
-            </button>
+              Get Started
+              <ArrowRightIcon className="ml-2 h-5 w-5" aria-hidden="true" />
+            </Button>
           </div>
         </div>
 
@@ -139,25 +134,19 @@ export function WelcomePage() {
 
         {/* CTA Section */}
         <div className="py-16 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to optimize your Discogs pricing?</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to optimise your Discogs pricing?</h2>
           <p className="text-gray-600 mb-8">Join thousands of sellers who keep their prices competitive automatically.</p>
-          <button
+          <Button
             onClick={handleGetStarted}
-            disabled={isStarting}
-            className="btn-primary text-lg px-8 py-3 inline-flex items-center"
+            loading={isStarting}
+            loadingText="Starting..."
+            size="lg"
+            className="inline-flex items-center"
+            aria-label="Get started with WaxValue now"
           >
-            {isStarting ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Starting...
-              </>
-            ) : (
-              <>
-                Get Started Now
-                <ArrowRightIcon className="ml-2 h-5 w-5" />
-              </>
-            )}
-          </button>
+            Get Started Now
+            <ArrowRightIcon className="ml-2 h-5 w-5" aria-hidden="true" />
+          </Button>
         </div>
       </div>
     </div>
