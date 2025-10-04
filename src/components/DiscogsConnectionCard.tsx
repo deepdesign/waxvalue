@@ -236,6 +236,12 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
               Link your Discogs account to unlock automated pricing suggestions and market analysis. 
               You'll be redirected to Discogs to authorize WaxValue access to your account.
             </p>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+              <p className="text-xs text-yellow-800">
+                <strong>Development Mode:</strong> This will open a mock Discogs URL for testing. 
+                In production, this would connect to the real Discogs OAuth system.
+              </p>
+            </div>
             
             <div className="space-y-3">
               <Button

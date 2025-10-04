@@ -240,8 +240,9 @@ async def register(user_data: dict):
 @app.post("/auth/setup")
 async def setup_auth(credentials: dict = None):
     # Mock OAuth setup - always returns same mock data for development
+    # In production, this would generate real OAuth URLs with proper tokens
     return {
-        "authUrl": "https://discogs.com/oauth/authorize?oauth_token=mock_token",
+        "authUrl": "https://www.discogs.com/oauth/authorize?oauth_token=mock_token&oauth_callback=http://localhost:3000",
         "requestToken": "mock_request_token"
     }
 

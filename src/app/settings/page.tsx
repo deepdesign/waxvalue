@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/DashboardLayout'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
-import { SettingsDiscogs } from '@/components/SettingsDiscogs'
+import { DiscogsConnectionCard } from '@/components/DiscogsConnectionCard'
 import { AutomationSettingsForm } from '@/components/AutomationSettingsForm'
 import { Button } from '@/components/ui/Button'
 import {
@@ -102,12 +102,7 @@ export default function SettingsPage() {
 
         <div className="space-y-6">
           {/* Discogs Account */}
-          <SettingsDiscogs 
-            user={user} 
-            onConnectionChange={(connected) => {
-              // Handle connection change if needed
-            }}
-          />
+          <DiscogsConnectionCard user={user} />
 
           {/* Automation Settings */}
           <AutomationSettingsForm
