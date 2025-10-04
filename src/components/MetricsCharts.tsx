@@ -77,8 +77,19 @@ export function MetricsCharts({ className = '' }: MetricsChartsProps) {
   if (isLoading) {
     return (
       <div className={`space-y-6 ${className}`}>
+        {/* Portfolio Overview Loading */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-gray-50 rounded-lg p-4 animate-pulse">
+              <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+              <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Charts Loading */}
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="card animate-pulse">
+          <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse">
             <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
             <div className="h-64 bg-gray-200 rounded"></div>
           </div>
@@ -89,177 +100,195 @@ export function MetricsCharts({ className = '' }: MetricsChartsProps) {
 
   return (
     <div className={`space-y-6 ${className}`}>
-      {/* Portfolio Overview Cards */}
-      {portfolioMetrics && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="card">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <ChartBarIcon className="h-5 w-5 text-white" />
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Listings</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {portfolioMetrics.totalListings}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                  <ArrowUpIcon className="h-5 w-5 text-white" />
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Underpriced</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {portfolioMetrics.underpriced}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
-                  <ArrowDownIcon className="h-5 w-5 text-white" />
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Overpriced</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {portfolioMetrics.overpriced}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                  portfolioMetrics.averageDelta >= 0 ? 'bg-green-500' : 'bg-red-500'
-                }`}>
-                  {portfolioMetrics.averageDelta >= 0 ? (
-                    <ArrowUpIcon className="h-5 w-5 text-white" />
-                  ) : (
-                    <ArrowDownIcon className="h-5 w-5 text-white" />
-                  )}
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Avg Delta</p>
-                <p className={`text-lg font-semibold ${
-                  portfolioMetrics.averageDelta >= 0 ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {portfolioMetrics.averageDelta > 0 ? '+' : ''}
-                  {portfolioMetrics.averageDelta.toFixed(1)}%
-                </p>
-              </div>
-            </div>
-          </div>
+      {/* Portfolio Overview Section */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-xl font-semibold text-gray-900">Portfolio Overview</h3>
+          <p className="mt-1 text-sm text-gray-600">Key metrics about your inventory pricing</p>
         </div>
-      )}
+        <div className="p-6">
+          {portfolioMetrics && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                      <ChartBarIcon className="h-5 w-5 text-white" />
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-500">Total Listings</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {portfolioMetrics.totalListings}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                      <ArrowUpIcon className="h-5 w-5 text-white" />
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-500">Underpriced</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {portfolioMetrics.underpriced}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
+                      <ArrowDownIcon className="h-5 w-5 text-white" />
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-500">Overpriced</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {portfolioMetrics.overpriced}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                      portfolioMetrics.averageDelta >= 0 ? 'bg-green-500' : 'bg-red-500'
+                    }`}>
+                      {portfolioMetrics.averageDelta >= 0 ? (
+                        <ArrowUpIcon className="h-5 w-5 text-white" />
+                      ) : (
+                        <ArrowDownIcon className="h-5 w-5 text-white" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-500">Avg Delta</p>
+                    <p className={`text-lg font-semibold ${
+                      portfolioMetrics.averageDelta >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {portfolioMetrics.averageDelta > 0 ? '+' : ''}
+                      {portfolioMetrics.averageDelta.toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Price Trend Chart */}
       {trendData.length > 0 && (
-        <div className="card">
-          <div className="mb-4">
-            <h3 className="text-lg font-medium text-gray-900">Price Trends</h3>
-            <p className="text-sm text-gray-500">Your average prices vs market median over time</p>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-6 border-b border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-900">Price Trends</h3>
+            <p className="mt-1 text-sm text-gray-600">Your average prices vs market median over time</p>
           </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="date" 
-                  tickFormatter={(value) => new Date(value).toLocaleDateString()}
-                />
-                <YAxis />
-                <Tooltip 
-                  labelFormatter={(value) => new Date(value).toLocaleDateString()}
-                  formatter={(value: number) => [`$${value.toFixed(2)}`, '']}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="userAverage" 
-                  stroke="#3B82F6" 
-                  strokeWidth={2}
-                  name="Your Average"
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="marketMedian" 
-                  stroke="#10B981" 
-                  strokeWidth={2}
-                  name="Market Median"
-                />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="p-6">
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={trendData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="date" 
+                    tickFormatter={(value) => new Date(value).toLocaleDateString()}
+                  />
+                  <YAxis />
+                  <Tooltip 
+                    labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                    formatter={(value: number) => [`$${value.toFixed(2)}`, '']}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="userAverage" 
+                    stroke="#3B82F6" 
+                    strokeWidth={2}
+                    name="Your Average"
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="marketMedian" 
+                    stroke="#10B981" 
+                    strokeWidth={2}
+                    name="Market Median"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Price Distribution Chart */}
+      {/* Price Distribution Section */}
       {distributionData.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="card">
-            <div className="mb-4">
-              <h3 className="text-lg font-medium text-gray-900">Price Distribution</h3>
-              <p className="text-sm text-gray-500">Market vs your listings by price range</p>
-            </div>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={distributionData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="priceRange" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#3B82F6" name="Market" />
-                  <Bar dataKey="userListings" fill="#10B981" name="Your Listings" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-6 border-b border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-900">Price Distribution Analysis</h3>
+            <p className="mt-1 text-sm text-gray-600">Compare your listings against market distribution</p>
           </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="mb-4">
+                  <h4 className="text-lg font-medium text-gray-900">Price Distribution</h4>
+                  <p className="text-sm text-gray-500">Market vs your listings by price range</p>
+                </div>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={distributionData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="priceRange" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="count" fill="#3B82F6" name="Market" />
+                      <Bar dataKey="userListings" fill="#10B981" name="Your Listings" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
 
-          <div className="card">
-            <div className="mb-4">
-              <h3 className="text-lg font-medium text-gray-900">Pricing Position</h3>
-              <p className="text-sm text-gray-500">How your listings compare to market</p>
-            </div>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: 'Below P25', value: portfolioMetrics?.belowP25 || 0, fill: '#EF4444' },
-                      { name: 'P25-P75', value: portfolioMetrics?.betweenP25P75 || 0, fill: '#F59E0B' },
-                      { name: 'Above P75', value: portfolioMetrics?.aboveP75 || 0, fill: '#10B981' },
-                    ]}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}`}
-                  >
-                    {[
-                      { name: 'Below P25', value: portfolioMetrics?.belowP25 || 0 },
-                      { name: 'P25-P75', value: portfolioMetrics?.betweenP25P75 || 0 },
-                      { name: 'Above P75', value: portfolioMetrics?.aboveP75 || 0 },
-                    ].map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="mb-4">
+                  <h4 className="text-lg font-medium text-gray-900">Pricing Position</h4>
+                  <p className="text-sm text-gray-500">How your listings compare to market</p>
+                </div>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'Below P25', value: portfolioMetrics?.belowP25 || 0, fill: '#EF4444' },
+                          { name: 'P25-P75', value: portfolioMetrics?.betweenP25P75 || 0, fill: '#F59E0B' },
+                          { name: 'Above P75', value: portfolioMetrics?.aboveP75 || 0, fill: '#10B981' },
+                        ]}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        dataKey="value"
+                        label={({ name, value }) => `${name}: ${value}`}
+                      >
+                        {[
+                          { name: 'Below P25', value: portfolioMetrics?.belowP25 || 0 },
+                          { name: 'P25-P75', value: portfolioMetrics?.betweenP25P75 || 0 },
+                          { name: 'Above P75', value: portfolioMetrics?.aboveP75 || 0 },
+                        ].map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -267,40 +296,41 @@ export function MetricsCharts({ className = '' }: MetricsChartsProps) {
 
         {/* Portfolio Summary */}
         {portfolioMetrics && (
-          <div className="card">
-            <div className="mb-4">
-              <h3 className="text-lg font-medium text-gray-900">Portfolio Summary</h3>
-              <p className="text-sm text-gray-500">Key insights about your pricing strategy</p>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-xl font-semibold text-gray-900">Portfolio Summary</h3>
+              <p className="mt-1 text-sm text-gray-600">Key insights about your pricing strategy</p>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {((portfolioMetrics.underpriced / portfolioMetrics.totalListings) * 100).toFixed(1)}%
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-blue-50 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {((portfolioMetrics.underpriced / portfolioMetrics.totalListings) * 100).toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-gray-500">Underpriced</div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {portfolioMetrics.underpriced} of {portfolioMetrics.totalListings} listings
+                  </div>
                 </div>
-                <div className="text-sm text-gray-500">Underpriced</div>
-                <div className="text-xs text-gray-400 mt-1">
-                  {portfolioMetrics.underpriced} of {portfolioMetrics.totalListings} listings
-                </div>
-              </div>
 
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {((portfolioMetrics.betweenP25P75 / portfolioMetrics.totalListings) * 100).toFixed(1)}%
+                <div className="bg-green-50 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-green-600">
+                    {((portfolioMetrics.betweenP25P75 / portfolioMetrics.totalListings) * 100).toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-gray-500">Market Range</div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    P25-P75 percentile
+                  </div>
                 </div>
-                <div className="text-sm text-gray-500">Market Range</div>
-                <div className="text-xs text-gray-400 mt-1">
-                  P25-P75 percentile
-                </div>
-              </div>
 
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">
-                  {((portfolioMetrics.overpriced / portfolioMetrics.totalListings) * 100).toFixed(1)}%
-                </div>
-                <div className="text-sm text-gray-500">Overpriced</div>
-                <div className="text-xs text-gray-400 mt-1">
-                  Above P75 percentile
+                <div className="bg-red-50 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-red-600">
+                    {((portfolioMetrics.overpriced / portfolioMetrics.totalListings) * 100).toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-gray-500">Overpriced</div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    Above P75 percentile
+                  </div>
                 </div>
               </div>
             </div>
@@ -308,11 +338,12 @@ export function MetricsCharts({ className = '' }: MetricsChartsProps) {
         )}
 
         {/* Item-Level Drilldown */}
-        <div className="card">
-          <div className="mb-4">
-            <h3 className="text-lg font-medium text-gray-900">Item Performance</h3>
-            <p className="text-sm text-gray-500">Detailed analysis of individual listings</p>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-6 border-b border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-900">Item Performance</h3>
+            <p className="mt-1 text-sm text-gray-600">Detailed analysis of individual listings</p>
           </div>
+          <div className="p-6">
           
           <div className="space-y-4">
             {itemDetails.length > 0 ? (
@@ -382,6 +413,7 @@ export function MetricsCharts({ className = '' }: MetricsChartsProps) {
                 </p>
               </div>
             )}
+          </div>
           </div>
         </div>
 

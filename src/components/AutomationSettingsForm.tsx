@@ -39,7 +39,7 @@ export function AutomationSettingsForm({
   }
 
   return (
-    <div className="card">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="flex items-center mb-4">
         <CogIcon className="h-6 w-6 text-gray-400 mr-3" />
         <h3 className="text-lg font-medium text-gray-900">Automation Settings</h3>

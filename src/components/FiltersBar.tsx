@@ -105,9 +105,9 @@ export function FiltersBar({
             )}
           </button>
           
-          <div className="text-sm text-gray-500 text-center sm:text-left">
+          <span className="text-sm text-gray-500 text-center sm:text-left">
             Showing {filteredItems} of {totalItems} items
-          </div>
+          </span>
         </div>
 
         {hasActiveFilters && (

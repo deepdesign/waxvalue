@@ -107,7 +107,7 @@ export function RunSummaryCards() {
     return (
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="card animate-pulse">
+          <div key={i} className="bg-gray-50 rounded-lg p-4 animate-pulse">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
@@ -130,42 +130,44 @@ export function RunSummaryCards() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Action Bar */}
-      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-        <div>
-          <h2 className="text-lg font-medium text-gray-900">Pricing Overview</h2>
-          <p className="text-sm text-gray-500">Current status of your Discogs inventory</p>
-        </div>
-        <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="dryRun"
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-            />
-            <label htmlFor="dryRun" className="text-sm text-gray-700">
-              Dry Run Mode
-            </label>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="p-6 border-b border-gray-200">
+        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">Pricing Overview</h2>
+            <p className="mt-1 text-sm text-gray-600">Current status of your Discogs inventory</p>
           </div>
-          <Button
-            onClick={handleRunSimulation}
-            loading={summaryData.isRunning}
-            loadingText="Running..."
-            className="w-full sm:w-auto"
-            aria-label="Run pricing simulation"
-          >
-            <PlayIcon className="h-4 w-4 mr-2" aria-hidden="true" />
-            Run Simulation
-          </Button>
+          <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="dryRun"
+                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              />
+              <label htmlFor="dryRun" className="text-sm text-gray-700">
+                Dry Run Mode
+              </label>
+            </div>
+            <Button
+              onClick={handleRunSimulation}
+              loading={summaryData.isRunning}
+              loadingText="Running..."
+              className="w-full sm:w-auto"
+              aria-label="Run pricing simulation"
+            >
+              <PlayIcon className="h-4 w-4 mr-2" aria-hidden="true" />
+              Run Simulation
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="p-6">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {isLoading ? (
           Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="card">
+            <div key={index} className="bg-gray-50 rounded-lg p-4">
               <div className="flex items-center">
                 <Skeleton className="w-8 h-8 rounded-lg" />
                 <div className="ml-5 w-0 flex-1">
@@ -177,7 +179,7 @@ export function RunSummaryCards() {
           ))
         ) : (
           cards.map((card, index) => (
-            <div key={index} className="card hover:shadow-md transition-shadow duration-200">
+            <div key={index} className="bg-gray-50 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className={`w-8 h-8 ${card.color} rounded-lg flex items-center justify-center`}>
@@ -212,24 +214,25 @@ export function RunSummaryCards() {
             </div>
           ))
         )}
-      </div>
+        </div>
 
-      {/* Quick Stats */}
-      {summaryData.suggestedUpdates > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <ArrowTrendingUpIcon className="h-5 w-5 text-blue-600" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-blue-800">
-                <span className="font-medium">{summaryData.suggestedUpdates} items</span> have pricing suggestions available. 
-                Review them in the table below and apply changes as needed.
-              </p>
+        {/* Quick Stats */}
+        {summaryData.suggestedUpdates > 0 && (
+          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <ArrowTrendingUpIcon className="h-5 w-5 text-blue-600" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-blue-800">
+                  <span className="font-medium">{summaryData.suggestedUpdates} items</span> have pricing suggestions available. 
+                  Review them in the table below and apply changes as needed.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

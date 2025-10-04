@@ -9,6 +9,7 @@ import {
   ArrowRightIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline'
+import { Button } from '@/components/ui/Button'
 
 interface DiscogsConnectionCardProps {
   user?: any
@@ -19,7 +20,11 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
 
   if (isConnected) {
     return (
-      <div className="overflow-hidden rounded-lg bg-white shadow">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="p-6 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900">Discogs Connection</h2>
+          <p className="mt-1 text-sm text-gray-600">Manage your Discogs account integration</p>
+        </div>
         <div className="p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -56,14 +61,13 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
                     </ul>
                   </div>
                   <div className="mt-4">
-                    <div className="-mx-2 -my-1.5 flex">
-                      <Link
-                        href="/settings"
-                        className="rounded-md bg-green-50 px-2 py-1.5 text-sm font-medium text-green-800 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-green-50"
-                      >
-                        Manage connection
-                      </Link>
-                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.location.href = '/settings'}
+                    >
+                      Manage connection
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -75,7 +79,11 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg bg-white shadow">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="p-6 border-b border-gray-200">
+        <h2 className="text-xl font-semibold text-gray-900">Discogs Connection</h2>
+        <p className="mt-1 text-sm text-gray-600">Connect your Discogs account to enable automated pricing</p>
+      </div>
       <div className="p-6">
         <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -114,16 +122,15 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
                   </ul>
                 </div>
                 <div className="mt-4">
-                  <div className="-mx-2 -my-1.5 flex">
-                    <Link
-                      href="/settings"
-                      className="inline-flex items-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-                    >
-                      <LinkIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-                      Connect now
-                      <ChevronRightIcon className="ml-2 -mr-1 h-5 w-5" aria-hidden="true" />
-                    </Link>
-                  </div>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => window.location.href = '/settings'}
+                  >
+                    <LinkIcon className="mr-2 h-4 w-4" aria-hidden="true" />
+                    Connect now
+                    <ChevronRightIcon className="ml-2 h-4 w-4" aria-hidden="true" />
+                  </Button>
                 </div>
               </div>
             </div>
