@@ -4,7 +4,7 @@ import { useApp } from '@/components/Providers'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { DashboardLayout } from '@/components/DashboardLayout'
-import { MetricsCharts } from '@/components/MetricsCharts'
+import dynamic from 'next/dynamic'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 
 export default function MetricsPage() {
@@ -24,6 +24,11 @@ export default function MetricsPage() {
   if (!user) {
     return null
   }
+
+  const MetricsCharts = dynamic(() => import('@/components/MetricsCharts').then(m => m.MetricsCharts), {
+    ssr: false,
+    loading: () => <div className="space-y-6"><div className="card animate-pulse h-64" /><div className="card animate-pulse h-64" /></div>,
+  })
 
   return (
     <DashboardLayout>
