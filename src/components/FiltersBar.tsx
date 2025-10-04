@@ -88,205 +88,220 @@ export function FiltersBar({
     filters.priceRange.max !== null ||
     filters.showFlaggedOnly
 
+  // This component now renders just the filters button and expandable panel
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-      <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 mb-4">
-        <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-500">
-            Showing {filteredItems} of {totalItems} items
-          </span>
-          
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-gray-900"
-          >
-            <FunnelIcon className="h-4 w-4 mr-2" />
-            Filters
-            {hasActiveFilters && (
-              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-                Active
-              </span>
-            )}
-          </button>
-        </div>
-
+    <>
+      {/* Filters Button */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 dark:focus:border-primary-400 transition-colors"
+      >
+        <FunnelIcon className="h-4 w-4 mr-2" />
+        Filters
         {hasActiveFilters && (
-          <button
-            onClick={onClearFilters}
-            className="inline-flex items-center justify-center text-sm text-gray-500 hover:text-gray-700"
-          >
-            <XMarkIcon className="h-4 w-4 mr-1" />
-            Clear all
-          </button>
+          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 dark:bg-primary-900/50 text-primary-800 dark:text-primary-200">
+            Active
+          </span>
         )}
-      </div>
+      </button>
 
+      {/* Expandable Filters Panel */}
       {isExpanded && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          {/* Status Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Status
-            </label>
-            <select
-              value={filters.status}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="input-field"
-            >
-              {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Format Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Format
-            </label>
-            <select
-              value={filters.format}
-              onChange={(e) => handleFilterChange('format', e.target.value)}
-              className="input-field"
-            >
-              {formatOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Condition Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Condition
-            </label>
-            <select
-              value={filters.condition}
-              onChange={(e) => handleFilterChange('condition', e.target.value)}
-              className="input-field"
-            >
-              {conditionOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Price Range */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Price Range
-            </label>
-            <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-              <input
-                type="number"
-                placeholder="Min"
-                value={filters.priceRange.min || ''}
-                onChange={(e) => handlePriceRangeChange('min', e.target.value)}
-                className="input-field flex-1"
-                step="0.01"
-                min="0"
-              />
-              <input
-                type="number"
-                placeholder="Max"
-                value={filters.priceRange.max || ''}
-                onChange={(e) => handlePriceRangeChange('max', e.target.value)}
-                className="input-field flex-1"
-                step="0.01"
-                min="0"
-              />
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Filter Inventory</h3>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                Showing {filteredItems} of {totalItems} items
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              {hasActiveFilters && (
+                <button
+                  onClick={onClearFilters}
+                  className="inline-flex items-center px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                >
+                  <XMarkIcon className="h-4 w-4 mr-1" />
+                  Clear all
+                </button>
+              )}
+              <button
+                onClick={() => setIsExpanded(false)}
+                className="inline-flex items-center px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+              >
+                <XMarkIcon className="h-4 w-4" />
+              </button>
             </div>
           </div>
 
-          {/* Flagged Only Toggle */}
-          <div className="flex items-end">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={filters.showFlaggedOnly}
-                onChange={(e) => handleFilterChange('showFlaggedOnly', e.target.checked)}
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-              />
-              <span className="ml-2 text-sm text-gray-700">
-                Show flagged only
-              </span>
-            </label>
-          </div>
-        </div>
-      )}
+          {/* Filter Controls */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            {/* Status Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Status
+              </label>
+              <select
+                value={filters.status}
+                onChange={(e) => handleFilterChange('status', e.target.value)}
+                className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
+              >
+                {statusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-      {/* Active Filters Display */}
-      {hasActiveFilters && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="flex flex-wrap gap-2">
-            {filters.status && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                Status: {filters.status}
-                <button
-                  onClick={() => handleFilterChange('status', '')}
-                  className="ml-1 text-blue-600 hover:text-blue-800"
-                >
-                  <XMarkIcon className="h-3 w-3" />
-                </button>
-              </span>
-            )}
-            
-            {filters.format && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                Format: {filters.format}
-                <button
-                  onClick={() => handleFilterChange('format', '')}
-                  className="ml-1 text-green-600 hover:text-green-800"
-                >
-                  <XMarkIcon className="h-3 w-3" />
-                </button>
-              </span>
-            )}
-            
-            {filters.condition && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                Condition: {filters.condition}
-                <button
-                  onClick={() => handleFilterChange('condition', '')}
-                  className="ml-1 text-yellow-600 hover:text-yellow-800"
-                >
-                  <XMarkIcon className="h-3 w-3" />
-                </button>
-              </span>
-            )}
-            
-            {(filters.priceRange.min !== null || filters.priceRange.max !== null) && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                Price: ${filters.priceRange.min || 0} - ${filters.priceRange.max || '∞'}
-                <button
-                  onClick={() => handleFilterChange('priceRange', { min: null, max: null })}
-                  className="ml-1 text-purple-600 hover:text-purple-800"
-                >
-                  <XMarkIcon className="h-3 w-3" />
-                </button>
-              </span>
-            )}
-            
-            {filters.showFlaggedOnly && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                Flagged only
-                <button
-                  onClick={() => handleFilterChange('showFlaggedOnly', false)}
-                  className="ml-1 text-red-600 hover:text-red-800"
-                >
-                  <XMarkIcon className="h-3 w-3" />
-                </button>
-              </span>
-            )}
+            {/* Format Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Format
+              </label>
+              <select
+                value={filters.format}
+                onChange={(e) => handleFilterChange('format', e.target.value)}
+                className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
+              >
+                {formatOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Condition Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Condition
+              </label>
+              <select
+                value={filters.condition}
+                onChange={(e) => handleFilterChange('condition', e.target.value)}
+                className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
+              >
+                {conditionOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Price Range */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Price Range
+              </label>
+              <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={filters.priceRange.min || ''}
+                  onChange={(e) => handlePriceRangeChange('min', e.target.value)}
+                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
+                  step="0.01"
+                  min="0"
+                />
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={filters.priceRange.max || ''}
+                  onChange={(e) => handlePriceRangeChange('max', e.target.value)}
+                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
+                  step="0.01"
+                  min="0"
+                />
+              </div>
+            </div>
+
+            {/* Flagged Only Toggle */}
+            <div className="flex items-end">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={filters.showFlaggedOnly}
+                  onChange={(e) => handleFilterChange('showFlaggedOnly', e.target.checked)}
+                  className="h-4 w-4 text-primary-600 dark:text-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
+                />
+                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  Show flagged only
+                </span>
+              </label>
+            </div>
           </div>
+
+          {/* Active Filters Display */}
+          {hasActiveFilters && (
+            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Active Filters:</h4>
+              <div className="flex flex-wrap gap-2">
+                {filters.status && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200">
+                    Status: {filters.status}
+                    <button
+                      onClick={() => handleFilterChange('status', '')}
+                      className="ml-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                    >
+                      <XMarkIcon className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+                
+                {filters.format && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200">
+                    Format: {filters.format}
+                    <button
+                      onClick={() => handleFilterChange('format', '')}
+                      className="ml-1 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
+                    >
+                      <XMarkIcon className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+                
+                {filters.condition && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200">
+                    Condition: {filters.condition}
+                    <button
+                      onClick={() => handleFilterChange('condition', '')}
+                      className="ml-1 text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300"
+                    >
+                      <XMarkIcon className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+                
+                {(filters.priceRange.min !== null || filters.priceRange.max !== null) && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200">
+                    Price: ${filters.priceRange.min || 0} - ${filters.priceRange.max || '∞'}
+                    <button
+                      onClick={() => handleFilterChange('priceRange', { min: null, max: null })}
+                      className="ml-1 text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300"
+                    >
+                      <XMarkIcon className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+                
+                {filters.showFlaggedOnly && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200">
+                    Flagged only
+                    <button
+                      onClick={() => handleFilterChange('showFlaggedOnly', false)}
+                      className="ml-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                    >
+                      <XMarkIcon className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
-    </div>
+    </>
   )
 }
