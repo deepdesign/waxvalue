@@ -556,13 +556,14 @@ async def setup_discogs_auth(session_id: Optional[str] = Query(None)):
         raise HTTPException(status_code=400, detail="Failed to setup Discogs authentication")
 
 @app.post("/auth/verify")
-async def verify_discogs_auth(verification_data: dict, current_user: User = Depends(get_current_user)):
-    """Verify Discogs OAuth and get access tokens"""
+async def verify_discogs_auth(verification_data: dict, session_id: Optional[str] = Query(None)):
+    """Verify Discogs OAuth and get access tokens - NO auth required for first-time OAuth"""
     verifier = verification_data.get("verifierCode")
     request_token = verification_data.get("requestToken")
+    request_token_secret = verification_data.get("requestTokenSecret")
 
-    if not verifier or not request_token:
-        raise HTTPException(status_code=400, detail="Verifier code and request token are required")
+    if not verifier or not request_token or not request_token_secret:
+        raise HTTPException(status_code=400, detail="Verifier code, request token, and secret are required")
 
     try:
         # Get credentials from environment variables
@@ -574,23 +575,31 @@ async def verify_discogs_auth(verification_data: dict, current_user: User = Depe
         
         oauth = DiscogsOAuth(consumer_key, consumer_secret)
         access_token, access_token_secret = oauth.get_access_token(
-            request_token, current_user.accessTokenSecret, verifier
+            request_token, request_token_secret, verifier
         )
-
-        # Update user with access tokens
-        current_user.accessToken = access_token
-        current_user.accessTokenSecret = access_token_secret
         
         # Get user info from Discogs
         client = DiscogsClient(consumer_key, consumer_secret, access_token, access_token_secret)
         discogs_user = client.get_user_info()
-        current_user.discogsUserId = discogs_user.get("id")
-        current_user.username = discogs_user.get("username", current_user.username)
         
-        users_db[str(current_user.id)] = current_user
+        # Create or update user
+        user_id = discogs_user.get("id")
+        username = discogs_user.get("username")
+        
+        # Store/update user in database
+        user = User(
+            id=user_id,
+            username=username,
+            discogsUserId=user_id,
+            accessToken=access_token,
+            accessTokenSecret=access_token_secret
+        )
+        users_db[str(user_id)] = user
+        
+        logger.info(f"OAuth verified for user: {username} (ID: {user_id})")
 
         return {
-            "user": current_user,
+            "user": user.dict(),
             "message": "Discogs authentication successful"
         }
 
