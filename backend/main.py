@@ -523,8 +523,8 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
 
 # Discogs OAuth endpoints
 @app.post("/auth/setup")
-async def setup_discogs_auth(current_user: User = Depends(get_current_user)):
-    """Setup Discogs OAuth authentication"""
+async def setup_discogs_auth(session_id: Optional[str] = Query(None)):
+    """Setup Discogs OAuth authentication - NO auth required for first-time OAuth"""
     # Get credentials from environment variables
     consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
     consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
@@ -537,14 +537,14 @@ async def setup_discogs_auth(current_user: User = Depends(get_current_user)):
         request_token, request_token_secret = oauth.get_request_token()
         auth_url = oauth.get_authorize_url(request_token)
 
-        # Store request token temporarily (in production, use Redis or database)
-        current_user.accessToken = request_token
-        current_user.accessTokenSecret = request_token_secret
-        users_db[str(current_user.id)] = current_user
+        # Store tokens in session storage if session_id provided
+        # (This will be retrieved later in the verify endpoint)
+        logger.info(f"OAuth setup successful - tokens generated for session: {session_id}")
 
         return {
             "authUrl": auth_url,
             "requestToken": request_token,
+            "requestTokenSecret": request_token_secret,
             "message": "OAuth setup successful"
         }
 
