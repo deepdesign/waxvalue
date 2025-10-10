@@ -1,19 +1,16 @@
-"""
-Production WaxValue backend with proper Discogs API integration
-"""
+#!/usr/bin/env python3
 
-from fastapi import FastAPI, HTTPException, Depends, Header, Query
+import os
+import secrets
+import logging
+import time
+from datetime import datetime
+from typing import Dict, Any, Optional, List
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any, Literal, Tuple
-import json
-import os
-from datetime import datetime, timedelta
-import logging
-import asyncio
-import hashlib
 from dotenv import load_dotenv
-from discogs_client import DiscogsClient, DiscogsOAuth, DiscogsAPIError, DiscogsAuthError
+from discogs_client import DiscogsOAuth, DiscogsClient
 
 # Load environment variables
 load_dotenv()
@@ -22,1183 +19,1533 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="WaxValue API", version="1.0.0")
+# Global lock to prevent concurrent analysis
+analysis_lock = {}  # session_id -> is_running
+
+def get_user_inventory_all_pages(client: DiscogsClient, username: str, first_page_data: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+    """Fetch all pages of user inventory"""
+    all_listings = []
+    
+    try:
+        # Use provided first page data if available to avoid duplicate fetch
+        if first_page_data:
+            page_listings = first_page_data.get("listings", [])
+            all_listings.extend(page_listings)
+            logger.info(f"Page 1: Using provided data, {len(page_listings)} listings")
+            pagination = first_page_data.get("pagination", {})
+            total_pages = pagination.get("pages", 1)
+            start_page = 2  # Start from page 2 since we have page 1
+        else:
+            start_page = 1
+            total_pages = None
+        
+        page = start_page
+        per_page = 100  # Maximum per page from Discogs API
+        
+        while True:
+            logger.info(f"Fetching inventory page {page} for user {username}")
+            inventory = client.get_user_inventory(username, page=page, per_page=per_page)
+            page_listings = inventory.get("listings", [])
+            
+            if not page_listings:
+                logger.info(f"No more listings on page {page}, stopping pagination")
+                break
+                
+            all_listings.extend(page_listings)
+            logger.info(f"Page {page}: Fetched {len(page_listings)} listings, total so far: {len(all_listings)}")
+            
+            # Check if we've reached the last page
+            pagination = inventory.get("pagination", {})
+            total_pages = pagination.get("pages", 1)
+            if page >= total_pages:
+                logger.info(f"Reached last page ({total_pages})")
+                break
+                
+            page += 1
+            
+            # Safety limit to prevent infinite loops
+            if page > 50:  # Max 5000 items
+                logger.warning(f"Reached safety limit of 50 pages, stopping pagination")
+                break
+    
+    except Exception as e:
+        logger.error(f"Error fetching inventory pages: {e}")
+        # Return what we have so far rather than failing completely
+        logger.info(f"Returning {len(all_listings)} listings fetched before error")
+    
+    return all_listings
+
+# Initialize FastAPI app
+app = FastAPI(title="WaxValue Backend", version="1.0.0")
 
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://waxvalue.com", "http://93.127.200.187"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# In-memory storage for development (replace with database in production)
-users_db = {}
-user_settings_db = {}
-strategies_db = {}
-run_logs_db = {}
-listing_snapshots_db = {}
+# Global exception handler for debugging
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    logger.error(f"Unhandled exception: {exc}", exc_info=True)
+    return {"detail": f"Internal server error: {str(exc)}"}
+
+# Request logging middleware
+@app.middleware("http")
+async def log_requests(request, call_next):
+    logger.info(f"Request: {request.method} {request.url}")
+    try:
+        response = await call_next(request)
+        logger.info(f"Response: {response.status_code}")
+        return response
+    except Exception as e:
+        logger.error(f"Request failed: {e}", exc_info=True)
+        raise
+
+# Import persistent session manager
+from session_manager import session_manager
 
 # Pydantic models
 class User(BaseModel):
-    id: int
+    id: str
     username: str
-    discogsUserId: Optional[int] = None
-    email: Optional[str] = None
+    email: str
     firstName: Optional[str] = None
     lastName: Optional[str] = None
+    discogsUserId: Optional[int] = None
     accessToken: Optional[str] = None
     accessTokenSecret: Optional[str] = None
-    createdAt: str = datetime.now().isoformat()
-    updatedAt: str = datetime.now().isoformat()
 
 class UserSettings(BaseModel):
-    userId: int
-    currency: str = "USD"
-    defaultDryRun: bool = True
+    automationEnabled: bool = True
     dailySchedule: str = "09:00"
-    globalFloor: float = 5.0
-    globalCeiling: float = 1000.0
-    maxChangePercent: int = 25
-    apiRateLimitSeconds: float = 1.2
-    updatedAt: str = datetime.now().isoformat()
+    priceChangeThreshold: float = 10.0
+    maxPriceIncrease: float = 50.0
+    minPriceDecrease: float = -25.0
 
 class Strategy(BaseModel):
-    id: int
-    userId: int
+    id: str
     name: str
-    anchor: str = "median"
+    description: str
+    scarcityBoost: float = 0.1
+    offset: float = 0.0
     offsetType: str = "percentage"
-    offsetValue: float = 0.0
-    conditionWeights: Dict[str, float] = {"media": 0.8, "sleeve": 0.2}
-    scarcityBoost: Optional[Dict[str, Any]] = None
-    floor: Optional[float] = None
-    ceiling: Optional[float] = None
-    rounding: float = 0.50
-    maxChangePercent: int = 25
-    isActive: bool = True
-    createdAt: str = datetime.now().isoformat()
-    updatedAt: str = datetime.now().isoformat()
+    isActive: bool = False
 
 class PriceSuggestion(BaseModel):
     listingId: int
     releaseId: int
     currentPrice: float
     suggestedPrice: float
-    confidence: str
-    condition: str
-    sleeveCondition: str
     basis: str
-    reason: str
-    release: Optional[Dict[str, Any]] = None
-    artist: Optional[Dict[str, Any]] = None
-
-class RunLog(BaseModel):
-    id: str
-    userId: int
-    runDate: str
     status: str
-    itemsScanned: int
-    itemsUpdated: int
-    errors: int
-    isDryRun: bool
-    strategyId: Optional[int] = None
+    strategy: str
+    condition: str
+    artist: str
+    title: str
+    label: str
+    imageUrl: str
 
-# Reprice endpoint models
-class RepriceRequest(BaseModel):
-    scope: Optional[Literal["global", "selection", "item"]] = "global"
-    filters: Optional[Dict[str, Any]] = None
-    listing_id: Optional[int] = None
-    approved_listing_ids: Optional[List[int]] = None
-    strategy_id: Optional[str] = None
-    params: Optional[Dict[str, Any]] = None
-
-class RepriceItemResult(BaseModel):
-    listing_id: int
-    old_price: float
-    new_price: float
-    currency: str
-    decision: Literal["auto_applied", "user_applied", "flagged", "declined", "simulated"]
-    reason: str
-    confidence: float
-    discogs_status: Optional[str] = None
-    http_status: Optional[int] = None
-    ratelimit_remaining: Optional[str] = None
-    ratelimit_reset: Optional[str] = None
-
-class RepriceResponse(BaseModel):
-    run_id: int
-    dry_run: bool
-    summary: Dict[str, int]
-    items: List[RepriceItemResult]
-
-class ListingSnapshot(BaseModel):
-    id: str
-    run_id: str
-    listing_id: int
-    old_price: float
-    target_price: float
-    delta: float
-    decision: str
-    reason: str
-    confidence: float
-    flagged: bool
-    http_status: Optional[int] = None
-    created_at: str = datetime.now().isoformat()
-
-# Session storage for user sessions
-sessions_db = {}
-
-# Dependency to get current user from session_id
-async def get_current_user(session_id: Optional[str] = Query(None), authorization: str = Header(None)) -> User:
-    """Extract user from session_id or authorization header"""
-    # Try session_id first (primary method)
-    if session_id and session_id in sessions_db:
-        user_id = sessions_db[session_id]
-        if user_id in users_db:
-            return users_db[user_id]
-    
-    # Fallback to Bearer token
-    if authorization and authorization.startswith("Bearer "):
-        token = authorization.replace("Bearer ", "")
-        user_id = token.split("-")[-1] if "-" in token else None
-        
-        if user_id and user_id in users_db:
-            return users_db[user_id]
-    
-    raise HTTPException(status_code=401, detail="Invalid authorization header")
-
-def get_discogs_client(user: User) -> DiscogsClient:
-    """Get authenticated Discogs client for user"""
-    if not user.accessToken or not user.accessTokenSecret:
-        raise HTTPException(status_code=400, detail="User not connected to Discogs")
-    
-    # Get credentials from environment variables
-    consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
-    consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
-    
-    if not consumer_key or not consumer_secret:
-        raise HTTPException(status_code=500, detail="Discogs credentials not configured")
-    
-    return DiscogsClient(
-        consumer_key=consumer_key,
-        consumer_secret=consumer_secret,
-        access_token=user.accessToken,
-        access_token_secret=user.accessTokenSecret
+# Default strategies
+DEFAULT_STRATEGIES = [
+        Strategy(
+        id="conservative",
+        name="Conservative",
+        description="Safe pricing with minimal adjustments",
+        scarcityBoost=0.05,
+        offset=0.0,
+            offsetType="percentage",
+            isActive=True
+    ),
+    Strategy(
+        id="aggressive",
+        name="Aggressive",
+        description="Maximize profit with higher prices",
+        scarcityBoost=0.2,
+        offset=0.15,
+        offsetType="percentage",
+        isActive=False
+    ),
+    Strategy(
+        id="competitive",
+        name="Competitive",
+        description="Match market rates for quick sales",
+        scarcityBoost=0.1,
+        offset=-0.05,
+        offsetType="percentage",
+        isActive=False
     )
+]
 
-def get_user_settings(user: User) -> UserSettings:
-    """Get user settings with defaults"""
-    settings = user_settings_db.get(str(user.id))
-    if not settings:
-        settings = UserSettings(userId=user.id)
-        user_settings_db[str(user.id)] = settings
-    return settings
+def require_auth(session_id: str) -> User:
+    """Require authentication and return user"""
+    if not session_id:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
+    user = get_current_user(session_id)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid session")
+    
+    return user
 
-def compute_target_price(listing: Dict[str, Any], strategy: Dict[str, Any], 
-                        client: DiscogsClient) -> Dict[str, Any]:
-    """
-    Compute target price for a listing using Discogs' official price suggestions
+def require_discogs_auth(user: User):
+    """Require Discogs authentication"""
+    if not user.accessToken or not user.accessTokenSecret:
+        raise HTTPException(status_code=400, detail="Discogs account not connected")
+
+def get_current_user(session_id: str) -> Optional[User]:
+    """Get current user from session"""
+    logger.info(f"Getting user for session: {session_id[:10]}...")
     
-    This function identifies when items are over/under priced compared to Discogs' 
-    current market recommendations and applies the user's pricing strategy.
+    if not session_manager.has_session(session_id):
+        logger.error(f"Session {session_id[:10]}... not found in sessions")
+        return None
     
-    Args:
-        listing: User's inventory listing
-        strategy: Pricing strategy configuration
-        client: Discogs API client
-        
-    Returns:
-        Pricing calculation result with Discogs market data analysis
-    """
-    current_price = listing.get("price", 0.0)
-    release_id = listing.get("release", {}).get("id")
-    media_condition = listing.get("condition", "Very Good Plus")
+    session_data = session_manager.get_session(session_id)
+    if not session_data:
+        logger.error(f"No session data found for {session_id[:10]}...")
+        return None
     
-    if not release_id:
-        return {
-            "new_price": current_price,
-            "currency": "USD",
-            "reason": "No release ID available",
-            "confidence": 0.0,
-            "increase_pct": 0.0,
-            "pricing_status": "no_data",
-            "discogs_suggestion": None,
-            "market_analysis": None
-        }
+    user_data = session_data.get("user", {})
+    if not user_data:
+        logger.error(f"No user data found in session {session_id[:10]}...")
+        return None
     
     try:
-        # Get Discogs' official price suggestions for this release
-        price_suggestions = client.get_price_suggestions(release_id)
-        
-        if not price_suggestions:
-            return {
-                "new_price": current_price,
-                "currency": "USD", 
-                "reason": "No Discogs price suggestions available",
-                "confidence": 0.0,
-                "increase_pct": 0.0,
-                "pricing_status": "no_suggestions",
-                "discogs_suggestion": None,
-                "market_analysis": None
-            }
-        
-        # Get Discogs' recommended price for the item's condition
-        discogs_suggested_price = None
-        condition_price_data = None
-        
-        # Try to find exact condition match
-        if media_condition in price_suggestions:
-            condition_price_data = price_suggestions[media_condition]
-            # Handle both dict and direct float values
-            if isinstance(condition_price_data, dict):
-                discogs_suggested_price = condition_price_data.get("value", 0)
-            else:
-                discogs_suggested_price = float(condition_price_data) if condition_price_data else 0
-        else:
-            # Try to find similar condition if exact match not found
-            condition_mapping = {
-                "Mint (M)": ["Mint"],
-                "Near Mint (NM or M-)": ["Near Mint", "NM"],
-                "Very Good Plus (VG+)": ["Very Good Plus", "VG+"],
-                "Very Good (VG)": ["Very Good", "VG"],
-                "Good Plus (G+)": ["Good Plus", "G+"],
-                "Good (G)": ["Good", "G"],
-                "Fair (F)": ["Fair", "F"],
-                "Poor (P)": ["Poor", "P"]
-            }
-            
-            for discogs_condition in condition_mapping.get(media_condition, []):
-                if discogs_condition in price_suggestions:
-                    condition_price_data = price_suggestions[discogs_condition]
-                    # Handle both dict and direct float values
-                    if isinstance(condition_price_data, dict):
-                        discogs_suggested_price = condition_price_data.get("value", 0)
-                    else:
-                        discogs_suggested_price = float(condition_price_data) if condition_price_data else 0
-                    break
-        
-        if not discogs_suggested_price:
-            return {
-                "new_price": current_price,
-                "currency": "USD",
-                "reason": f"No price suggestion for condition '{media_condition}'",
-                "confidence": 0.0,
-                "increase_pct": 0.0,
-                "pricing_status": "no_condition_match",
-                "discogs_suggestion": None,
-                "market_analysis": None
-            }
-        
-        # Ensure discogs_suggested_price is a number
-        if isinstance(discogs_suggested_price, dict):
-            discogs_suggested_price = discogs_suggested_price.get("value", 0)
-        discogs_suggested_price = float(discogs_suggested_price) if discogs_suggested_price else 0
-        
-        # Analyze pricing status compared to Discogs recommendation
-        price_difference = current_price - discogs_suggested_price
-        price_difference_pct = (price_difference / max(discogs_suggested_price, 0.01)) * 100
-        
-        if price_difference_pct > 10:
-            pricing_status = "overpriced"
-            status_reason = "Significantly above Discogs recommendation"
-        elif price_difference_pct > 5:
-            pricing_status = "slightly_overpriced"
-            status_reason = "Above Discogs recommendation"
-        elif price_difference_pct < -10:
-            pricing_status = "underpriced"
-            status_reason = "Significantly below Discogs recommendation"
-        elif price_difference_pct < -5:
-            pricing_status = "slightly_underpriced"
-            status_reason = "Below Discogs recommendation"
-        else:
-            pricing_status = "fairly_priced"
-            status_reason = "Close to Discogs recommendation"
-        
-        # Apply user's pricing strategy to Discogs' recommendation
-        anchor = strategy.get("anchor", "median")
-        offset = strategy.get("offsetValue", 0)
-        offset_type = strategy.get("offsetType", "percentage")
-        
-        # Use Discogs suggestion as the base price
-        base_price = discogs_suggested_price
-        
-        # Apply offset based on strategy
-        if offset_type == "percentage":
-            new_price = base_price * (1 + offset / 100)
-        else:
-            new_price = base_price + offset
-        
-        # Apply scarcity boost if configured
-        scarcity_boost = strategy.get("scarcityBoost")
-        if scarcity_boost:
-            # Get marketplace stats to determine scarcity
-            try:
-                stats = client.get_marketplace_stats(release_id)
-                available_count = stats.get("available", 0)
-                
-                if available_count <= scarcity_boost.get("threshold", 5):
-                    boost_percent = scarcity_boost.get("boostPercent", 20)
-                    new_price = new_price * (1 + boost_percent / 100)
-                    reason = f"Discogs suggestion (${base_price:.2f}) +{offset}% +scarcity boost {boost_percent}%"
-                else:
-                    reason = f"Discogs suggestion (${base_price:.2f}) +{offset}%"
-            except:
-                reason = f"Discogs suggestion (${base_price:.2f}) +{offset}%"
-        else:
-            reason = f"Discogs suggestion (${base_price:.2f}) +{offset}%"
-        
-        # Apply price limits
-        floor = strategy.get("floor", 1.0)
-        ceiling = strategy.get("ceiling", 1000.0)
-        new_price = max(floor, min(ceiling, new_price))
-        
-        # Apply rounding
-        rounding = strategy.get("rounding", 0.25)
-        new_price = round(new_price / rounding) * rounding
-        
-        # Calculate percentage change from current price
-        increase_pct = ((new_price - current_price) / max(current_price, 0.01)) * 100
-        
-        # Calculate confidence based on data availability
-        confidence = 0.9 if condition_price_data else 0.7
-        
-        # Build market analysis
-        market_analysis = {
-            "discogs_suggested_price": discogs_suggested_price,
-            "current_price": current_price,
-            "price_difference": price_difference,
-            "price_difference_pct": price_difference_pct,
-            "pricing_status": pricing_status,
-            "status_reason": status_reason,
-            "available_conditions": list(price_suggestions.keys()),
-            "strategy_applied": {
-                "anchor": anchor,
-                "offset": offset,
-                "offset_type": offset_type
-            }
-        }
-        
-        return {
-            "new_price": max(0.01, new_price),
-            "currency": condition_price_data.get("currency", "USD"),
-            "reason": reason,
-            "confidence": confidence,
-            "increase_pct": increase_pct,
-            "pricing_status": pricing_status,
-            "discogs_suggestion": discogs_suggested_price,
-            "market_analysis": market_analysis
-        }
-        
+        return User(**user_data)
     except Exception as e:
-        logger.error(f"Error computing target price for listing {listing.get('id')}: {e}")
-        return {
-            "new_price": current_price,
-            "currency": "USD",
-            "reason": f"Error: {str(e)}",
-            "confidence": 0.0,
-            "increase_pct": 0.0,
-            "pricing_status": "error",
-            "discogs_suggestion": None,
-            "market_analysis": None
-        }
+        logger.error(f"Error creating User object: {e}")
+        return None
 
-def decide_action(old_price: float, new_price: float, increase_pct: float, 
-                 approved_set: set, settings: UserSettings) -> Tuple[str, str]:
-    """Decide whether to auto-apply, flag, or decline a price change"""
+# Auth endpoints
+@app.get("/auth/me")
+async def get_current_user_endpoint(session_id: str = None):
+    """Get current user info"""
+    if not session_id:
+        raise HTTPException(status_code=401, detail="Session required")
     
-    # Safeguards
-    if new_price < settings.globalFloor or new_price > settings.globalCeiling:
-        return "flagged", "outside floor/ceiling"
+    user = get_current_user(session_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     
-    max_change = settings.maxChangePercent
-    if abs(increase_pct) > max_change:
-        return "flagged", f"exceeds max_change_pct {max_change}"
-    
-    # Manual approvals take precedence
-    if approved_set:
-        return ("user_applied", "") if (new_price != old_price) else ("declined", "no change")
-    
-    # Automation rules
-    if new_price <= old_price:
-        return "flagged", "decrease requires approval"
-    
-    # Check if auto-update is enabled (assuming it's in settings)
-    auto_update_enabled = getattr(settings, 'autoUpdateEnabled', False)
-    auto_update_threshold = getattr(settings, 'autoUpdateThreshold', 20)
-    
-    if not auto_update_enabled:
-        return "flagged", "automation disabled"
-    
-    if increase_pct > auto_update_threshold:
-        return "flagged", "increase above threshold"
-    
-    return "auto_applied", ""
-
-def apply_price_change(client: DiscogsClient, listing_id: int, price: float, 
-                      currency: str = "USD") -> Tuple[int, Dict[str, Any]]:
-    """Apply price change to Discogs listing"""
-    return client.update_listing_price(listing_id, price, currency=currency, status="For Sale")
-
-def resolve_candidate_listings(user: User, scope: str, payload: RepriceRequest, 
-                             client: DiscogsClient) -> List[Dict[str, Any]]:
-    """Resolve candidate listings based on scope and filters"""
-    if scope == "item" and payload.listing_id:
-        # Single item
-        listing = client.get_listing(payload.listing_id)
-        return [listing] if listing else []
-    
-    # Get user's inventory
-    inventory = client.get_user_inventory(user.username, per_page=100)
-    listings = inventory.get("listings", [])
-    
-    if scope == "selection" and payload.filters:
-        # Apply filters
-        filtered_listings = []
-        for listing in listings:
-            if payload.filters.get("status") and listing.get("status") != payload.filters["status"]:
-                continue
-            if payload.filters.get("media") and listing.get("condition") not in payload.filters["media"]:
-                continue
-            filtered_listings.append(listing)
-        return filtered_listings
-    
-    return listings
-
-def create_run_fingerprint(run_id: int, listing_id: int, old_price: float, new_price: float) -> str:
-    """Create fingerprint for deduplication"""
-    content = f"{run_id}:{listing_id}:{old_price}->{new_price}"
-    return hashlib.sha1(content.encode()).hexdigest()
-
-# Authentication endpoints
-@app.post("/auth/register")
-async def register(user_data: dict):
-    """Register a new user"""
-    email = user_data.get("email")
-    password = user_data.get("password")
-    firstName = user_data.get("firstName")
-    lastName = user_data.get("lastName")
-
-    if not all([email, password, firstName, lastName]):
-        raise HTTPException(status_code=400, detail="All fields are required")
-
-    if len(password) < 8:
-        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
-
-    # Check if email already exists
-    for user_id, user in users_db.items():
-        if user.email == email:
-            raise HTTPException(status_code=409, detail="Email already registered")
-
-    # Create new user
-    new_user_id = len(users_db) + 1
-    new_user = User(
-        id=new_user_id,
-        username=email.split("@")[0],
-        discogsUserId=None,
-        email=email,
-        firstName=firstName,
-        lastName=lastName
-    )
-    users_db[str(new_user_id)] = new_user
-
-    # Create default settings
-    user_settings_db[str(new_user_id)] = UserSettings(userId=new_user_id)
-
-    return {
-        "user": new_user,
-        "token": f"waxvalue-token-{new_user_id}-{int(datetime.now().timestamp())}",
-        "message": "Registration successful"
-    }
+    return user
 
 @app.post("/auth/login")
-async def login(credentials: dict):
-    """Login user"""
+async def login(credentials: dict, session_id: str = None):
+    """Login user (creates session)"""
     email = credentials.get("email")
     password = credentials.get("password")
-
+    
     if not email or not password:
         raise HTTPException(status_code=400, detail="Email and password are required")
-
-    # Find user by email
-    user = None
-    for user_id, u in users_db.items():
-        if u.email == email:
-            user = u
-            break
-
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-
+    
+    # Generate session ID if not provided
+    if not session_id:
+        session_id = secrets.token_urlsafe(32)
+    
+    # Create user session
+    user = User(
+        id=secrets.token_urlsafe(16),
+        username=email.split("@")[0],
+        discogsUserId=None,
+        email=email
+    )
+    
+    session_data = {
+        "user": user.model_dump(),
+        "settings": UserSettings().model_dump(),
+        "strategies": [s.model_dump() for s in DEFAULT_STRATEGIES],
+        "logs": [],
+        "suggestions": []
+    }
+    session_manager.set_session(session_id, session_data)
+    
     return {
         "user": user,
-        "token": f"waxvalue-token-{user.id}-{int(datetime.now().timestamp())}",
+        "session_id": session_id,
         "message": "Login successful"
     }
 
-@app.get("/auth/me")
-async def get_current_user_info(current_user: User = Depends(get_current_user)):
-    """Get current user information"""
-    return current_user
-
-# Discogs OAuth endpoints
 @app.post("/auth/setup")
-async def setup_discogs_auth(session_id: Optional[str] = Query(None)):
-    """Setup Discogs OAuth authentication - NO auth required for first-time OAuth"""
-    # Get credentials from environment variables
+async def setup_auth():
+    """Initialize OAuth flow with Discogs - no session required"""
     consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
     consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
     
     if not consumer_key or not consumer_secret:
-        raise HTTPException(status_code=500, detail="Discogs credentials not configured")
-
+        raise HTTPException(status_code=500, detail="Discogs API credentials not configured")
+    
     try:
-        # Use production callback URL
-        callback_url = os.getenv("NEXT_PUBLIC_APP_URL", "http://93.127.200.187") + "/auth/callback"
-        
         oauth = DiscogsOAuth(consumer_key, consumer_secret)
-        request_token, request_token_secret = oauth.get_request_token(callback_url)
+        request_token, request_token_secret = oauth.get_request_token("http://localhost:3000/auth/callback")
         auth_url = oauth.get_authorize_url(request_token)
-
-        # Store tokens in session storage if session_id provided
-        # (This will be retrieved later in the verify endpoint)
-        logger.info(f"OAuth setup successful - tokens generated for session: {session_id}")
-
+        
+        logger.info(f"OAuth setup complete, returning auth URL")
+        
         return {
             "authUrl": auth_url,
             "requestToken": request_token,
-            "requestTokenSecret": request_token_secret,
-            "message": "OAuth setup successful"
+            "requestTokenSecret": request_token_secret
         }
-
     except Exception as e:
-        logger.error(f"Discogs OAuth setup failed: {e}")
-        raise HTTPException(status_code=400, detail="Failed to setup Discogs authentication")
+        logger.error(f"OAuth setup error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to initialize OAuth: {str(e)}")
 
 @app.post("/auth/verify")
-async def verify_discogs_auth(verification_data: dict, session_id: Optional[str] = Query(None)):
-    """Verify Discogs OAuth and get access tokens - NO auth required for first-time OAuth"""
-    verifier = verification_data.get("verifierCode")
-    request_token = verification_data.get("requestToken")
-    request_token_secret = verification_data.get("requestTokenSecret")
-
-    if not verifier or not request_token or not request_token_secret:
-        raise HTTPException(status_code=400, detail="Verifier code, request token, and secret are required")
-
+async def verify_auth(verification: dict, session_id: str = None):
+    """Verify OAuth authorization and get user access tokens"""
+    logger.info(f"Verify auth called with session_id: {session_id[:10] if session_id else 'None'}...")
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="Session ID required")
+    
+    # Debug: Log all sessions
+    logger.info(f"Total sessions in memory: {len(session_manager.sessions)}")
+    logger.info(f"Session IDs: {[sid[:10] + '...' for sid in session_manager.sessions.keys()]}")
+    
+    consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
+    consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
+    
+    if not consumer_key or not consumer_secret:
+        raise HTTPException(status_code=500, detail="Discogs API credentials not configured")
+    
+    request_token = verification.get("requestToken")
+    verifier_code = verification.get("verifierCode") or verification.get("oauthVerifier")
+    request_token_secret = verification.get("requestTokenSecret")
+    
+    if not request_token or not verifier_code or not request_token_secret:
+        raise HTTPException(status_code=400, detail="Missing required OAuth parameters")
+    
     try:
-        # Get credentials from environment variables
+        oauth = DiscogsOAuth(consumer_key, consumer_secret)
+        access_token, access_token_secret = oauth.get_access_token(
+            request_token, request_token_secret, verifier_code
+        )
+        
+        # Create authenticated client to get user info
+        client = DiscogsClient(consumer_key, consumer_secret, 
+                              access_token, access_token_secret)
+        
+        try:
+            user_info = client.get_user_info()
+        except Exception as e:
+            logger.error(f"Failed to get user info from Discogs: {e}")
+            user_info = {"username": "discogs_user", "id": 1}
+        
+        # Create or get user session
+        if not session_manager.has_session(session_id):
+            logger.info(f"Session {session_id[:10]}... not found, creating new session")
+            # Create new session for first-time OAuth from home page
+            session_manager.set_session(session_id, {
+                "user": {
+                    "id": secrets.token_urlsafe(16),
+                    "username": None,
+                    "email": None,
+                    "discogsUserId": None,
+                    "accessToken": None,
+                    "accessTokenSecret": None
+                },
+                "settings": {
+                    "automationEnabled": True,
+                    "dailySchedule": "09:00",
+                    "priceChangeThreshold": 10.0,
+                    "maxPriceIncrease": 50.0,
+                    "minPriceDecrease": -25.0
+                }
+            })
+        
+        session = session_manager.get_session(session_id)
+        user_data = session["user"]
+        
+        # Update user with Discogs info
+        user_data.update({
+            "discogsUserId": user_info["id"],
+            "username": user_info["username"],
+            "email": user_info.get("email", user_data.get("email")),
+            "firstName": user_info.get("first_name"),
+            "lastName": user_info.get("last_name"),
+            "accessToken": access_token,
+            "accessTokenSecret": access_token_secret
+        })
+        
+        # Save updated session data
+        session_manager.update_session_data(session_id, "user", user_data)
+        
+        return {
+            "user": User(**user_data),
+            "message": "Account connected successfully"
+        }
+    except Exception as e:
+        logger.error(f"OAuth verification error: {e}")
+        raise HTTPException(status_code=400, detail=f"OAuth verification failed: {str(e)}")
+
+@app.post("/auth/disconnect")
+async def disconnect_auth(session_id: str = None):
+    """Disconnect Discogs account"""
+    if not session_id:
+        raise HTTPException(status_code=400, detail="Session ID required")
+    
+    if not session_manager.has_session(session_id):
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    # Remove Discogs data from user session
+    session = session_manager.get_session(session_id)
+    user_data = session["user"]
+    
+    user_data.update({
+        "discogsUserId": None,
+        "accessToken": None,
+        "accessTokenSecret": None
+    })
+    
+    # Save updated session data
+    session_manager.update_session_data(session_id, "user", user_data)
+    
+    return {"message": "Account disconnected successfully"}
+
+# Dashboard endpoints
+@app.get("/inventory/count")
+async def get_inventory_count(session_id: str = None):
+    """Get count of For Sale items in user's inventory"""
+    user = require_auth(session_id)
+    require_discogs_auth(user)
+    
+    try:
+        # Initialize Discogs client
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        if not consumer_key or not consumer_secret:
-            raise HTTPException(status_code=500, detail="Discogs credentials not configured")
-        
-        oauth = DiscogsOAuth(consumer_key, consumer_secret)
-        access_token, access_token_secret = oauth.get_access_token(
-            request_token, request_token_secret, verifier
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
         )
         
-        # Get user info from Discogs
-        client = DiscogsClient(consumer_key, consumer_secret, access_token, access_token_secret)
-        discogs_user = client.get_user_info()
-        
-        # Create or update user
-        user_id = discogs_user.get("id")
-        username = discogs_user.get("username")
-        
-        # Store/update user in database
-        user = User(
-            id=user_id,
-            username=username,
-            discogsUserId=user_id,
-            accessToken=access_token,
-            accessTokenSecret=access_token_secret
-        )
-        users_db[str(user_id)] = user
-        
-        # Create session for this user
-        if session_id:
-            sessions_db[session_id] = str(user_id)
-            logger.info(f"Session created: {session_id} -> user {user_id}")
-        
-        logger.info(f"OAuth verified for user: {username} (ID: {user_id})")
-
-        return {
-            "user": user.dict(),
-            "session_id": session_id,
-            "message": "Discogs authentication successful"
-        }
-
-    except Exception as e:
-        logger.error(f"Discogs OAuth verification failed: {e}")
-        raise HTTPException(status_code=400, detail="Failed to verify Discogs authentication")
-
-@app.post("/auth/disconnect")
-async def disconnect_discogs(current_user: User = Depends(get_current_user)):
-    """Disconnect Discogs account"""
-    current_user.accessToken = None
-    current_user.accessTokenSecret = None
-    current_user.discogsUserId = None
-    users_db[str(current_user.id)] = current_user
-
-    return {"message": "Discogs account disconnected"}
-
-# Dashboard endpoints
-@app.get("/dashboard/summary")
-async def get_dashboard_summary(current_user: User = Depends(get_current_user)):
-    """Get dashboard summary data"""
-    try:
-        if not current_user.discogsUserId:
+        # Get user inventory count - use pagination data for fast count
+        try:
+            # Get first page to get pagination info and sample of listings
+            inventory = client.get_user_inventory(user.username, per_page=100)
+            pagination = inventory.get("pagination", {})
+            total_listings = pagination.get("items", 0)
+            
+            # Get a sample of listings to estimate For Sale percentage
+            sample_listings = inventory.get("listings", [])
+            if sample_listings:
+                # Count For Sale items in the sample
+                sample_for_sale = len([listing for listing in sample_listings if listing.get("status") == "For Sale"])
+                sample_size = len(sample_listings)
+                
+                # Estimate total For Sale items based on sample
+                if sample_size > 0:
+                    for_sale_percentage = sample_for_sale / sample_size
+                    estimated_for_sale = int(total_listings * for_sale_percentage)
+                else:
+                    estimated_for_sale = 0
+                
+                logger.info(f"Total listings: {total_listings}, Sample size: {sample_size}, For Sale in sample: {sample_for_sale}, Estimated For Sale: {estimated_for_sale}")
+                
+                return {
+                    "totalForSale": estimated_for_sale,
+                    "totalListings": total_listings
+                }
+            else:
+                # No listings found
+                return {
+                    "totalForSale": 0,
+                    "totalListings": 0
+                }
+                
+        except Exception as e:
+            logger.error(f"Error fetching inventory count: {e}")
             return {
-                "totalListings": 0,
-                "suggestedUpdates": 0,
-                "averageDelta": 0,
-                "lastRunDate": None,
-                "isRunning": False
+                "totalForSale": 0,
+                "totalListings": 0
             }
-
-        client = get_discogs_client(current_user)
         
-        # Get user's inventory
-        inventory = client.get_user_inventory(current_user.username, per_page=100)
-        total_listings = inventory.get("pagination", {}).get("items", 0)
-        
-        # Get recent run log
-        recent_log = None
-        for log in run_logs_db.values():
-            if log.userId == current_user.id:
-                recent_log = log
-                break
+    except Exception as e:
+        logger.error(f"Error getting inventory count: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get inventory count: {str(e)}")
 
+@app.get("/dashboard/summary")
+async def get_dashboard_summary(session_id: str = None):
+    """Get dashboard summary with real data"""
+    user = require_auth(session_id)
+    require_discogs_auth(user)
+    
+    try:
+        # Initialize Discogs client
+        consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
+        consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
+        
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
+        
+        # Get user inventory count (For Sale items only) - fetch all pages for accurate count
+        try:
+            all_listings = get_user_inventory_all_pages(client, user.username)
+            logger.info(f"Fetched {len(all_listings)} total listings for dashboard summary")
+            
+            # Count only "For Sale" items
+            for_sale_count = len([listing for listing in all_listings if listing.get("status") == "For Sale"])
+            total_listings = for_sale_count
+            logger.info(f"Dashboard summary: {total_listings} For Sale items")
+        except Exception as e:
+            logger.error(f"Error fetching inventory for dashboard: {e}")
+            # Fallback to basic count if pagination fails
+            try:
+                inventory = client.get_user_inventory(user.username, per_page=1)
+                basic_count = inventory.get("pagination", {}).get("items", 0)
+                total_listings = basic_count
+                logger.info(f"Using fallback count: {total_listings} items")
+            except Exception as fallback_error:
+                logger.error(f"Fallback count also failed: {fallback_error}")
+                total_listings = 0
+        
+        # Get latest log entry and suggestions
+        try:
+            session = session_manager.get_session(session_id)
+            logger.info(f"Session data keys: {list(session.keys()) if session else 'No session'}")
+            
+            logs = session.get("logs", [])
+            latest_log = logs[-1] if logs else None
+            suggestions = session.get("suggestions", [])
+            
+            logger.info(f"Dashboard summary: {len(logs)} logs, {len(suggestions)} suggestions")
+        except Exception as e:
+            logger.error(f"Error accessing session data: {e}")
+            latest_log = None
+            suggestions = []
+        
+        # Calculate average delta from suggestions
+        average_delta = 0
+        if suggestions:
+            total_delta = sum(abs(s.get("suggestedPrice", 0) - s.get("currentPrice", 0)) for s in suggestions)
+            average_delta = round((total_delta / len(suggestions)) / sum(s.get("currentPrice", 1) for s in suggestions) * 100, 1)
+        
         return {
             "totalListings": total_listings,
-            "suggestedUpdates": 0,  # Will be calculated during pricing runs
-            "averageDelta": 0,      # Will be calculated during pricing runs
-            "lastRunDate": recent_log.runDate if recent_log else None,
-            "isRunning": False      # Will be set during active runs
+            "suggestedUpdates": len(suggestions),
+            "averageDelta": average_delta,
+            "lastRunDate": latest_log["runDate"] if latest_log else None,
+            "isRunning": False
         }
 
-    except DiscogsAuthError:
-        raise HTTPException(status_code=401, detail="Discogs authentication required")
     except Exception as e:
-        logger.error(f"Failed to get dashboard summary: {e}")
-        raise HTTPException(status_code=500, detail="Failed to fetch dashboard data")
-
-# Item Strategy endpoints
-@app.get("/inventory/item-strategies")
-async def get_item_strategies(current_user: User = Depends(get_current_user)):
-    """Get item-specific strategy assignments for user"""
-    try:
-        # In a real implementation, this would query the item_strategies table
-        # For now, return empty list
-        return {"itemStrategies": []}
-        
-    except Exception as e:
-        logger.error(f"Failed to fetch item strategies: {e}")
-        raise HTTPException(status_code=500, detail="Failed to fetch item strategies")
-
-@app.post("/inventory/item-strategies")
-async def assign_item_strategy(
-    request_data: dict,
-    current_user: User = Depends(get_current_user)
-):
-    """Assign or remove a strategy for a specific item"""
-    try:
-        listing_id = request_data.get("listingId")
-        strategy_id = request_data.get("strategyId")  # null to remove assignment
-        
-        if not listing_id:
-            raise HTTPException(status_code=400, detail="Listing ID is required")
-        
-        # In a real implementation, this would:
-        # 1. Validate the listing belongs to the user
-        # 2. If strategy_id is provided, validate it exists and belongs to user
-        # 3. Insert/update/delete record in item_strategies table
-        # 4. Log the change in item_strategy_history
-        
-        return {
-            "message": "Item strategy updated successfully",
-            "listingId": listing_id,
-            "strategyId": strategy_id
-        }
-        
-    except Exception as e:
-        logger.error(f"Failed to assign item strategy: {e}")
-        raise HTTPException(status_code=500, detail="Failed to assign item strategy")
+        logger.error(f"Error getting dashboard summary: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get dashboard summary: {str(e)}")
 
 # Inventory endpoints
+@app.get("/inventory/suggestions/stream")
+async def get_suggestions_stream(session_id: str = None):
+    """Get pricing suggestions for user's inventory with streaming progress updates"""
+    from fastapi.responses import StreamingResponse
+    import json
+    import asyncio
+    
+    user = require_auth(session_id)
+    require_discogs_auth(user)
+    
+    # Check if analysis is already running for this session
+    if analysis_lock.get(session_id, False):
+        logger.warning(f"Analysis already running for session {session_id[:10]}... - rejecting duplicate request")
+        async def already_running():
+            yield f"data: {json.dumps({'type': 'error', 'error': 'Analysis already in progress'})}\n\n"
+        return StreamingResponse(already_running(), media_type="text/plain")
+    
+    async def generate_suggestions():
+        # Set lock to prevent concurrent analysis
+        analysis_lock[session_id] = True
+        logger.info(f"Started analysis for session {session_id[:10]}... (lock acquired)")
+        
+        try:
+            # Initialize Discogs client
+            consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
+            consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
+            
+            client = DiscogsClient(
+                consumer_key=consumer_key,
+                consumer_secret=consumer_secret,
+                access_token=user.accessToken,
+                access_token_secret=user.accessTokenSecret
+            )
+            
+            # Use the stored username from the session (avoid extra API call)
+            username = user.username
+            logger.info(f"Using stored username: {username}")
+            
+            if not username:
+                yield f"data: {json.dumps({'error': 'Could not get user username'})}\n\n"
+                return
+            
+            # Get user profile to get instant "For Sale" count
+            logger.info("Getting user profile for instant count...")
+            try:
+                user_profile = client.get_user_info()
+                instant_for_sale_count = user_profile.get('num_for_sale', 0)
+                logger.info(f"User profile shows {instant_for_sale_count} For Sale items")
+                
+                # Send instant count immediately (no API delay!)
+                yield f"data: {json.dumps({'type': 'total', 'total': instant_for_sale_count})}\n\n"
+                logger.info(f"Sent instant For Sale count: {instant_for_sale_count}")
+            except Exception as profile_error:
+                logger.warning(f"Could not get instant count from profile: {profile_error}")
+                instant_for_sale_count = 0
+            
+            # Now fetch inventory pages for detailed analysis
+            logger.info("Fetching inventory pages...")
+            yield f"data: {json.dumps({'type': 'status', 'message': 'Fetching inventory details...'})}\n\n"
+            
+            first_page = client.get_user_inventory(username, page=1, per_page=100)
+            first_page_listings = first_page.get("listings", [])
+            
+            # Now fetch remaining pages (reusing first page data)
+            all_listings = get_user_inventory_all_pages(client, username, first_page_data=first_page)
+            
+            # Filter to only include items that are "For Sale"
+            for_sale_listings = [listing for listing in all_listings if listing.get("status") == "For Sale"]
+            
+            logger.info(f"Fetched {len(all_listings)} total listings from Discogs")
+            logger.info(f"Filtered to {len(for_sale_listings)} For Sale items (actual count)")
+            
+            # Use actual count for processing
+            total_items = len(for_sale_listings)
+            if total_items != instant_for_sale_count:
+                logger.info(f"Actual count ({total_items}) differs from profile count ({instant_for_sale_count})")
+            
+            # Cache for price suggestions by release_id to avoid duplicate API calls
+            # This significantly speeds up analysis when you have multiple copies of the same release
+            price_cache = {}
+            cache_hits = 0
+            
+            suggestions = []
+            
+            # Process all for-sale items
+            items_to_process = for_sale_listings
+            total_items = len(items_to_process)
+            logger.info(f"Processing {total_items} For Sale items...")
+            
+            yield f"data: {json.dumps({'type': 'status', 'message': f'Processing {total_items} items...'})}\n\n"
+            
+            for i, listing in enumerate(items_to_process):
+                # Double-check status (should already be filtered, but just in case)
+                if listing.get("status") != "For Sale":
+                    logger.warning(f"Skipping listing {listing.get('id')} with status: {listing.get('status')}")
+                    continue
+                    
+                listing_id = listing["id"]
+                release_id = listing["release"]["id"]
+                
+                # Send progress update
+                progress_data = {
+                    'type': 'progress',
+                    'current': i + 1,
+                    'total': total_items,
+                    'percentage': round(((i + 1) / total_items) * 100, 1)
+                }
+                yield f"data: {json.dumps(progress_data)}\n\n"
+                
+                # Log progress every 5 items
+                if (i + 1) % 5 == 0 or i == 0:
+                    logger.info(f"Processing item {i+1}/{len(items_to_process)}: listing {listing_id}, release {release_id}")
+                
+                # Rate limiting is now handled by the token bucket in DiscogsClient
+                # No artificial delay needed - the rate limiter handles it
+                
+                try:
+                    # Handle price as dict with 'value' field from Discogs API
+                    price_data = listing.get("price", {})
+                    if isinstance(price_data, dict):
+                        current_price = float(price_data.get("value", 0))
+                    else:
+                        current_price = float(price_data or 0)
+                    
+                    # Get price suggestions from Discogs (with caching)
+                    if release_id in price_cache:
+                        price_suggestions = price_cache[release_id]
+                        cache_hits += 1
+                        logger.debug(f"Cache HIT for release {release_id} (saved API call #{cache_hits})")
+                    else:
+                        price_suggestions = client.get_price_suggestions(release_id)
+                        price_cache[release_id] = price_suggestions
+                        logger.debug(f"Cache MISS - fetched price suggestions for release {release_id}")
+                    
+                    stats = {}
+                    
+                    # The Discogs API returns price suggestions by condition (M, VG+, etc.)
+                    # We need to find the condition that matches our listing
+                    if price_suggestions and isinstance(price_suggestions, dict):
+                        # Get the listing condition to match against price suggestions
+                        listing_condition = listing.get("condition", "").upper()
+                        
+                        # Try to find a matching condition in the price suggestions
+                        suggested_price = None
+                        condition_used = None
+                        
+                        # Common condition mappings
+                        condition_mappings = {
+                            "MINT (M)": ["M", "Mint"],
+                            "NEAR MINT (NM OR M-)": ["NM", "Near Mint"],
+                            "VERY GOOD PLUS (VG+)": ["VG+", "Very Good Plus"],
+                            "VERY GOOD (VG)": ["VG", "Very Good"],
+                            "GOOD PLUS (G+)": ["G+", "Good Plus"],
+                            "GOOD (G)": ["G", "Good"],
+                            "FAIR (F)": ["F", "Fair"],
+                            "POOR (P)": ["P", "Poor"]
+                        }
+                        
+                        # Try to find matching condition
+                        for condition_key, search_terms in condition_mappings.items():
+                            if any(term in listing_condition for term in search_terms):
+                                # Look for this condition in price suggestions
+                                for condition, price_data in price_suggestions.items():
+                                    if any(term in condition.upper() for term in search_terms):
+                                        if isinstance(price_data, dict) and "value" in price_data:
+                                            suggested_price = float(price_data["value"])
+                                            condition_used = condition
+                                            break
+                                break
+                        
+                        # If no specific condition match, try to use any available suggestion
+                        if suggested_price is None and price_suggestions:
+                            for condition, price_data in price_suggestions.items():
+                                if isinstance(price_data, dict) and "value" in price_data:
+                                    suggested_price = float(price_data["value"])
+                                    condition_used = condition
+                                    break
+                        
+                        if suggested_price is not None:
+                            # Determine status
+                            if suggested_price > current_price * 1.1:
+                                status = "underpriced"
+                            elif suggested_price < current_price * 0.9:
+                                status = "overpriced"
+                            else:
+                                status = "fairly_priced"
+                            
+                            # Extract release information
+                            release_info = listing.get("release", {})
+                            artist = release_info.get("artist", "Unknown Artist")
+                            title = release_info.get("title", "Unknown Title")
+                            
+                            # Get label information
+                            label = release_info.get("label", "Unknown Label")
+                            
+                            # Get image URL
+                            images = release_info.get("images", [])
+                            primary_image = next((img for img in images if img.get("type") == "primary"), None)
+                            if primary_image:
+                                image_url = primary_image.get("uri150", primary_image.get("uri", ""))
+                            else:
+                                image_url = release_info.get("thumbnail", "")
+                            
+                            # Format condition properly
+                            media_condition = listing.get("condition", "Not Graded")
+                            sleeve_condition = listing.get("sleeve_condition", "Not Graded")
+                            
+                            # Convert full condition names to short codes
+                            def get_condition_short_code(condition):
+                                condition_mapping = {
+                                    'Mint (M)': 'M',
+                                    'Near Mint (NM or M-)': 'NM',
+                                    'Very Good Plus (VG+)': 'VG+',
+                                    'Very Good (VG)': 'VG',
+                                    'Good Plus (G+)': 'G+',
+                                    'Good (G)': 'G',
+                                    'Fair (F)': 'F',
+                                    'Poor (P)': 'P'
+                                }
+                                return condition_mapping.get(condition, condition)
+                            
+                            media_short = get_condition_short_code(media_condition)
+                            sleeve_short = get_condition_short_code(sleeve_condition)
+                            condition_display = f"Media: {media_short}, Sleeve: {sleeve_short}"
+                            
+                            # Simplify basis
+                            basis_simple = condition_used.split("(")[-1].replace(")", "").strip() if "(" in condition_used else condition_used
+                            
+                            # Get currency from listing or default to USD
+                            raw_currency = listing.get("currency", "USD")
+                            supported_currencies = ["USD", "GBP", "EUR", "CAD", "AUD", "JPY", "CHF", "MXN", "BRL", "NZD", "SEK", "ZAR"]
+                            currency = raw_currency if raw_currency in supported_currencies else "USD"
+                            
+                            if raw_currency not in supported_currencies:
+                                logger.warning(f"Unsupported currency '{raw_currency}' for listing {listing_id}, defaulting to USD")
+                            
+                            suggestion = PriceSuggestion(
+                                listingId=listing_id,
+                                releaseId=release_id,
+                                currentPrice=current_price,
+                                suggestedPrice=round(suggested_price, 2),
+                                originalSuggestedPrice=round(suggested_price, 2),
+                                currency=currency,
+                                basis=basis_simple,
+                                status=status,
+                                strategy="Conservative",
+                                condition=condition_display,
+                                artist=artist,
+                                title=title,
+                                label=label,
+                                imageUrl=image_url
+                            )
+                            suggestions.append(suggestion)
+                            
+                            # Save incrementally every 10 suggestions so users can see partial results if they navigate away
+                            if len(suggestions) % 10 == 0:
+                                session_manager.update_session_data(session_id, "suggestions", [s.dict() for s in suggestions])
+                                logger.debug(f"Incrementally saved {len(suggestions)} suggestions to session")
+                            
+                            # Send individual suggestion
+                            yield f"data: {json.dumps({'type': 'suggestion', 'suggestion': suggestion.dict()})}\n\n"
+                
+                except Exception as e:
+                    logger.error(f"Error processing listing {listing_id}: {e}")
+                    continue
+            
+            # Log cache efficiency
+            total_api_calls = total_items - cache_hits
+            logger.info(f"Analysis complete: {total_items} items processed, {cache_hits} cache hits, {total_api_calls} API calls made")
+            if cache_hits > 0:
+                logger.info(f"Cache saved {cache_hits} API calls ({round((cache_hits/total_items)*100, 1)}% reduction)")
+            
+            # Save suggestions to session for persistence
+            session_manager.update_session_data(session_id, "suggestions", [s.dict() for s in suggestions])
+            logger.info(f"Saved {len(suggestions)} suggestions to session")
+            
+            # Send completion
+            yield f"data: {json.dumps({'type': 'complete', 'suggestions': [s.dict() for s in suggestions], 'totalItems': total_items})}\n\n"
+            
+        except Exception as e:
+            logger.error(f"Error in streaming suggestions: {e}")
+            yield f"data: {json.dumps({'type': 'error', 'error': str(e)})}\n\n"
+        finally:
+            # Release lock
+            if session_id in analysis_lock:
+                del analysis_lock[session_id]
+                logger.info(f"Analysis completed for session {session_id[:10]}... (lock released)")
+    
+    return StreamingResponse(generate_suggestions(), media_type="text/plain")
+
 @app.get("/inventory/suggestions")
-async def get_inventory_suggestions(current_user: User = Depends(get_current_user)):
-    """Get price suggestions for user's inventory"""
+async def get_suggestions(session_id: str = None):
+    """Get pricing suggestions for user's inventory (returns cached if available)"""
+    user = require_auth(session_id)
+    require_discogs_auth(user)
+    
     try:
-        if not current_user.discogsUserId:
-            return {"suggestions": []}
-
-        client = get_discogs_client(current_user)
+        # Check if we have cached suggestions in the session first
+        session = session_manager.get_session(session_id)
+        cached_suggestions = session.get("suggestions", [])
+        
+        if cached_suggestions:
+            logger.info(f"Returning {len(cached_suggestions)} cached suggestions from session")
+            return {
+                "suggestions": cached_suggestions,
+                "total": len(cached_suggestions),
+                "totalItems": len(cached_suggestions),
+                "message": f"Found {len(cached_suggestions)} pricing suggestions (cached)"
+            }
+        
+        logger.info("No cached suggestions, running fresh analysis...")
+        
+        # Initialize Discogs client
+        consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
+        consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
+        
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
+        
+        # Use the stored username from the session (avoid extra API call)
+        username = user.username
+        logger.info(f"Using stored username: {username}")
+        
+        if not username:
+            raise HTTPException(status_code=400, detail="Could not get user username")
+        
+        # Get user's inventory - fetch ALL pages for complete processing
+        logger.info("Fetching all inventory pages for suggestions...")
+        try:
+            all_listings = get_user_inventory_all_pages(client, username)
+            
+            # Filter to only include items that are "For Sale"
+            for_sale_listings = [listing for listing in all_listings if listing.get("status") == "For Sale"]
+            
+            logger.info(f"Fetched {len(all_listings)} total listings from Discogs")
+            logger.info(f"Filtered to {len(for_sale_listings)} For Sale items")
+        except Exception as e:
+            logger.error(f"Error fetching inventory for suggestions: {e}")
+            for_sale_listings = []
+        
         suggestions = []
-
-        # Get user's inventory
-        inventory = client.get_user_inventory(current_user.username, per_page=100)
-        listings = inventory.get("listings", [])
-
-        # Get user's active strategy (default to conservative if none)
-        strategy = {
-            "anchor": "median",
-            "offsetType": "percentage", 
-            "offsetValue": -5,
-            "conditionWeights": {"media": 0.8, "sleeve": 0.2},
-            "conditionMatching": {
-                "enabled": True,
-                "mediaConditionMatch": True,
-                "sleeveConditionMatch": True,
-                "fallbackToSimilar": True
-            },
-            "scarcityBoost": {"threshold": 3, "boostPercent": 25},
-            "maxChangePercent": 15,
-            "rounding": 0.50,
-            "floor": 1.0,
-            "ceiling": 1000.0
+        
+        # Cache for price suggestions by release_id
+        price_cache = {}
+        cache_hits = 0
+        
+        # Process all for-sale items
+        items_to_process = for_sale_listings
+        total_items = len(items_to_process)
+        logger.info(f"Processing {total_items} For Sale items...")
+        
+        for i, listing in enumerate(items_to_process):
+            # Double-check status (should already be filtered, but just in case)
+            if listing.get("status") != "For Sale":
+                logger.warning(f"Skipping listing {listing.get('id')} with status: {listing.get('status')}")
+                continue
+                
+            listing_id = listing["id"]
+            release_id = listing["release"]["id"]
+            # Log progress every 5 items
+            if (i + 1) % 5 == 0 or i == 0:
+                logger.info(f"Processing item {i+1}/{len(items_to_process)}: listing {listing_id}, release {release_id}")
+            
+            # Rate limiting is now handled by the token bucket in DiscogsClient
+            # No artificial delay needed
+            
+            try:
+                # Handle price as dict with 'value' field from Discogs API
+                price_data = listing.get("price", {})
+                if isinstance(price_data, dict):
+                    current_price = float(price_data.get("value", 0))
+                else:
+                    current_price = float(price_data or 0)
+                    
+                # Get price suggestions from Discogs (with caching)
+                if release_id in price_cache:
+                    price_suggestions = price_cache[release_id]
+                    cache_hits += 1
+                else:
+                    price_suggestions = client.get_price_suggestions(release_id)
+                    price_cache[release_id] = price_suggestions
+                    
+                stats = {}
+                
+                # Debug: Log the actual response structure
+                logger.info(f"Price suggestions for release {release_id}: {price_suggestions}")
+                
+                # The Discogs API returns price suggestions by condition (M, VG+, etc.)
+                # We need to find the condition that matches our listing
+                if price_suggestions and isinstance(price_suggestions, dict):
+                    # Get the listing condition to match against price suggestions
+                    listing_condition = listing.get("condition", "").upper()
+                    
+                    # Try to find a matching condition in the price suggestions
+                    suggested_price = None
+                    condition_used = None
+                    
+                    # Common condition mappings
+                    condition_mappings = {
+                        "MINT (M)": ["M", "Mint"],
+                        "NEAR MINT (NM OR M-)": ["NM", "Near Mint"],
+                        "VERY GOOD PLUS (VG+)": ["VG+", "Very Good Plus"],
+                        "VERY GOOD (VG)": ["VG", "Very Good"],
+                        "GOOD PLUS (G+)": ["G+", "Good Plus"],
+                        "GOOD (G)": ["G", "Good"],
+                        "FAIR (F)": ["F", "Fair"],
+                        "POOR (P)": ["P", "Poor"]
+                    }
+                    
+                    # Try to find matching condition
+                    for condition_key, search_terms in condition_mappings.items():
+                        if any(term in listing_condition for term in search_terms):
+                            # Look for this condition in price suggestions
+                            for condition, price_data in price_suggestions.items():
+                                if any(term in condition.upper() for term in search_terms):
+                                    if isinstance(price_data, dict) and "value" in price_data:
+                                        suggested_price = float(price_data["value"])
+                                        condition_used = condition
+                                        break
+                            break
+                    
+                    # If no specific condition match, try to use any available suggestion
+                    if suggested_price is None and price_suggestions:
+                        for condition, price_data in price_suggestions.items():
+                            if isinstance(price_data, dict) and "value" in price_data:
+                                suggested_price = float(price_data["value"])
+                                condition_used = condition
+                                break
+                    
+                    if suggested_price is not None:
+                        # Determine status
+                        if suggested_price > current_price * 1.1:
+                            status = "underpriced"
+                        elif suggested_price < current_price * 0.9:
+                            status = "overpriced"
+                        else:
+                            status = "fairly_priced"
+                        
+                        # Extract release information
+                        release_info = listing.get("release", {})
+                        logger.info(f"Release {release_id} full data: {release_info}")
+                        artist = release_info.get("artist", "Unknown Artist")
+                        title = release_info.get("title", "Unknown Title")
+                        
+                        # Get label information - Discogs returns label directly, not in labels array
+                        label = release_info.get("label", "Unknown Label")
+                        logger.info(f"Release {release_id} label: {label}")
+                        
+                        # Get image URL - try primary image first, then thumbnail
+                        images = release_info.get("images", [])
+                        logger.info(f"Release {release_id} images: {len(images)} available")
+                        primary_image = next((img for img in images if img.get("type") == "primary"), None)
+                        if primary_image:
+                            image_url = primary_image.get("uri150", primary_image.get("uri", ""))
+                            logger.info(f"Using primary image: {image_url}")
+                        else:
+                            image_url = release_info.get("thumbnail", "")
+                            logger.info(f"Using thumbnail: {image_url}")
+                        
+                        # Format condition properly (Media: VG+, Sleeve: G)
+                        # Discogs API uses 'condition' for media and 'sleeve_condition' for sleeve
+                        media_condition = listing.get("condition", "Not Graded")
+                        sleeve_condition = listing.get("sleeve_condition", "Not Graded")
+                        
+                        # Convert full condition names to short codes
+                        def get_condition_short_code(condition):
+                            condition_mapping = {
+                                'Mint (M)': 'M',
+                                'Near Mint (NM or M-)': 'NM',
+                                'Very Good Plus (VG+)': 'VG+',
+                                'Very Good (VG)': 'VG',
+                                'Good Plus (G+)': 'G+',
+                                'Good (G)': 'G',
+                                'Fair (F)': 'F',
+                                'Poor (P)': 'P'
+                            }
+                            return condition_mapping.get(condition, condition)
+                        
+                        media_short = get_condition_short_code(media_condition)
+                        sleeve_short = get_condition_short_code(sleeve_condition)
+                        condition_display = f"Media: {media_short}, Sleeve: {sleeve_short}"
+                        
+                        # Simplify basis (just the condition abbreviation)
+                        basis_simple = condition_used.split("(")[-1].replace(")", "").strip() if "(" in condition_used else condition_used
+                        
+                        # Get currency from listing or default to USD
+                        # Validate currency is supported by Discogs API
+                        raw_currency = listing.get("currency", "USD")
+                        supported_currencies = ["USD", "GBP", "EUR", "CAD", "AUD", "JPY", "CHF", "MXN", "BRL", "NZD", "SEK", "ZAR"]
+                        currency = raw_currency if raw_currency in supported_currencies else "USD"
+                        
+                        if raw_currency not in supported_currencies:
+                            logger.warning(f"Unsupported currency '{raw_currency}' for listing {listing_id}, defaulting to USD")
+                        
+                        suggestion = PriceSuggestion(
+                                listingId=listing_id,
+                                releaseId=release_id,
+                                currentPrice=current_price,
+                                suggestedPrice=round(suggested_price, 2),
+                                originalSuggestedPrice=round(suggested_price, 2),  # Store original for strategy calculations
+                                currency=currency,  # Include currency information
+                                basis=basis_simple,
+                                status=status,
+                                strategy="Conservative",
+                                condition=condition_display,
+                                artist=artist,
+                                title=title,
+                                label=label,
+                                imageUrl=image_url
+                            )
+                        suggestions.append(suggestion)
+                        logger.info(f"Added suggestion for listing {listing_id}: ${current_price} -> ${suggested_price} ({status})")
+                
+            except Exception as e:
+                logger.error(f"Error processing listing {listing_id}: {e}")
+                continue
+            
+            # If no price suggestions available, skip this item
+            if not price_suggestions or not isinstance(price_suggestions, dict):
+                logger.info(f"No price suggestions available for release {release_id}, skipping")
+                continue
+        
+        # Store suggestions in session
+        session_manager.update_session_data(session_id, "suggestions", [s.model_dump() for s in suggestions])
+        
+        # Add log entry for this run
+        from datetime import datetime
+        log_entry = {
+            "runDate": datetime.now().isoformat(),
+            "suggestionsFound": len(suggestions),
+            "totalListings": len(for_sale_listings),
+            "status": "completed"
+        }
+        session = session_manager.get_session(session_id)
+        session["logs"].append(log_entry)
+        session_manager.update_session_data(session_id, "logs", session["logs"])
+        
+        return {
+            "suggestions": [s.model_dump() for s in suggestions],
+            "total": len(suggestions),
+            "totalItems": total_items,
+            "message": f"Found {len(suggestions)} pricing suggestions"
         }
         
-        for listing in listings:
-            try:
-                # Calculate suggested price using new market-based pricing
-                pricing_result = compute_target_price(listing, strategy, client)
-                
-                current_price = listing.get("price", 0)
-                suggested_price = pricing_result["new_price"]
-                confidence = "high" if pricing_result["confidence"] > 0.7 else "medium" if pricing_result["confidence"] > 0.4 else "low"
-                
-                suggestions.append({
-                    "listingId": listing.get("id"),
-                    "releaseId": listing.get("release", {}).get("id"),
-                    "currentPrice": current_price,
-                    "suggestedPrice": suggested_price,
-                    "confidence": confidence,
-                    "condition": listing.get("condition"),
-                    "sleeveCondition": listing.get("sleeve_condition", "Not Graded"),
-                    "basis": "market_median",
-                    "reason": pricing_result["reason"],
-                    "release": listing.get("release"),
-                    "artist": listing.get("release", {}).get("artists", [{}])[0] if listing.get("release", {}).get("artists") else {}
-                })
-
-            except Exception as e:
-                logger.error(f"Failed to get suggestions for listing {listing.get('id')}: {e}")
-                continue
-
-        return {"suggestions": suggestions}
-
-    except DiscogsAuthError:
-        raise HTTPException(status_code=401, detail="Discogs authentication required")
     except Exception as e:
-        logger.error(f"Failed to get inventory suggestions: {e}")
-        raise HTTPException(status_code=500, detail="Failed to fetch price suggestions")
-
-@app.post("/inventory/apply")
-async def apply_price_suggestion(listing_data: dict, current_user: User = Depends(get_current_user)):
-    """Apply a price suggestion to a listing"""
-    listing_id = listing_data.get("listingId")
-    new_price = listing_data.get("newPrice")
-
-    if not listing_id or not new_price:
-        raise HTTPException(status_code=400, detail="Listing ID and new price are required")
-
-    try:
-        client = get_discogs_client(current_user)
-        
-        # Update the listing price
-        result = client.update_listing_price(listing_id, new_price)
-        
-        # Log the change
-        log_id = f"run_{current_user.id}_{int(datetime.now().timestamp())}"
-        run_logs_db[log_id] = RunLog(
-            id=log_id,
-            userId=current_user.id,
-            runDate=datetime.now().isoformat(),
-            status="completed",
-            itemsScanned=1,
-            itemsUpdated=1,
-            errors=0,
-            isDryRun=False
-        )
-
-        return {"message": "Price updated successfully", "listing": result}
-
-    except DiscogsAuthError:
-        raise HTTPException(status_code=401, detail="Discogs authentication required")
-    except DiscogsAPIError as e:
-        raise HTTPException(status_code=400, detail=f"Failed to update listing: {e}")
-    except Exception as e:
-        logger.error(f"Failed to apply price suggestion: {e}")
-        raise HTTPException(status_code=500, detail="Failed to update listing")
-
-@app.post("/inventory/decline")
-async def decline_price_suggestion(listing_data: dict, current_user: User = Depends(get_current_user)):
-    """Decline a price suggestion"""
-    listing_id = listing_data.get("listingId")
-    
-    if not listing_id:
-        raise HTTPException(status_code=400, detail="Listing ID is required")
-
-    # Log the decline
-    log_id = f"decline_{current_user.id}_{int(datetime.now().timestamp())}"
-    run_logs_db[log_id] = RunLog(
-        id=log_id,
-        userId=current_user.id,
-        runDate=datetime.now().isoformat(),
-        status="completed",
-        itemsScanned=1,
-        itemsUpdated=0,
-        errors=0,
-        isDryRun=False
-    )
-
-    return {"message": "Price suggestion declined"}
-
-@app.post("/inventory/update-price")
-async def update_listing_price(price_data: dict, current_user: User = Depends(get_current_user)):
-    """Update a listing price directly"""
-    try:
-        listing_id = price_data.get("listingId")
-        new_price = price_data.get("newPrice")
-        
-        if not listing_id or new_price is None:
-            raise HTTPException(status_code=400, detail="Listing ID and new price are required")
-        
-        # Get user's Discogs client
-        client = get_discogs_client(current_user)
-        
-        # Update the price on Discogs
-        status_code, response = client.update_listing_price(listing_id, new_price)
-        
-        if status_code == 200:
-            return {"success": True, "message": "Price updated successfully", "data": response}
-        else:
-            raise HTTPException(status_code=status_code, detail="Failed to update price on Discogs")
-            
-    except DiscogsAPIError as e:
-        logger.error(f"Discogs API error updating price: {e}")
-        raise HTTPException(status_code=500, detail=f"Discogs API error: {str(e)}")
-    except Exception as e:
-        logger.error(f"Error updating listing price: {e}")
-        raise HTTPException(status_code=500, detail="Failed to update listing price")
+        logger.error(f"Error getting suggestions: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get suggestions: {str(e)}")
 
 # Strategy endpoints
 @app.get("/strategies")
-async def get_strategies(current_user: User = Depends(get_current_user)):
-    """Get user's pricing strategies"""
-    user_strategies = [s for s in strategies_db.values() if s.userId == current_user.id]
-    return {"strategies": user_strategies}
+async def get_strategies(session_id: str = None):
+    """Get all strategies"""
+    user = require_auth(session_id)
+    session = session_manager.get_session(session_id)
+    
+    strategies = session["strategies"]
+    active_strategy = next((s for s in strategies if s["isActive"]), None)
+    
+    return {
+        "strategies": strategies,
+        "activeStrategy": active_strategy
+    }
 
-@app.post("/strategies/create")
-async def create_strategy(strategy_data: dict, current_user: User = Depends(get_current_user)):
-    """Create a new pricing strategy"""
-    strategy_id = len(strategies_db) + 1
+@app.post("/strategies")
+async def create_strategy(strategy_data: dict, session_id: str = None):
+    """Create a new custom strategy"""
+    user = require_auth(session_id)
+    session = session_manager.get_session(session_id)
+    
+    # Generate unique ID
+    strategy_id = f"custom_{secrets.token_urlsafe(8)}"
     
     strategy = Strategy(
         id=strategy_id,
-        userId=current_user.id,
-        **strategy_data
+        name=strategy_data["name"],
+        description=strategy_data["description"],
+        scarcityBoost=float(strategy_data["scarcityBoost"]),
+        offset=float(strategy_data["offset"]),
+        offsetType=strategy_data["offsetType"],
+        isActive=False
     )
     
-    strategies_db[strategy_id] = strategy
-    return {"strategy": strategy, "message": "Strategy created successfully"}
-
-@app.post("/strategies/preview")
-async def preview_strategy(strategy_data: dict, current_user: User = Depends(get_current_user)):
-    """Preview how a strategy would price sample items"""
-    try:
-        # This would generate sample pricing data based on the strategy
-        # For now, return mock data
-        sample_items = [
-            {
-                "title": "Sample Release 1",
-                "artist": "Sample Artist",
-                "currentPrice": 25.00,
-                "suggestedPrice": 28.50,
-                "basis": "Median + 14%"
-            },
-            {
-                "title": "Sample Release 2", 
-                "artist": "Another Artist",
-                "currentPrice": 15.00,
-                "suggestedPrice": 16.20,
-                "basis": "Median + 8%"
-            },
-            {
-                "title": "Sample Release 3",
-                "artist": "Third Artist", 
-                "currentPrice": 45.00,
-                "suggestedPrice": 48.60,
-                "basis": "Median + 8%"
-            }
-        ]
-        
-        return {"preview": sample_items}
-    except Exception as e:
-        logger.error(f"Error generating strategy preview: {e}")
-        raise HTTPException(status_code=500, detail="Failed to generate strategy preview")
-
-@app.post("/strategies/apply-globally")
-async def apply_strategy_globally(request_data: dict, current_user: User = Depends(get_current_user)):
-    """Apply a strategy globally to all inventory"""
-    try:
-        strategy_id = request_data.get("strategyId")
-        if not strategy_id:
-            raise HTTPException(status_code=400, detail="Strategy ID is required")
-        
-        # Get the strategy
-        strategy = strategies_db.get(strategy_id)
-        if not strategy or strategy.userId != current_user.id:
-            raise HTTPException(status_code=404, detail="Strategy not found")
-        
-        # In a real implementation, this would apply the strategy to all inventory
-        # For now, return a success message
-        return {"message": "Strategy applied globally", "strategyId": strategy_id}
-        
-    except Exception as e:
-        logger.error(f"Error applying strategy globally: {e}")
-        raise HTTPException(status_code=500, detail="Failed to apply strategy globally")
-
-# Logs endpoints
-@app.get("/logs")
-async def get_run_logs(current_user: User = Depends(get_current_user)):
-    """Get user's run logs"""
-    user_logs = [log for log in run_logs_db.values() if log.userId == current_user.id]
-    return {"logs": user_logs}
-
-@app.get("/logs/{run_id}/snapshots")
-async def get_run_snapshots(run_id: str, current_user: User = Depends(get_current_user)):
-    """Get snapshots for a specific run"""
-    if run_id not in run_logs_db or run_logs_db[run_id].userId != current_user.id:
-        raise HTTPException(status_code=404, detail="Run not found")
+    session["strategies"].append(strategy.dict())
     
-    # Return mock snapshot data
-    return {"snapshots": []}
+    return {
+        "strategy": strategy.dict(),
+        "message": "Strategy created successfully"
+    }
 
 # Settings endpoints
 @app.get("/settings")
-async def get_user_settings(current_user: User = Depends(get_current_user)):
+async def get_settings(session_id: str = None):
     """Get user settings"""
-    settings = user_settings_db.get(str(current_user.id))
-    if not settings:
-        settings = UserSettings(userId=current_user.id)
-        user_settings_db[str(current_user.id)] = settings
-    
-    return {"settings": settings}
+    user = require_auth(session_id)
+    session = session_manager.get_session(session_id)
+    return session["settings"]
 
-@app.post("/settings")
-async def update_user_settings(settings_data: dict, current_user: User = Depends(get_current_user)):
+@app.put("/settings")
+async def update_settings(settings: dict, session_id: str = None):
     """Update user settings"""
-    settings = user_settings_db.get(str(current_user.id), UserSettings(userId=current_user.id))
+    user = require_auth(session_id)
+    session = session_manager.get_session(session_id)
     
-    # Update settings
-    for key, value in settings_data.items():
-        if hasattr(settings, key):
-            setattr(settings, key, value)
-    
-    settings.updatedAt = datetime.now().isoformat()
-    user_settings_db[str(current_user.id)] = settings
-    
-    return {"settings": settings, "message": "Settings updated successfully"}
-
-# Metrics endpoints
-@app.get("/metrics/portfolio")
-async def get_portfolio_metrics(current_user: User = Depends(get_current_user)):
-    """Get portfolio metrics"""
+    session["settings"].update(settings)
+    session_manager.update_session_data(session_id, "settings", session["settings"])
     return {
-        "totalValue": 0,
-        "averagePrice": 0,
-        "totalListings": 0,
-        "belowP25": 0,
-        "betweenP25P75": 0,
-        "aboveP75": 0
+        "settings": session["settings"],
+        "message": "Settings updated successfully"
     }
 
-@app.get("/metrics/trends")
-async def get_trend_metrics(current_user: User = Depends(get_current_user)):
-    """Get trend metrics"""
-    return {"trends": []}
+# Item strategies endpoints
+@app.get("/inventory/item-strategies")
+async def get_item_strategies(session_id: str = None):
+    """Get item-specific strategies"""
+    user = require_auth(session_id)
+    session = session_manager.get_session(session_id)
+    
+    # Get item strategies from session (initialize if not exists)
+    item_strategies = session.get("itemStrategies", {})
+    return {"itemStrategies": item_strategies}
 
-@app.get("/metrics/distribution")
-async def get_distribution_metrics(current_user: User = Depends(get_current_user)):
-    """Get distribution metrics"""
-    return {"distribution": []}
+@app.post("/inventory/item-strategies")
+async def update_item_strategy(strategy_data: dict, session_id: str = None):
+    """Update strategy for a specific item"""
+    user = require_auth(session_id)
+    session = session_manager.get_session(session_id)
+    
+    listing_id = strategy_data.get("listingId")
+    strategy_id = strategy_data.get("strategyId")
+    
+    if not listing_id:
+        raise HTTPException(status_code=400, detail="listingId is required")
+    
+    # Initialize item strategies if not exists
+    if "itemStrategies" not in session:
+        session["itemStrategies"] = {}
+    
+    # Update item strategy
+    if strategy_id:
+        # Find the strategy details
+        strategy = next((s for s in session["strategies"] if s["id"] == strategy_id), None)
+        if not strategy:
+            raise HTTPException(status_code=404, detail="Strategy not found")
+        
+        session["itemStrategies"][str(listing_id)] = strategy
+        message = f'Applied "{strategy["name"]}" strategy to item {listing_id}'
+    else:
+        # Remove strategy assignment (use global strategy)
+        if str(listing_id) in session["itemStrategies"]:
+            del session["itemStrategies"][str(listing_id)]
+        message = f'Removed strategy assignment for item {listing_id} - using global strategy'
+    
+    # Save updated session
+    session_manager.update_session_data(session_id, "itemStrategies", session["itemStrategies"])
+    
+    # If a strategy was applied, recalculate the suggested price for this item
+    if strategy_id:
+        await recalculate_item_price(session_id, listing_id, strategy)
+    
+    return {"success": True, "message": message}
 
-# Simulation endpoint
-@app.post("/reprice", response_model=RepriceResponse)
-async def reprice(
-    payload: RepriceRequest,
-    dry_run: bool = Query(True),
-    scope: Literal["global", "selection", "item"] = Query("global"),
-    current_user: User = Depends(get_current_user)
-):
-    """Apply approved price changes to Discogs listings with automation rules"""
+async def recalculate_item_price(session_id: str, listing_id: int, strategy: dict):
+    """Recalculate suggested price for an item based on its assigned strategy"""
+    try:
+        session = session_manager.get_session(session_id)
+        suggestions = session.get("suggestions", [])
+        
+        # Find the suggestion for this listing
+        suggestion = next((s for s in suggestions if s.get("listingId") == listing_id), None)
+        if not suggestion:
+            return
+        
+        # Get the original Discogs suggested price (we'll need to fetch this again)
+        # For now, let's apply the strategy adjustments to the current suggested price
+        original_price = suggestion.get("originalSuggestedPrice", suggestion.get("suggestedPrice", 0))
+        
+        # Apply strategy adjustments
+        scarcity_boost = strategy.get("scarcityBoost", 0)
+        offset = strategy.get("offset", 0)
+        offset_type = strategy.get("offsetType", "percentage")
+        
+        new_suggested_price = original_price
+        
+        # Apply scarcity boost (this would need market data analysis)
+        # For now, we'll just apply the offset
+        
+        # Apply offset
+        if offset_type == "percentage":
+            new_suggested_price = new_suggested_price * (1 + offset / 100)
+        else:  # fixed amount
+            new_suggested_price = new_suggested_price + offset
+        
+        # Update the suggestion
+        suggestion["suggestedPrice"] = round(new_suggested_price, 2)
+        suggestion["strategy"] = strategy.get("name", "Custom Strategy")
+        
+        # Save updated suggestions
+        session_manager.update_session_data(session_id, "suggestions", suggestions)
+        
+    except Exception as e:
+        logger.error(f"Error recalculating item price: {e}")
+
+@app.post("/inventory/adjust-suggested-price")
+async def adjust_suggested_price(request: dict, session_id: str = None):
+    """Adjust suggested price for a specific item"""
+    user = require_auth(session_id)
+    session = session_manager.get_session(session_id)
+    
+    listing_id = request.get("listingId")
+    new_suggested_price = request.get("newSuggestedPrice")
+    
+    if not listing_id or new_suggested_price is None:
+        raise HTTPException(status_code=400, detail="listingId and newSuggestedPrice are required")
+    
+    # Find the suggestion in the session and update it
+    suggestions = session.get("suggestions", [])
+    suggestion_found = False
+    
+    for suggestion in suggestions:
+        if suggestion.get("listingId") == listing_id:
+            suggestion["suggestedPrice"] = new_suggested_price
+            suggestion_found = True
+            break
+    
+    if not suggestion_found:
+        raise HTTPException(status_code=404, detail="Suggestion not found")
+    
+    # Save updated suggestions
+    session_manager.update_session_data(session_id, "suggestions", suggestions)
+    
+    return {"success": True, "message": f"Suggested price updated to ${new_suggested_price:.2f}"}
+
+# Inventory action endpoints
+@app.post("/inventory/apply/{listing_id}")
+async def apply_price_suggestion(listing_id: int, listing_data: dict, session_id: str = None):
+    """Apply a price suggestion to a listing"""
+    user = require_auth(session_id)
+    require_discogs_auth(user)
+    
+    new_price = listing_data.get("newPrice")
+    
+    if not new_price:
+        raise HTTPException(status_code=400, detail="New price is required")
     
     try:
-        # Setup
-        client = get_discogs_client(current_user)
-        settings = get_user_settings(current_user)
+        # Initialize Discogs client
+        consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
+        consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        # Create run log
-        run_id = len(run_logs_db) + 1
-        run_log = RunLog(
-            id=str(run_id),
-            userId=current_user.id,
-            runDate=datetime.now().isoformat(),
-            status="running",
-            itemsScanned=0,
-            itemsUpdated=0,
-            errors=0,
-            isDryRun=dry_run,
-            strategyId=payload.strategy_id
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
         )
-        run_logs_db[str(run_id)] = run_log
         
-        # Resolve candidate listings
-        candidate_listings = resolve_candidate_listings(current_user, scope, payload, client)
+        # Update the listing price
+        logger.info(f"Attempting to update listing {listing_id} with price {new_price}")
+        logger.info(f"User: {user.username}, Access Token: {user.accessToken[:10]}...")
         
-        # Process each listing
-        results: List[RepriceItemResult] = []
-        counters = {"scanned": 0, "auto_applied": 0, "user_applied": 0, "flagged": 0, "declined": 0, "errors": 0}
-        approved_set = set(payload.approved_listing_ids or [])
+        try:
+            status_code, result = client.update_listing_price(listing_id, new_price)
+            logger.info(f"Discogs API response: status={status_code}, result={result}")
+        except Exception as update_error:
+            logger.error(f"Exception during update_listing_price: {update_error}", exc_info=True)
+            raise
         
-        # Get strategy configuration (in production, this would come from database)
-        strategy = payload.params if payload.params else {
-            "anchor": "median",
-            "offsetType": "percentage",
-            "offsetValue": 0,
-            "conditionWeights": {"media": 0.7, "sleeve": 0.3},
-            "conditionMatching": {
-                "enabled": True,
-                "mediaConditionMatch": True,
-                "sleeveConditionMatch": True,
-                "fallbackToSimilar": True
-            },
-            "scarcityBoost": {"threshold": 5, "boostPercent": 20},
-            "maxChangePercent": 50,
-            "rounding": 0.25,
-            "floor": 1.0,
-            "ceiling": 1000.0
+        # Check if the Discogs API call was successful
+        # 200 OK, 201 Created, 204 No Content are all success codes
+        if status_code not in [200, 201, 204]:
+            # Log the complete result structure for debugging
+            logger.error(f"Discogs API FAILED - Status: {status_code}")
+            logger.error(f"Result keys: {list(result.keys()) if isinstance(result, dict) else 'Not a dict'}")
+            logger.error(f"Full result: {result}")
+            
+            # Extract error message from various possible formats
+            error_data = result.get("error", {})
+            error_text = result.get("text", "")
+            
+            # Try to get message from different possible structures
+            if isinstance(error_data, dict):
+                error_msg = error_data.get("message") or error_data.get("error") or error_text or f"Status {status_code}: {result}"
+            elif isinstance(error_data, str):
+                error_msg = error_data
+            else:
+                error_msg = error_text or f"HTTP {status_code} - Response: {str(result)[:200]}"
+            
+            logger.error(f"Discogs API error: {status_code} - {error_msg}")
+            raise HTTPException(status_code=500, detail=f"Discogs API error: {error_msg}")
+        
+        # Log the change
+        session = session_manager.get_session(session_id)
+        logs = session.get("logs", [])
+        
+        log_entry = {
+            "id": f"apply_{listing_id}_{int(time.time())}",
+            "userId": user.id,
+            "runDate": datetime.now().isoformat(),
+            "status": "completed",
+            "itemsScanned": 1,
+            "itemsUpdated": 1,
+            "errors": 0,
+            "isDryRun": False,
+            "action": "apply",
+            "listingId": listing_id,
+            "newPrice": new_price
         }
         
-        for listing in candidate_listings:
-            counters["scanned"] += 1
-            
-            # Compute target price using new market-based pricing
-            target = compute_target_price(listing, strategy, client)
-            old_price = listing.get("price", 0.0)
-            
-            # Decide action
-            decision, blocked_reason = decide_action(
-                old_price, target["new_price"], target["increase_pct"], 
-                approved_set, settings
-            )
-            
-            http_status = None
-            rl_remaining = rl_reset = None
-            
-            # Apply price change if needed
-            if decision in ("auto_applied", "user_applied") and not dry_run:
-                http_status, meta = apply_price_change(
-                    client, listing["id"], target["new_price"], target["currency"]
-                )
-                rl_remaining = meta.get("ratelimit_remaining")
-                rl_reset = meta.get("ratelimit_reset")
-                
-                if http_status not in (200, 201):
-                    counters["errors"] += 1
-                    decision = "flagged"
-            elif dry_run:
-                decision = "simulated"
-            
-            counters[decision] = counters.get(decision, 0) + 1
-            
-            # Create snapshot
-            snapshot_id = f"snapshot_{run_id}_{listing['id']}_{int(datetime.now().timestamp())}"
-            snapshot = ListingSnapshot(
-                id=snapshot_id,
-                run_id=str(run_id),
-                listing_id=listing["id"],
-                old_price=old_price,
-                target_price=target["new_price"],
-                delta=target["new_price"] - old_price,
-                decision=decision,
-                reason=blocked_reason or target["reason"],
-                confidence=target["confidence"],
-                flagged=(decision == "flagged"),
-                http_status=http_status
-            )
-            listing_snapshots_db[snapshot_id] = snapshot
-            
-            # Add result
-            results.append(RepriceItemResult(
-                listing_id=listing["id"],
-                old_price=float(old_price),
-                new_price=float(target["new_price"]),
-                currency=target["currency"],
-                decision=decision,
-                reason=blocked_reason or target["reason"],
-                confidence=float(target["confidence"]),
-                discogs_status="For Sale",
-                http_status=http_status,
-                ratelimit_remaining=rl_remaining,
-                ratelimit_reset=rl_reset
-            ))
+        logs.append(log_entry)
+        session_manager.update_session_data(session_id, "logs", logs)
         
-        # Update run log
-        run_log.status = "completed"
-        run_log.itemsScanned = counters["scanned"]
-        run_log.itemsUpdated = counters["auto_applied"] + counters["user_applied"]
-        run_log.errors = counters["errors"]
+        return {"message": "Price updated successfully", "listing": result}
         
-        return RepriceResponse(
-            run_id=run_id,
-            dry_run=dry_run,
-            summary=counters,
-            items=results
+    except Exception as e:
+        logger.error(f"Failed to apply price suggestion: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to update listing: {str(e)}")
+
+@app.post("/inventory/bulk-apply")
+async def bulk_apply_price_suggestions(request: dict, session_id: str = None):
+    """Apply price suggestions to multiple listings"""
+    user = require_auth(session_id)
+    require_discogs_auth(user)
+    
+    listing_ids = request.get("listingIds", [])
+    if not listing_ids:
+        raise HTTPException(status_code=400, detail="No listing IDs provided")
+    
+    try:
+        # Initialize Discogs client
+        consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
+        consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
+        
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
         )
         
-    except DiscogsAuthError:
-        raise HTTPException(status_code=401, detail="Discogs authentication required")
-    except DiscogsAPIError as e:
-        raise HTTPException(status_code=400, detail=f"Discogs API error: {e}")
+        results = []
+        successful_updates = 0
+        errors = 0
+        
+        # Get current suggestions from session
+        session = session_manager.get_session(session_id)
+        suggestions = session.get("suggestions", [])
+        
+        for listing_id in listing_ids:
+            try:
+                # Find the suggestion for this listing
+                suggestion = next((s for s in suggestions if s.get("listingId") == listing_id), None)
+                if not suggestion:
+                    results.append({"listingId": listing_id, "success": False, "error": "Suggestion not found"})
+                    errors += 1
+                    continue
+                
+                new_price = suggestion.get("suggestedPrice")
+                if not new_price:
+                    results.append({"listingId": listing_id, "success": False, "error": "No suggested price"})
+                    errors += 1
+                    continue
+                
+                # Update the listing on Discogs
+                logger.info(f"Bulk apply: Attempting to update listing {listing_id} with price {new_price}")
+                status_code, result = client.update_listing_price(listing_id, new_price)
+                
+                logger.info(f"Bulk apply: Discogs API response for listing {listing_id}: status={status_code}, result={result}")
+                
+                if status_code in [200, 201]:
+                    results.append({"listingId": listing_id, "success": True, "newPrice": new_price})
+                    successful_updates += 1
+                    
+                    # Remove this suggestion from the session since it's been applied
+                    suggestions = [s for s in suggestions if s.get("listingId") != listing_id]
+                else:
+                    results.append({"listingId": listing_id, "success": False, "error": "Failed to update listing"})
+                    errors += 1
+                    
+            except Exception as e:
+                logger.error(f"Error applying price for listing {listing_id}: {e}")
+                results.append({"listingId": listing_id, "success": False, "error": str(e)})
+                errors += 1
+        
+        # Update session with remaining suggestions
+        session_manager.update_session_data(session_id, "suggestions", suggestions)
+        
+        # Log the bulk operation
+        logs = session.get("logs", [])
+        log_entry = {
+            "id": f"bulk_apply_{int(time.time())}",
+            "userId": user.id,
+            "runDate": datetime.now().isoformat(),
+            "status": "completed" if errors == 0 else "completed_with_errors",
+            "itemsScanned": len(listing_ids),
+            "itemsUpdated": successful_updates,
+            "errors": errors,
+            "isDryRun": False,
+            "action": "bulk_apply",
+            "results": results
+        }
+        
+        logs.append(log_entry)
+        session_manager.update_session_data(session_id, "logs", logs)
+        
+        return {
+            "message": f"Bulk apply completed: {successful_updates} successful, {errors} errors",
+            "successful_updates": successful_updates,
+            "errors": errors,
+            "results": results
+        }
+        
     except Exception as e:
-        logger.error(f"Reprice failed: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        logger.error(f"Failed to bulk apply price suggestions: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to apply price suggestions: {str(e)}")
 
-@app.post("/simulate")
-async def run_simulation(simulation_data: dict, current_user: User = Depends(get_current_user)):
-    """Run a pricing simulation"""
-    is_dry_run = simulation_data.get("isDryRun", True)
+@app.post("/inventory/decline/{listing_id}")
+async def decline_price_suggestion(listing_id: int, session_id: str = None):
+    """Decline a price suggestion"""
+    user = require_auth(session_id)
     
-    log_id = f"sim_{current_user.id}_{int(datetime.now().timestamp())}"
+    try:
+        # Log the decline
+        session = session_manager.get_session(session_id)
+        logs = session.get("logs", [])
+        
+        log_entry = {
+            "id": f"decline_{listing_id}_{int(time.time())}",
+            "userId": user.id,
+            "runDate": datetime.now().isoformat(),
+            "status": "completed",
+            "itemsScanned": 1,
+            "itemsUpdated": 0,
+            "errors": 0,
+            "isDryRun": False,
+            "action": "decline",
+            "listingId": listing_id
+        }
+        
+        logs.append(log_entry)
+        session_manager.update_session_data(session_id, "logs", logs)
+        
+        return {"message": "Price suggestion declined"}
+        
+    except Exception as e:
+        logger.error(f"Failed to decline price suggestion: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to decline suggestion: {str(e)}")
+
+# Logs endpoints
+@app.get("/user/profile")
+async def get_user_profile(session_id: str = None):
+    """Get user's Discogs profile information"""
+    user = require_auth(session_id)
+    require_discogs_auth(user)
     
-    # Create run log
-    run_log = RunLog(
-        id=log_id,
-        userId=current_user.id,
-        runDate=datetime.now().isoformat(),
-        status="running",
-        itemsScanned=0,
-        itemsUpdated=0,
-        errors=0,
-        isDryRun=is_dry_run
-    )
-    
-    run_logs_db[log_id] = run_log
-    
-    # Simulate processing
-    await asyncio.sleep(2)
-    
-    # Update log with results
-    run_log.status = "completed"
-    run_log.itemsScanned = 150
-    run_log.itemsUpdated = 12 if not is_dry_run else 0
-    
-    return {"message": "Simulation completed", "runId": log_id}
+    try:
+        # Initialize Discogs client
+        consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
+        consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
+        
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
+        
+        # Get user profile from Discogs
+        logger.info(f"Fetching profile for user: {user.username}")
+        profile = client.get_user_info()
+        logger.info(f"Received profile data: {profile}")
+        logger.info(f"Available profile fields: {list(profile.keys()) if isinstance(profile, dict) else 'Not a dict'}")
+        
+        # Map the profile data to our expected format
+        # Discogs API uses 'realname' for the real name field
+        mapped_profile = {
+            "username": profile.get("username"),
+            "name": profile.get("realname"),  # Discogs uses 'realname' not 'name'
+            "home_page": profile.get("home_page"),
+            "location": profile.get("location"),
+            "profile": profile.get("profile"),
+            "curr_abbr": profile.get("curr_abbr"),
+            "id": profile.get("id"),
+            "resource_url": profile.get("resource_url")
+        }
+        
+        logger.info(f"Mapped profile data: {mapped_profile}")
+        return mapped_profile
+        
+    except Exception as e:
+        logger.error(f"Error getting user profile: {e}")
+        logger.error(f"User data: {user}")
+        raise HTTPException(status_code=500, detail=f"Failed to get user profile: {str(e)}")
+
+@app.get("/logs")
+async def get_logs(session_id: str = None):
+    """Get run logs"""
+    user = require_auth(session_id)
+    session = session_manager.get_session(session_id)
+    return session["logs"]
 
 if __name__ == "__main__":
     import uvicorn
