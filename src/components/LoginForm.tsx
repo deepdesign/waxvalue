@@ -1,122 +1,156 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import {
-  EyeIcon,
-  EyeSlashIcon,
-  EnvelopeIcon,
-  LockClosedIcon,
-} from '@heroicons/react/24/outline'
-import toast from 'react-hot-toast'
+import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
-import { FormField } from '@/components/ui/FormField'
-
-const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-})
-
-type LoginFormData = z.infer<typeof loginSchema>
+import { SocialAuthButtons } from './SocialAuthButtons'
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 
 interface LoginFormProps {
-  onSwitchToRegister: () => void
-  onLoginSuccess: (user: any) => void
+  onAuthSuccess: (user: any) => void
+  onSwitchToSignup: () => void
 }
 
-export function LoginForm({ onSwitchToRegister, onLoginSuccess }: LoginFormProps) {
+export function LoginForm({ onAuthSuccess, onSwitchToSignup }: LoginFormProps) {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-  })
-
-  const handleLogin = async (data: LoginFormData) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     setIsLoading(true)
+    setErrors({})
+
     try {
       const response = await fetch('/api/backend/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Login failed')
+        throw new Error('Login failed')
       }
 
-      const result = await response.json()
+      const data = await response.json()
       
-      // Store user data and token
-      localStorage.setItem('waxvalue_user', JSON.stringify(result.user))
-      localStorage.setItem('waxvalue_token', result.token)
+      // Store session ID and user data
+      localStorage.setItem('waxvalue_session_id', data.session_id)
+      localStorage.setItem('waxvalue_user', JSON.stringify(data.user))
       
-      onLoginSuccess(result.user)
-      toast.success('Welcome back!')
+      onAuthSuccess(data.user)
     } catch (error) {
       console.error('Login error:', error)
-      toast.error(error instanceof Error ? error.message : 'Login failed')
+      setErrors({ general: 'Invalid email or password. Please try again.' })
     } finally {
       setIsLoading(false)
     }
   }
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }))
+    }
+  }
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-600 p-6 max-w-md mx-auto">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Welcome Back</h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">Sign in to your WaxValue account</p>
+    <div className="space-y-6">
+      {/* Social Auth */}
+      <div>
+        <SocialAuthButtons onAuthSuccess={onAuthSuccess} mode="login" />
       </div>
 
-      <form onSubmit={handleSubmit(handleLogin)} className="space-y-6">
-        <FormField
-          {...register('email')}
-          label="Email Address"
-          type="email"
-          autoComplete="email"
-          placeholder="Enter your email"
-          error={errors.email?.message}
-          icon={<EnvelopeIcon />}
-          required
-        />
+      {/* Divider */}
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+            Or continue with email
+          </span>
+        </div>
+      </div>
 
-        <div className="space-y-1">
+      {/* Email/Password Form */}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {errors.general && (
+          <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3">
+            <p className="text-sm text-red-600 dark:text-red-400">{errors.general}</p>
+          </div>
+        )}
+
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Email address
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={formData.email}
+            onChange={handleInputChange}
+            className={`block w-full rounded-lg border px-3 py-2 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 dark:focus:border-primary-400 transition-colors ${
+              errors.email 
+                ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20' 
+                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+            } text-gray-900 dark:text-gray-100`}
+            placeholder="Enter your email"
+          />
+          {errors.email && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Password
+          </label>
           <div className="relative">
-            <FormField
-              {...register('password')}
-              label="Password"
+            <input
+              id="password"
+              name="password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
-              placeholder="Enter your password"
-              error={errors.password?.message}
-              icon={<LockClosedIcon />}
               required
-              className="pr-10"
+              value={formData.password}
+              onChange={handleInputChange}
+              className={`block w-full rounded-lg border px-3 py-2 pr-10 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 dark:focus:border-primary-400 transition-colors ${
+                errors.password 
+                  ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20' 
+                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-gray-100`}
+              placeholder="Enter your password"
             />
             <button
               type="button"
-              className="absolute inset-y-0 right-0 pr-3 flex items-center top-7"
               onClick={() => setShowPassword(!showPassword)}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
             >
               {showPassword ? (
-                <EyeSlashIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400" />
+                <EyeSlashIcon className="h-5 w-5" />
               ) : (
-                <EyeIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400" />
+                <EyeIcon className="h-5 w-5" />
               )}
             </button>
           </div>
+          {errors.password && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>
+          )}
         </div>
 
         <div className="flex items-center justify-between">
@@ -125,55 +159,51 @@ export function LoginForm({ onSwitchToRegister, onLoginSuccess }: LoginFormProps
               id="remember-me"
               name="remember-me"
               type="checkbox"
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-400 dark:bg-gray-700"
             />
             <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               Remember me
             </label>
           </div>
 
-          <div className="text-sm">
-            <a href="#" className="font-medium text-primary-600 hover:text-primary-500">
-              Forgot your password?
-            </a>
-          </div>
+          <Link
+            href="/forgot-password"
+            className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300"
+          >
+            Forgot password?
+          </Link>
         </div>
 
         <Button
           type="submit"
-          loading={isLoading}
-          loadingText="Signing in..."
+          disabled={isLoading}
+          variant="gradient"
           className="w-full"
+          size="lg"
         >
-          Sign In
+          {isLoading ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+              Signing in...
+            </>
+          ) : (
+            'Sign in'
+          )}
         </Button>
       </form>
 
-      <div className="mt-6">
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">New to WaxValue?</span>
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onSwitchToRegister}
-            className="w-full"
+      {/* Switch to Signup */}
+      <div className="text-center">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Don't have an account?{' '}
+          <button
+            onClick={onSwitchToSignup}
+            className="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300"
           >
-            Create an account
-          </Button>
-        </div>
+            Sign up
+          </button>
+        </p>
       </div>
     </div>
   )
 }
-
-
-
-

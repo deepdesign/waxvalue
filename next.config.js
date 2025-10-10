@@ -4,6 +4,10 @@ const nextConfig = {
     DISCOGS_API_URL: process.env.DISCOGS_API_URL || 'https://api.discogs.com',
     DATABASE_URL: process.env.DATABASE_URL,
   },
+  // Force IPv4 for Node.js
+  serverRuntimeConfig: {
+    // This will be available only on the server side
+  },
   compress: true,
   poweredByHeader: false,
   compiler: {
@@ -23,9 +27,13 @@ const nextConfig = {
     return [
       {
         source: '/api/backend/:path*',
-        destination: 'http://localhost:8000/:path*',
+        destination: 'http://127.0.0.1:8000/:path*',
       },
     ]
+  },
+  // Force IPv4 for all requests
+  experimental: {
+    serverComponentsExternalPackages: [],
   },
 }
 

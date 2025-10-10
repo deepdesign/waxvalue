@@ -143,8 +143,17 @@ export function SettingsDiscogs({ user, onConnectionChange }: SettingsDiscogsPro
     }
 
     try {
+      const sessionId = localStorage.getItem('waxvalue_session_id')
+      if (!sessionId) {
+        throw new Error('No session found. Please login first.')
+      }
+      
       const response = await fetch('/api/backend/auth/disconnect', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ session_id: sessionId }),
       })
 
       if (response.ok) {

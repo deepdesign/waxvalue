@@ -12,7 +12,7 @@ def create_env_file():
     credentials = {
         'DISCOGS_CONSUMER_KEY': 'WDwjaxApILXXiTrTBbpB',
         'DISCOGS_CONSUMER_SECRET': 'sRLerNInpEQEGTjUuhltwpVOhIJjnbVO',
-        'USER_AGENT': 'WaxValue/1.0 +https://waxvalue.com',
+        'USER_AGENT': 'WaxValue/1.0 +http://localhost:3000',
         'RATE_LIMIT_SECONDS': '1.2',
         'MAX_RETRIES': '3',
         'DEBUG': 'true'

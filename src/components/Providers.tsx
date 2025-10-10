@@ -1,7 +1,9 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { ThemeProvider } from 'next-themes'
 import { User, UserSettings } from '@/types'
+import { InventoryProvider } from '@/contexts/InventoryContext'
 
 interface AppContextType {
   user: User | null
@@ -10,6 +12,7 @@ interface AppContextType {
   setUser: (user: User | null) => void
   setUserSettings: (settings: UserSettings | null) => void
   setIsLoading: (loading: boolean) => void
+  logout: () => void
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -27,15 +30,23 @@ export function Providers({ children }: { children: ReactNode }) {
   const [userSettings, setUserSettings] = useState<UserSettings | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  const logout = () => {
+    setUser(null)
+    setUserSettings(null)
+    localStorage.removeItem('waxvalue_user')
+    localStorage.removeItem('waxvalue_session_id')
+    localStorage.removeItem('discogs_request_token')
+    localStorage.removeItem('discogs_request_token_secret')
+  }
+
   useEffect(() => {
     // Check for existing user session
     const checkAuth = async () => {
       try {
         // First check localStorage for user data
         const storedUser = localStorage.getItem('waxvalue_user')
-        const storedToken = localStorage.getItem('waxvalue_token')
         
-        if (storedUser && storedToken) {
+        if (storedUser) {
           try {
             const userData = JSON.parse(storedUser)
             setUser(userData)
@@ -48,12 +59,15 @@ export function Providers({ children }: { children: ReactNode }) {
           }
         }
 
-        // If no stored user, check with backend
-        const response = await fetch('/api/backend/auth/me')
-        if (response.ok) {
-          const userData = await response.json()
-          setUser(userData)
-          localStorage.setItem('waxvalue_user', JSON.stringify(userData))
+        // If no stored user, check with backend (for Discogs-only auth)
+        const storedToken = localStorage.getItem('waxvalue_token')
+        if (storedToken) {
+          const response = await fetch('/api/backend/auth/me')
+          if (response.ok) {
+            const userData = await response.json()
+            setUser(userData)
+            localStorage.setItem('waxvalue_user', JSON.stringify(userData))
+          }
         }
       } catch (error) {
         console.error('Auth check failed:', error)
@@ -75,11 +89,16 @@ export function Providers({ children }: { children: ReactNode }) {
     setUser,
     setUserSettings,
     setIsLoading,
+    logout,
   }
 
   return (
-    <AppContext.Provider value={value}>
-      {children}
-    </AppContext.Provider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <AppContext.Provider value={value}>
+        <InventoryProvider>
+          {children}
+        </InventoryProvider>
+      </AppContext.Provider>
+    </ThemeProvider>
   )
 }

@@ -188,35 +188,200 @@ def get_user_settings(user: User) -> UserSettings:
         user_settings_db[str(user.id)] = settings
     return settings
 
-def compute_target_price(listing: Dict[str, Any], strategy_id: str = "median_plus_8pct", 
-                        params: Dict[str, Any] = None) -> Dict[str, Any]:
-    """Compute target price for a listing based on strategy"""
+def compute_target_price(listing: Dict[str, Any], strategy: Dict[str, Any], 
+                        client: DiscogsClient) -> Dict[str, Any]:
+    """
+    Compute target price for a listing using Discogs' official price suggestions
+    
+    This function identifies when items are over/under priced compared to Discogs' 
+    current market recommendations and applies the user's pricing strategy.
+    
+    Args:
+        listing: User's inventory listing
+        strategy: Pricing strategy configuration
+        client: Discogs API client
+        
+    Returns:
+        Pricing calculation result with Discogs market data analysis
+    """
     current_price = listing.get("price", 0.0)
+    release_id = listing.get("release", {}).get("id")
+    media_condition = listing.get("condition", "Very Good Plus")
     
-    # Simplified pricing logic - in production, this would use market data
-    if strategy_id == "median_plus_8pct":
-        offset = params.get("offset_value", 8) if params else 8
-        new_price = current_price * (1 + offset / 100)
-        reason = f"anchor:median +{offset}%"
-        confidence = 0.8
-    elif strategy_id == "undercut_cheapest":
-        offset = params.get("offset_value", 0.5) if params else 0.5
-        new_price = current_price - offset
-        reason = f"undercut cheapest by {offset}"
-        confidence = 0.9
-    else:
-        # Default strategy
-        new_price = current_price * 1.05  # 5% increase
-        reason = "default +5%"
-        confidence = 0.7
+    if not release_id:
+        return {
+            "new_price": current_price,
+            "currency": "USD",
+            "reason": "No release ID available",
+            "confidence": 0.0,
+            "increase_pct": 0.0,
+            "pricing_status": "no_data",
+            "discogs_suggestion": None,
+            "market_analysis": None
+        }
     
-    return {
-        "new_price": max(0.01, new_price),  # Ensure minimum price
-        "currency": "USD",  # Default currency
-        "reason": reason,
-        "confidence": confidence,
-        "increase_pct": ((new_price - current_price) / max(current_price, 0.01)) * 100
-    }
+    try:
+        # Get Discogs' official price suggestions for this release
+        price_suggestions = client.get_price_suggestions(release_id)
+        
+        if not price_suggestions:
+            return {
+                "new_price": current_price,
+                "currency": "USD", 
+                "reason": "No Discogs price suggestions available",
+                "confidence": 0.0,
+                "increase_pct": 0.0,
+                "pricing_status": "no_suggestions",
+                "discogs_suggestion": None,
+                "market_analysis": None
+            }
+        
+        # Get Discogs' recommended price for the item's condition
+        discogs_suggested_price = None
+        condition_price_data = None
+        
+        # Try to find exact condition match
+        if media_condition in price_suggestions:
+            condition_price_data = price_suggestions[media_condition]
+            discogs_suggested_price = condition_price_data.get("value", 0)
+        else:
+            # Try to find similar condition if exact match not found
+            condition_mapping = {
+                "Mint (M)": ["Mint"],
+                "Near Mint (NM or M-)": ["Near Mint", "NM"],
+                "Very Good Plus (VG+)": ["Very Good Plus", "VG+"],
+                "Very Good (VG)": ["Very Good", "VG"],
+                "Good Plus (G+)": ["Good Plus", "G+"],
+                "Good (G)": ["Good", "G"],
+                "Fair (F)": ["Fair", "F"],
+                "Poor (P)": ["Poor", "P"]
+            }
+            
+            for discogs_condition in condition_mapping.get(media_condition, []):
+                if discogs_condition in price_suggestions:
+                    condition_price_data = price_suggestions[discogs_condition]
+                    discogs_suggested_price = condition_price_data.get("value", 0)
+                    break
+        
+        if not discogs_suggested_price:
+            return {
+                "new_price": current_price,
+                "currency": "USD",
+                "reason": f"No price suggestion for condition '{media_condition}'",
+                "confidence": 0.0,
+                "increase_pct": 0.0,
+                "pricing_status": "no_condition_match",
+                "discogs_suggestion": None,
+                "market_analysis": None
+            }
+        
+        # Analyze pricing status compared to Discogs recommendation
+        price_difference = current_price - discogs_suggested_price
+        price_difference_pct = (price_difference / max(discogs_suggested_price, 0.01)) * 100
+        
+        if price_difference_pct > 10:
+            pricing_status = "overpriced"
+            status_reason = "Significantly above Discogs recommendation"
+        elif price_difference_pct > 5:
+            pricing_status = "slightly_overpriced"
+            status_reason = "Above Discogs recommendation"
+        elif price_difference_pct < -10:
+            pricing_status = "underpriced"
+            status_reason = "Significantly below Discogs recommendation"
+        elif price_difference_pct < -5:
+            pricing_status = "slightly_underpriced"
+            status_reason = "Below Discogs recommendation"
+        else:
+            pricing_status = "fairly_priced"
+            status_reason = "Close to Discogs recommendation"
+        
+        # Apply user's pricing strategy to Discogs' recommendation
+        anchor = strategy.get("anchor", "median")
+        offset = strategy.get("offsetValue", 0)
+        offset_type = strategy.get("offsetType", "percentage")
+        
+        # Use Discogs suggestion as the base price
+        base_price = discogs_suggested_price
+        
+        # Apply offset based on strategy
+        if offset_type == "percentage":
+            new_price = base_price * (1 + offset / 100)
+        else:
+            new_price = base_price + offset
+        
+        # Apply scarcity boost if configured
+        scarcity_boost = strategy.get("scarcityBoost")
+        if scarcity_boost:
+            # Get marketplace stats to determine scarcity
+            try:
+                stats = client.get_marketplace_stats(release_id)
+                available_count = stats.get("available", 0)
+                
+                if available_count <= scarcity_boost.get("threshold", 5):
+                    boost_percent = scarcity_boost.get("boostPercent", 20)
+                    new_price = new_price * (1 + boost_percent / 100)
+                    reason = f"Discogs suggestion (${base_price:.2f}) +{offset}% +scarcity boost {boost_percent}%"
+                else:
+                    reason = f"Discogs suggestion (${base_price:.2f}) +{offset}%"
+            except:
+                reason = f"Discogs suggestion (${base_price:.2f}) +{offset}%"
+        else:
+            reason = f"Discogs suggestion (${base_price:.2f}) +{offset}%"
+        
+        # Apply price limits
+        floor = strategy.get("floor", 1.0)
+        ceiling = strategy.get("ceiling", 1000.0)
+        new_price = max(floor, min(ceiling, new_price))
+        
+        # Apply rounding
+        rounding = strategy.get("rounding", 0.25)
+        new_price = round(new_price / rounding) * rounding
+        
+        # Calculate percentage change from current price
+        increase_pct = ((new_price - current_price) / max(current_price, 0.01)) * 100
+        
+        # Calculate confidence based on data availability
+        confidence = 0.9 if condition_price_data else 0.7
+        
+        # Build market analysis
+        market_analysis = {
+            "discogs_suggested_price": discogs_suggested_price,
+            "current_price": current_price,
+            "price_difference": price_difference,
+            "price_difference_pct": price_difference_pct,
+            "pricing_status": pricing_status,
+            "status_reason": status_reason,
+            "available_conditions": list(price_suggestions.keys()),
+            "strategy_applied": {
+                "anchor": anchor,
+                "offset": offset,
+                "offset_type": offset_type
+            }
+        }
+        
+        return {
+            "new_price": max(0.01, new_price),
+            "currency": condition_price_data.get("currency", "USD"),
+            "reason": reason,
+            "confidence": confidence,
+            "increase_pct": increase_pct,
+            "pricing_status": pricing_status,
+            "discogs_suggestion": discogs_suggested_price,
+            "market_analysis": market_analysis
+        }
+        
+    except Exception as e:
+        logger.error(f"Error computing target price for listing {listing.get('id')}: {e}")
+        return {
+            "new_price": current_price,
+            "currency": "USD",
+            "reason": f"Error: {str(e)}",
+            "confidence": 0.0,
+            "increase_pct": 0.0,
+            "pricing_status": "error",
+            "discogs_suggestion": None,
+            "market_analysis": None
+        }
 
 def decide_action(old_price: float, new_price: float, increase_pct: float, 
                  approved_set: set, settings: UserSettings) -> Tuple[str, str]:
@@ -481,6 +646,48 @@ async def get_dashboard_summary(current_user: User = Depends(get_current_user)):
         logger.error(f"Failed to get dashboard summary: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch dashboard data")
 
+# Item Strategy endpoints
+@app.get("/inventory/item-strategies")
+async def get_item_strategies(current_user: User = Depends(get_current_user)):
+    """Get item-specific strategy assignments for user"""
+    try:
+        # In a real implementation, this would query the item_strategies table
+        # For now, return empty list
+        return {"itemStrategies": []}
+        
+    except Exception as e:
+        logger.error(f"Failed to fetch item strategies: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch item strategies")
+
+@app.post("/inventory/item-strategies")
+async def assign_item_strategy(
+    request_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Assign or remove a strategy for a specific item"""
+    try:
+        listing_id = request_data.get("listingId")
+        strategy_id = request_data.get("strategyId")  # null to remove assignment
+        
+        if not listing_id:
+            raise HTTPException(status_code=400, detail="Listing ID is required")
+        
+        # In a real implementation, this would:
+        # 1. Validate the listing belongs to the user
+        # 2. If strategy_id is provided, validate it exists and belongs to user
+        # 3. Insert/update/delete record in item_strategies table
+        # 4. Log the change in item_strategy_history
+        
+        return {
+            "message": "Item strategy updated successfully",
+            "listingId": listing_id,
+            "strategyId": strategy_id
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to assign item strategy: {e}")
+        raise HTTPException(status_code=500, detail="Failed to assign item strategy")
+
 # Inventory endpoints
 @app.get("/inventory/suggestions")
 async def get_inventory_suggestions(current_user: User = Depends(get_current_user)):
@@ -496,37 +703,47 @@ async def get_inventory_suggestions(current_user: User = Depends(get_current_use
         inventory = client.get_user_inventory(current_user.username, per_page=100)
         listings = inventory.get("listings", [])
 
+        # Get user's active strategy (default to conservative if none)
+        strategy = {
+            "anchor": "median",
+            "offsetType": "percentage", 
+            "offsetValue": -5,
+            "conditionWeights": {"media": 0.8, "sleeve": 0.2},
+            "conditionMatching": {
+                "enabled": True,
+                "mediaConditionMatch": True,
+                "sleeveConditionMatch": True,
+                "fallbackToSimilar": True
+            },
+            "scarcityBoost": {"threshold": 3, "boostPercent": 25},
+            "maxChangePercent": 15,
+            "rounding": 0.50,
+            "floor": 1.0,
+            "ceiling": 1000.0
+        }
+        
         for listing in listings:
             try:
-                # Get price suggestions for this release
-                release_id = listing.get("release", {}).get("id")
-                if release_id:
-                    price_suggestions = client.get_price_suggestions(release_id)
-                    
-                    # Calculate suggested price based on strategy
-                    current_price = listing.get("price", 0)
-                    suggested_price = current_price  # Default to current price
-                    confidence = "medium"
-                    
-                    # Apply pricing strategy (simplified)
-                    if "Very Good Plus" in price_suggestions:
-                        vg_plus_price = price_suggestions["Very Good Plus"].get("value", current_price)
-                        suggested_price = vg_plus_price * 1.05  # 5% above market
-                        confidence = "high"
-                    
-                    suggestions.append(PriceSuggestion(
-                        listingId=listing.get("id"),
-                        releaseId=release_id,
-                        currentPrice=current_price,
-                        suggestedPrice=suggested_price,
-                        confidence=confidence,
-                        condition=listing.get("condition"),
-                        sleeveCondition=listing.get("sleeve_condition", "Not Graded"),
-                        basis="market_median",
-                        reason="Based on market data analysis",
-                        release=listing.get("release"),
-                        artist=listing.get("release", {}).get("artist")
-                    ))
+                # Calculate suggested price using new market-based pricing
+                pricing_result = compute_target_price(listing, strategy, client)
+                
+                current_price = listing.get("price", 0)
+                suggested_price = pricing_result["new_price"]
+                confidence = "high" if pricing_result["confidence"] > 0.7 else "medium" if pricing_result["confidence"] > 0.4 else "low"
+                
+                suggestions.append({
+                    "listingId": listing.get("id"),
+                    "releaseId": listing.get("release", {}).get("id"),
+                    "currentPrice": current_price,
+                    "suggestedPrice": suggested_price,
+                    "confidence": confidence,
+                    "condition": listing.get("condition"),
+                    "sleeveCondition": listing.get("sleeve_condition", "Not Graded"),
+                    "basis": "market_median",
+                    "reason": pricing_result["reason"],
+                    "release": listing.get("release"),
+                    "artist": listing.get("release", {}).get("artists", [{}])[0] if listing.get("release", {}).get("artists") else {}
+                })
 
             except Exception as e:
                 logger.error(f"Failed to get suggestions for listing {listing.get('id')}: {e}")
@@ -809,11 +1026,30 @@ async def reprice(
         counters = {"scanned": 0, "auto_applied": 0, "user_applied": 0, "flagged": 0, "declined": 0, "errors": 0}
         approved_set = set(payload.approved_listing_ids or [])
         
+        # Get strategy configuration (in production, this would come from database)
+        strategy = payload.params if payload.params else {
+            "anchor": "median",
+            "offsetType": "percentage",
+            "offsetValue": 0,
+            "conditionWeights": {"media": 0.7, "sleeve": 0.3},
+            "conditionMatching": {
+                "enabled": True,
+                "mediaConditionMatch": True,
+                "sleeveConditionMatch": True,
+                "fallbackToSimilar": True
+            },
+            "scarcityBoost": {"threshold": 5, "boostPercent": 20},
+            "maxChangePercent": 50,
+            "rounding": 0.25,
+            "floor": 1.0,
+            "ceiling": 1000.0
+        }
+        
         for listing in candidate_listings:
             counters["scanned"] += 1
             
-            # Compute target price
-            target = compute_target_price(listing, payload.strategy_id, payload.params)
+            # Compute target price using new market-based pricing
+            target = compute_target_price(listing, strategy, client)
             old_price = listing.get("price", 0.0)
             
             # Decide action

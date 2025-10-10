@@ -7,6 +7,7 @@ This checklist must be completed before making ANY code changes to the WaxValue 
 ### 1. Documentation Review ✅
 - [x] Read and understand `DEVELOPMENT_GUIDELINES.md`
 - [x] Check Tailwind CSS documentation: https://tailwindcss.com/docs
+- [x] Check Tailadmin documentation: https://tailadmin.com/docs
 - [x] Review Discogs API documentation: https://www.discogs.com/developers
 - [x] Verify `docs/iteration-checklist.md` requirements
 

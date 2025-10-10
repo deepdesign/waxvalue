@@ -69,50 +69,33 @@ export interface MarketData {
   scarcity: 'high' | 'medium' | 'low'
 }
 
-// Strategy Types
-export interface Strategy {
-  id: string
-  userId: string
-  name: string
-  anchor: 'mean' | 'median' | 'mode' | 'cheapest' | 'most_expensive' | 'percentile'
-  offsetType: 'percentage' | 'fixed'
-  offsetValue: number
-  conditionWeights: {
-    media: number
-    sleeve: number
-  }
-  scarcityBoost?: {
-    threshold: number
-    boostPercent: number
-  }
-  floor?: number
-  ceiling?: number
-  rounding: number
-  maxChangePercent: number
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
-}
 
 // Pricing and Simulation Types
 export interface PriceSuggestion {
   listingId: number
+  releaseId?: number
   currentPrice: number
   suggestedPrice: number
+  originalSuggestedPrice?: number
+  currency: string  // Currency code (USD, GBP, AUD, etc.)
   basis: string
-  confidence: 'high' | 'medium' | 'low'
-  reasoning: string
+  status: 'underpriced' | 'overpriced' | 'fairly_priced'
+  strategy: string
   condition: string
-  sleeveCondition: string
-  marketData: MarketData
+  artist?: string
+  title?: string
+  label?: string
+  imageUrl?: string
+  // Legacy fields for compatibility
+  confidence?: 'high' | 'medium' | 'low'
+  reasoning?: string
+  sleeveCondition?: string
+  marketData?: MarketData
   release?: {
     title: string
     images?: Array<{
       uri150: string
     }>
-  }
-  artist?: {
-    name: string
   }
 }
 
@@ -188,7 +171,8 @@ export interface FilterState {
     min?: number
     max?: number
   }
-  status?: 'applied' | 'not_applied' | 'all'
+  priceDirection?: 'increase' | 'decrease' | ''
+  showFlaggedOnly?: boolean
 }
 
 // API Response Types
@@ -214,38 +198,4 @@ export interface SetupFormData {
   verifierCode?: string
 }
 
-export interface StrategyFormData {
-  name: string
-  anchor: Strategy['anchor']
-  offsetType: Strategy['offsetType']
-  offsetValue: number
-  conditionWeights: Strategy['conditionWeights']
-  scarcityBoost?: Strategy['scarcityBoost']
-  floor?: number
-  ceiling?: number
-  rounding: number
-  maxChangePercent: number
-}
 
-// Metrics Types
-export interface PortfolioMetrics {
-  totalListings: number
-  belowP25: number
-  betweenP25P75: number
-  aboveP75: number
-  averageDelta: number
-  underpriced: number
-  overpriced: number
-}
-
-export interface TrendData {
-  date: string
-  userAverage: number
-  marketMedian: number
-}
-
-export interface DistributionData {
-  priceRange: string
-  count: number
-  userListings: number
-}

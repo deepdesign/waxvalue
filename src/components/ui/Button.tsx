@@ -3,7 +3,7 @@
 import { forwardRef } from 'react'
 import { clsx } from 'clsx'
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive'
+type ButtonVariant = 'primary' | 'gradient' | 'secondary' | 'outline' | 'ghost' | 'destructive'
 type ButtonSize = 'sm' | 'default' | 'lg' | 'icon'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -17,6 +17,8 @@ const getVariantClasses = (variant: ButtonVariant) => {
   switch (variant) {
     case 'primary':
       return 'bg-primary-600 dark:bg-primary-500 text-white hover:bg-primary-700 dark:hover:bg-primary-600 active:bg-primary-800 dark:active:bg-primary-700 focus-visible:ring-primary-500 dark:focus-visible:ring-primary-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900'
+    case 'gradient':
+      return 'bg-gradient-primary text-white bg-gradient-primary-hover bg-gradient-primary-active focus-visible:ring-[#bd00ff] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 shadow-lg hover:shadow-xl transition-all duration-200'
     case 'secondary':
       return 'bg-secondary-100 dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 hover:bg-secondary-200 dark:hover:bg-secondary-700 active:bg-secondary-300 dark:active:bg-secondary-600 focus-visible:ring-secondary-500 dark:focus-visible:ring-secondary-400'
     case 'outline':

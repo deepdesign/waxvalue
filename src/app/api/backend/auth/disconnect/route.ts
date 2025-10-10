@@ -2,17 +2,27 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization')
+    // Get session ID from request body or query parameters
+    const body = await request.json().catch(() => ({}))
+    const sessionId = body.session_id || request.nextUrl.searchParams.get('session_id')
     
-    const response = await fetch(`${process.env.BACKEND_URL || 'http://127.0.0.1:8000'}/auth/disconnect`, {
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: 'Session ID required' },
+        { status: 400 }
+      )
+    }
+    
+    const response = await fetch(`${process.env.BACKEND_URL || 'http://127.0.0.1:8000'}/auth/disconnect?session_id=${sessionId}`, {
       method: 'POST',
       headers: {
-        'Authorization': authHeader || '',
+        'Content-Type': 'application/json',
       },
     })
 
     if (!response.ok) {
-      throw new Error('Backend request failed')
+      const errorData = await response.json().catch(() => ({}))
+      return NextResponse.json(errorData, { status: response.status })
     }
 
     const data = await response.json()

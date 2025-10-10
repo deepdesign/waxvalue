@@ -9,6 +9,8 @@ import {
   Cog6ToothIcon,
   ArrowRightIcon,
   ChevronRightIcon,
+  ArrowPathIcon,
+  LinkSlashIcon,
 } from '@heroicons/react/24/outline'
 import { Button } from '@/components/ui/Button'
 
@@ -17,8 +19,10 @@ interface DiscogsConnectionCardProps {
 }
 
 export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
-  const isConnected = !!user?.discogsUserId
+  // User is only truly connected if they have both discogsUserId AND access tokens
+  const isConnected = !!user?.discogsUserId && !!user?.accessToken && !!user?.accessTokenSecret
   const [isConnecting, setIsConnecting] = useState(false)
+  const [isDisconnecting, setIsDisconnecting] = useState(false)
   const [showVerification, setShowVerification] = useState(false)
   const [verificationCode, setVerificationCode] = useState('')
   const [isVerifying, setIsVerifying] = useState(false)
@@ -28,42 +32,51 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
     const urlParams = new URLSearchParams(window.location.search)
     const oauthVerifier = urlParams.get('oauth_verifier')
     if (oauthVerifier && !isConnected) {
-      setVerificationCode(oauthVerifier)
-      setShowVerification(true)
-      // Clean up the URL
-      window.history.replaceState({}, document.title, window.location.pathname)
+      // Redirect to callback page to handle the OAuth flow
+      window.location.href = `/auth/callback?${window.location.search}`
     }
   }, [isConnected])
 
   const handleConnectToDiscogs = async () => {
     setIsConnecting(true)
     try {
-      // Get the authorization URL from the backend
-      const token = localStorage.getItem('waxvalue_token')
+      // Check if user is logged in
+      const sessionId = localStorage.getItem('waxvalue_session_id')
+      if (!sessionId) {
+        throw new Error('No session found. Please login first.')
+      }
+      
+      // Get the authorization URL from the backend (no session required for OAuth setup)
       const response = await fetch('/api/backend/auth/setup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({}),
       })
       
       if (!response.ok) {
-        throw new Error('Failed to setup authentication')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.detail || `HTTP error: ${response.status}`)
       }
 
       const result = await response.json()
       
-      // Open Discogs authorization page
-      window.open(result.authUrl, '_blank')
-      
-      // Store the request token for later verification
+      // Store the request token and secret for later verification
       localStorage.setItem('discogs_request_token', result.requestToken)
+      localStorage.setItem('discogs_request_token_secret', result.requestTokenSecret)
+      
+      console.log('Stored tokens:', {
+        token: result.requestToken,
+        secret: result.requestTokenSecret
+      })
+      
+      // Redirect to Discogs authorization page in the same window
+      window.location.href = result.authUrl
       
     } catch (error) {
       console.error('Connection error:', error)
-      alert('Failed to connect to Discogs. Please try again.')
+      alert(`Failed to connect to Discogs: ${error.message}`)
     } finally {
       setIsConnecting(false)
     }
@@ -75,17 +88,26 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
     setIsVerifying(true)
     try {
       const requestToken = localStorage.getItem('discogs_request_token')
-      if (!requestToken) {
+      const requestTokenSecret = localStorage.getItem('discogs_request_token_secret')
+      
+      if (!requestToken || !requestTokenSecret) {
         throw new Error('No request token found. Please try connecting again.')
       }
 
-      const response = await fetch('/api/backend/auth/verify', {
+      // Get session ID from localStorage
+      const sessionId = localStorage.getItem('waxvalue_session_id')
+      if (!sessionId) {
+        throw new Error('No session found. Please login first.')
+      }
+
+      const response = await fetch(`/api/backend/auth/verify?session_id=${sessionId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           requestToken,
+          requestTokenSecret,
           verifierCode: verificationCode,
         }),
       })
@@ -107,11 +129,49 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
     }
   }
 
+  const handleDisconnect = async () => {
+    if (!confirm('Are you sure you want to disconnect your Discogs account? This will stop automated pricing suggestions.')) {
+      return
+    }
+
+    setIsDisconnecting(true)
+    try {
+      const sessionId = localStorage.getItem('waxvalue_session_id')
+      if (!sessionId) {
+        throw new Error('No session found. Please login first.')
+      }
+      
+      const response = await fetch('/api/backend/auth/disconnect', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ session_id: sessionId }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to disconnect account')
+      }
+
+      // Clear local storage and reload page
+      localStorage.removeItem('waxvalue_user')
+      localStorage.removeItem('discogs_request_token')
+      localStorage.removeItem('discogs_request_token_secret')
+      window.location.reload()
+      
+    } catch (error) {
+      console.error('Disconnect error:', error)
+      alert('Failed to disconnect account. Please try again.')
+    } finally {
+      setIsDisconnecting(false)
+    }
+  }
+
   if (isConnected) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Discogs Connection</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Discogs Connection</h2>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage your Discogs account integration</p>
         </div>
         <div className="p-6">
@@ -153,9 +213,20 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => window.location.href = '/settings'}
+                      onClick={handleDisconnect}
+                      disabled={isDisconnecting}
                     >
-                      Manage connection
+                      {isDisconnecting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
+                          Disconnecting...
+                        </>
+                      ) : (
+                        <>
+                          <LinkSlashIcon className="mr-2 h-4 w-4" />
+                          Disconnect
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -170,7 +241,7 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Discogs Connection</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Discogs Connection</h2>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Connect your Discogs account to enable automated pricing</p>
       </div>
       <div className="p-6">

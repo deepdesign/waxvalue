@@ -10,19 +10,6 @@
 - [ ] Plan component architecture and data flow
 - [ ] Set up development environment
 
-## Frontend Components
-- [ ] Dashboard with onboarding banner
-- [ ] Filters bar with status, format, condition, price range, flagged toggle
-- [ ] Enhanced inventory table with inline editing
-- [ ] Status indicators (Normal, Auto-applied, Flagged)
-- [ ] Bulk controls for apply/decline actions
-- [ ] SettingsDiscogs component for OAuth flow
-- [ ] AutomationSettingsForm for auto-update configuration
-- [ ] Strategy preview panel with sample items
-- [ ] CSV export functionality for logs
-- [ ] Item-level drilldown with sparklines and ranking
-- [ ] Enhanced help section with step-by-step guides
-
 ## Backend API
 - [ ] All API routes implemented and tested
 - [ ] Proper error handling and validation

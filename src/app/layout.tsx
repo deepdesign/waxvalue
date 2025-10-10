@@ -12,9 +12,7 @@ export const metadata: Metadata = {
   keywords: 'discogs, vinyl, records, pricing, marketplace, music',
 }
 
-const ToasterClient = dynamic(() => import('@/components/ToasterClient'), {
-  ssr: false,
-})
+const ToasterClient = dynamic(() => import('@/components/ToasterClient'))
 
 export default function RootLayout({
   children,
@@ -22,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <Providers>
           {children}

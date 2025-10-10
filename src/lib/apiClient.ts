@@ -1,5 +1,5 @@
-// British English spelling and hyphenated copy as requested.
-// Typed client for Discogs Auto-Repricer API – aligns with openapi/paths/reprice.yaml
+// API Client for WaxValue - Real Discogs Integration Only
+// No mock data - uses real Discogs API and user sessions
 
 export type RepriceScope = 'global' | 'selection' | 'item';
 
@@ -15,7 +15,6 @@ export interface RepriceRequest {
   filters?: Record<string, unknown>;           // used when scope === 'selection'
   listing_id?: number;                         // used when scope === 'item'
   approved_listing_ids?: number[];             // explicit user approvals in this call
-  strategy_id?: string;                        // server-known strategy id
   params?: Record<string, unknown>;            // per-run overrides (offsets, etc.)
 }
 
@@ -48,102 +47,169 @@ export interface RepriceResponse {
 }
 
 export interface ApiError {
-  status: 'error';
-  error: string;
-  detail?: string;
-}
-
-// ---------- Basic fetch wrapper ----------
-
-export interface ApiClientOptions {
-  baseUrl?: string;                // e.g. '/api' if proxied, or 'http://localhost:8000'
-  timeoutMs?: number;              // soft timeout for UI cancellations
-  fetchImpl?: typeof fetch;        // DI for tests
+  detail: string;
 }
 
 export class ApiClient {
   private baseUrl: string;
-  private fetchImpl: typeof fetch;
-  private timeoutMs: number;
+  private sessionId: string | null;
 
-  constructor(opts: ApiClientOptions = {}) {
-    this.baseUrl = (opts.baseUrl ?? '/api').replace(/\/+$/, '');
-    this.fetchImpl = opts.fetchImpl ?? fetch.bind(globalThis);
-    this.timeoutMs = opts.timeoutMs ?? 30000;
+  constructor(options: { baseUrl: string }) {
+    this.baseUrl = options.baseUrl;
+    this.sessionId = typeof window !== 'undefined' ? localStorage.getItem('waxvalue_session_id') : null;
   }
 
-  // Helper to build query strings safely
-  private qs(params: Record<string, string | number | boolean | undefined>) {
-    const sp = new URLSearchParams();
-    Object.entries(params).forEach(([k, v]) => {
-      if (v !== undefined && v !== null) sp.set(k, String(v));
-    });
-    const s = sp.toString();
-    return s ? `?${s}` : '';
-  }
-
-  private withTimeout<T>(p: Promise<T>): Promise<T> {
-    return new Promise<T>((resolve, reject) => {
-      const id = setTimeout(() => reject(new Error('Request timed out')), this.timeoutMs);
-      p.then(v => { clearTimeout(id); resolve(v); }).catch(e => { clearTimeout(id); reject(e); });
-    });
-  }
-
-  private async json<T>(res: Response): Promise<T> {
-    const text = await res.text();
-    try { return JSON.parse(text) as T; }
-    catch { throw new Error(text || `HTTP ${res.status}`); }
-  }
-
-  private async handle<T>(res: Response): Promise<T> {
-    if (res.ok) return this.json<T>(res);
-    // Try to parse structured error first
-    let parsed: ApiError | undefined;
-    try { parsed = await this.json<ApiError>(res); } catch { /* fall through */ }
-    if (parsed?.status === 'error') {
-      const msg = parsed.detail ? `${parsed.error}: ${parsed.detail}` : parsed.error;
-      throw new Error(msg);
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    let url = `${this.baseUrl}${endpoint}`;
+    
+    // Add session ID to query parameters
+    if (this.sessionId) {
+      const separator = url.includes('?') ? '&' : '?';
+      url = `${url}${separator}session_id=${encodeURIComponent(this.sessionId)}`;
     }
-    throw new Error(`HTTP ${res.status} ${res.statusText}`); // generic
-  }
 
-  // ---------- Endpoints ----------
-
-  /**
-   * POST /reprice
-   * Applies approved updates (or simulates, if dry_run=true) and returns decisions per item.
-   *
-   * @param body   RepriceRequest payload
-   * @param opts   { dry_run, scope } query params
-   */
-  async reprice(
-    body: RepriceRequest,
-    opts?: { dry_run?: boolean; scope?: RepriceScope }
-  ): Promise<RepriceResponse> {
-    const url = `${this.baseUrl}/reprice${this.qs({
-      dry_run: opts?.dry_run ?? true,
-      scope: opts?.scope ?? body.scope ?? 'global',
-    })}`;
-
-    const resP = this.fetchImpl(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      // Do NOT add auth tokens here; the server talks to Discogs with server-side OAuth.
-      body: JSON.stringify(body),
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
     });
 
-    return this.withTimeout(this.handle<RepriceResponse>(await resP));
+    if (!response.ok) {
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const error: ApiError = await response.json();
+        errorMessage = error.detail || errorMessage;
+      } catch (parseError) {
+        // If response is not JSON (e.g., HTML error page), get text content
+        try {
+          const textContent = await response.text();
+          errorMessage = textContent || errorMessage;
+        } catch (textError) {
+          // Fallback to status message
+          errorMessage = `HTTP error! status: ${response.status}`;
+        }
+      }
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
   }
 
-  /**
-   * POST /simulate (optional convenience if you expose a dedicated route)
-   * Identical to reprice with dry_run=true; provided for semantic clarity in the UI.
-   */
-  async simulate(body: RepriceRequest, scope?: RepriceScope): Promise<RepriceResponse> {
-    return this.reprice(body, { dry_run: true, scope });
+  // Auth endpoints
+  async login(credentials: { email: string; password: string }) {
+    return this.request('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+  }
+
+  async getCurrentUser() {
+    return this.request('/auth/me');
+  }
+
+  async setupAuth() {
+    return this.request('/auth/setup', {
+      method: 'POST',
+    });
+  }
+
+  async verifyAuth(verification: {
+    requestToken: string;
+    requestTokenSecret: string;
+    verifierCode: string;
+  }) {
+    return this.request('/auth/verify', {
+      method: 'POST',
+      body: JSON.stringify(verification),
+    });
+  }
+
+  async disconnectAuth() {
+    return this.request('/auth/disconnect', {
+      method: 'POST',
+    });
+  }
+
+  // Dashboard endpoints
+  async getDashboardSummary() {
+    return this.request('/dashboard/summary');
+  }
+
+  async simulate(request: RepriceRequest) {
+    return this.request('/simulate', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  // Inventory endpoints
+  async getSuggestions() {
+    return this.request('/inventory/suggestions');
+  }
+
+  async applySuggestion(listingId: number, newPrice?: number) {
+    const sessionId = localStorage.getItem('waxvalue_session_id');
+    return this.request(`/inventory/apply/${listingId}?session_id=${sessionId}`, {
+      method: 'POST',
+      body: JSON.stringify({ newPrice }),
+    });
+  }
+
+  async declineSuggestion(listingId: number) {
+    return this.request(`/inventory/decline/${listingId}`, {
+      method: 'POST',
+    });
+  }
+
+  async bulkApply(listingIds: number[]) {
+    const sessionId = localStorage.getItem('waxvalue_session_id');
+    return this.request(`/inventory/bulk-apply?session_id=${sessionId}`, {
+      method: 'POST',
+      body: JSON.stringify({ listingIds }),
+    });
+  }
+
+  async bulkDecline(listingIds: number[]) {
+    return this.request('/inventory/bulk-decline', {
+      method: 'POST',
+      body: JSON.stringify({ listingIds }),
+    });
+  }
+
+
+  // Settings endpoints
+  async getSettings() {
+    return this.request('/settings');
+  }
+
+  async updateSettings(settings: any) {
+    return this.request('/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings),
+    });
+  }
+
+  // Logs endpoints
+  async getLogs() {
+    return this.request('/logs');
+  }
+
+  async getLogDetails(logId: string) {
+    return this.request(`/logs/${logId}`);
+  }
+
+  // Metrics endpoints
+  async getMetricsDistribution() {
+    return this.request('/metrics/distribution');
+  }
+
+  async getMetricsPortfolio() {
+    return this.request('/metrics/portfolio');
+  }
+
+  async getMetricsTrends() {
+    return this.request('/metrics/trends');
   }
 }
-
-
-
-

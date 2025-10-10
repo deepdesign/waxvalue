@@ -2,20 +2,29 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization')
+    const { searchParams } = new URL(request.url)
+    const sessionId = searchParams.get('session_id')
+    
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: 'Session ID required' },
+        { status: 401 }
+      )
+    }
+    
     const body = await request.json()
     
-    const response = await fetch(`${process.env.BACKEND_URL || 'http://127.0.0.1:8000'}/inventory/bulk-apply`, {
+    const response = await fetch(`http://127.0.0.1:8000/inventory/bulk-apply?session_id=${sessionId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': authHeader || '',
       },
       body: JSON.stringify(body),
     })
 
     if (!response.ok) {
-      throw new Error('Backend request failed')
+      const errorData = await response.json().catch(() => ({}))
+      return NextResponse.json(errorData, { status: response.status })
     }
 
     const data = await response.json()

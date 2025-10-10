@@ -7,11 +7,7 @@ import {
   ArrowTrendingDownIcon,
   CurrencyDollarIcon,
   ClockIcon,
-  PlayIcon,
 } from '@heroicons/react/24/outline'
-import { RunLog, SimulationResult } from '@/types'
-import toast from 'react-hot-toast'
-import { Button } from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Skeleton'
 
 interface SummaryData {
@@ -22,7 +18,11 @@ interface SummaryData {
   isRunning: boolean
 }
 
-export function RunSummaryCards() {
+interface RunSummaryCardsProps {
+  refreshTrigger?: number
+}
+
+export function RunSummaryCards({ refreshTrigger }: RunSummaryCardsProps) {
   const [summaryData, setSummaryData] = useState<SummaryData>({
     totalListings: 0,
     suggestedUpdates: 0,
@@ -36,13 +36,28 @@ export function RunSummaryCards() {
     fetchSummaryData()
   }, [])
 
+  useEffect(() => {
+    if (refreshTrigger) {
+      fetchSummaryData()
+    }
+  }, [refreshTrigger])
+
   const fetchSummaryData = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('/api/backend/dashboard/summary')
+      const sessionId = localStorage.getItem('waxvalue_session_id')
+      if (!sessionId) {
+        console.error('No session ID found')
+        setIsLoading(false)
+        return
+      }
+      
+      const response = await fetch(`/api/backend/dashboard/summary?session_id=${sessionId}`)
       if (response.ok) {
         const data = await response.json()
         setSummaryData(data)
+      } else {
+        console.error('Failed to fetch summary data:', response.status)
       }
     } catch (error) {
       console.error('Failed to fetch summary data:', error)
@@ -51,26 +66,6 @@ export function RunSummaryCards() {
     }
   }
 
-  const handleRunSimulation = async () => {
-    try {
-      setSummaryData(prev => ({ ...prev, isRunning: true }))
-      const response = await fetch('/api/backend/simulate', {
-        method: 'POST',
-      })
-      
-      if (response.ok) {
-        toast.success('Simulation completed successfully!')
-        fetchSummaryData() // Refresh data
-      } else {
-        throw new Error('Simulation failed')
-      }
-    } catch (error) {
-      console.error('Simulation error:', error)
-      toast.error('Failed to run simulation')
-    } finally {
-      setSummaryData(prev => ({ ...prev, isRunning: false }))
-    }
-  }
 
   const cards = [
     {
@@ -132,33 +127,9 @@ export function RunSummaryCards() {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Pricing Overview</h2>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Current status of your Discogs inventory</p>
-          </div>
-          <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="dryRun"
-                className="h-4 w-4 text-primary-600 dark:text-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-              />
-              <label htmlFor="dryRun" className="text-sm text-gray-700 dark:text-gray-300">
-                Dry Run Mode
-              </label>
-            </div>
-            <Button
-              onClick={handleRunSimulation}
-              loading={summaryData.isRunning}
-              loadingText="Running..."
-              className="w-full sm:w-auto"
-              aria-label="Run pricing simulation"
-            >
-              <PlayIcon className="h-4 w-4 mr-2" aria-hidden="true" />
-              Run Simulation
-            </Button>
-          </div>
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Pricing Overview</h2>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Current status of your Discogs inventory</p>
         </div>
       </div>
 

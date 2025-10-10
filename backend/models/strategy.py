@@ -26,6 +26,9 @@ class Strategy(Base):
     # Condition weights (stored as JSON)
     condition_weights = Column(JSON, nullable=False, default={"media": 0.7, "sleeve": 0.3})
     
+    # Condition matching configuration (stored as JSON)
+    condition_matching = Column(JSON, nullable=True)  # {"enabled": true, "mediaConditionMatch": true, "sleeveConditionMatch": true, "fallbackToSimilar": true}
+    
     # Scarcity boost configuration (stored as JSON)
     scarcity_boost = Column(JSON, nullable=True)  # {"threshold": 5, "boost_percent": 15}
     

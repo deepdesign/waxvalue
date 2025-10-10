@@ -6,59 +6,77 @@ import { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/DashboardLayout'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { DiscogsConnectionCard } from '@/components/DiscogsConnectionCard'
-import { AutomationSettingsForm } from '@/components/AutomationSettingsForm'
+import { SettingsCard } from '@/components/SettingsCard'
 import { Button } from '@/components/ui/Button'
 import {
   UserIcon,
+  MapPinIcon,
+  GlobeAltIcon,
   CurrencyDollarIcon,
-  ShieldCheckIcon,
-  CogIcon,
-  ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
+
+interface UserProfile {
+  username?: string
+  name?: string
+  home_page?: string
+  location?: string
+  profile?: string
+  curr_abbr?: string
+  id?: number
+  resource_url?: string
+}
 
 export default function SettingsPage() {
   const { user, isLoading } = useApp()
   const router = useRouter()
-  const [settings, setSettings] = useState({
-    currency: 'USD',
-    defaultDryRun: true,
-    dailySchedule: '09:00',
-    globalFloor: 5.00,
-    globalCeiling: 1000.00,
-    maxChangePercent: 25,
-    apiRateLimitSeconds: 1.2,
-    logRetentionDays: 90,
-    autoUpdateIncreases: false,
-    alertThreshold: 25,
-  })
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const [profileLoading, setProfileLoading] = useState(false)
+
+  const fetchUserProfile = async () => {
+    if (!user?.accessToken) return
+    
+    setProfileLoading(true)
+    try {
+      const sessionId = localStorage.getItem('waxvalue_session_id')
+      if (!sessionId) {
+        console.error('No session ID found')
+        return
+      }
+      
+      const response = await fetch(`/api/backend/user/profile?session_id=${sessionId}`)
+      if (response.ok) {
+        const profile = await response.json()
+        console.log('Profile data received:', profile)
+        console.log('Profile fields:', {
+          username: profile.username,
+          name: profile.name,
+          location: profile.location,
+          curr_abbr: profile.curr_abbr,
+          home_page: profile.home_page,
+          profile: profile.profile
+        })
+        setUserProfile(profile)
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Failed to fetch user profile:', response.status, errorData)
+        toast.error(`Failed to load profile: ${errorData.detail || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Failed to fetch user profile:', error)
+      toast.error('Failed to load profile information')
+    } finally {
+      setProfileLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (!isLoading && !user) {
       router.push('/')
+    } else if (user?.accessToken) {
+      fetchUserProfile()
     }
   }, [user, isLoading, router])
-
-  const handleSaveSettings = async () => {
-    try {
-      const response = await fetch('/api/backend/settings', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(settings),
-      })
-
-      if (response.ok) {
-        toast.success('Settings saved successfully!')
-      } else {
-        throw new Error('Failed to save settings')
-      }
-    } catch (error) {
-      console.error('Save settings error:', error)
-      toast.error('Failed to save settings')
-    }
-  }
 
   const handleDisconnectAccount = async () => {
     if (!confirm('Are you sure you want to disconnect your Discogs account? This will stop all automated pricing.')) {
@@ -66,8 +84,17 @@ export default function SettingsPage() {
     }
 
     try {
+      const sessionId = localStorage.getItem('waxvalue_session_id')
+      if (!sessionId) {
+        throw new Error('No session found. Please login first.')
+      }
+      
       const response = await fetch('/api/backend/auth/disconnect', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ session_id: sessionId }),
       })
 
       if (response.ok) {
@@ -95,7 +122,7 @@ export default function SettingsPage() {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Page Header */}
-        <div className="border-b border-gray-200 pb-6">
+        <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
           <h1 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">Settings</h1>
           <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">Manage your account and application preferences</p>
         </div>
@@ -104,183 +131,135 @@ export default function SettingsPage() {
           {/* Discogs Account */}
           <DiscogsConnectionCard user={user} />
 
-          {/* Automation Settings */}
-          <AutomationSettingsForm
-            settings={{
-              autoUpdateIncreases: settings.autoUpdateIncreases,
-              alertThreshold: settings.alertThreshold,
-              dailySchedule: settings.dailySchedule,
-              defaultDryRun: settings.defaultDryRun,
-            }}
-            onSettingsChange={(newSettings) => {
-              setSettings(prev => ({ ...prev, ...newSettings }))
-            }}
-            onSave={handleSaveSettings}
-            isLoading={false}
-          />
+          {/* Display & Analysis Settings */}
+          <SettingsCard />
 
-          {/* General Settings */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex items-center mb-4">
-              <CogIcon className="h-6 w-6 text-gray-400 mr-3" />
-              <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">General</h2>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Default Currency
-                </label>
-                <select
-                  value={settings.currency}
-                  onChange={(e) => setSettings(prev => ({ ...prev, currency: e.target.value }))}
-                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
-                >
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                  <option value="GBP">GBP (£)</option>
-                  <option value="CAD">CAD (C$)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Daily Reprice Schedule
-                </label>
-                <input
-                  type="time"
-                  value={settings.dailySchedule}
-                  onChange={(e) => setSettings(prev => ({ ...prev, dailySchedule: e.target.value }))}
-                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
-                />
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="defaultDryRun"
-                  checked={settings.defaultDryRun}
-                  onChange={(e) => setSettings(prev => ({ ...prev, defaultDryRun: e.target.checked }))}
-                  className="h-4 w-4 text-primary-600 dark:text-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                />
-                <label htmlFor="defaultDryRun" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                  Default to Dry Run Mode
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* Safeguards */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex items-center mb-4">
-              <ShieldCheckIcon className="h-6 w-6 text-gray-400 mr-3" />
-              <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Safeguards</h2>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Global Price Floor
-                </label>
-                <div className="relative">
-                  <CurrencyDollarIcon className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={settings.globalFloor}
-                    onChange={(e) => setSettings(prev => ({ ...prev, globalFloor: Number(e.target.value) }))}
-                    className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 pl-10 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
-                    placeholder="5.00"
-                  />
+          {/* User Profile Information */}
+          {user?.accessToken && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              {/* Header */}
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Discogs Profile</h2>
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Your Discogs account information and preferences</p>
+                  </div>
+                  {userProfile?.username && (
+                    <a
+                      href={`https://www.discogs.com/user/${userProfile.username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+                    >
+                      View on Discogs
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  )}
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Minimum price for any item</p>
               </div>
+              
+              {/* Content */}
+              <div className="p-6">
+                {profileLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                    <span className="ml-3 text-sm text-gray-600 dark:text-gray-400">Loading profile...</span>
+                  </div>
+                ) : userProfile ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Username */}
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <UserIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
+                      </div>
+                      <p className="text-sm text-gray-900 dark:text-gray-100 font-mono bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg">
+                        {userProfile.username || 'Not available'}
+                      </p>
+                    </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Global Price Ceiling
-                </label>
-                <div className="relative">
-                  <CurrencyDollarIcon className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={settings.globalCeiling}
-                    onChange={(e) => setSettings(prev => ({ ...prev, globalCeiling: Number(e.target.value) }))}
-                    className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 pl-10 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
-                    placeholder="1000.00"
-                  />
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Maximum price for any item</p>
-              </div>
+                    {/* Real Name */}
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <UserIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Real Name</label>
+                      </div>
+                      <p className="text-sm text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg">
+                        {userProfile.name || 'Not provided'}
+                      </p>
+                    </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Max Change % per Run
-                </label>
-                <input
-                  type="number"
-                  value={settings.maxChangePercent}
-                  onChange={(e) => setSettings(prev => ({ ...prev, maxChangePercent: Number(e.target.value) }))}
-                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
-                  placeholder="25"
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Maximum price change percentage in a single run</p>
+                    {/* Location */}
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <MapPinIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
+                      </div>
+                      <p className="text-sm text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg">
+                        {userProfile.location || 'Not provided'}
+                      </p>
+                    </div>
+
+                    {/* Currency */}
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <CurrencyDollarIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Currency</label>
+                      </div>
+                      <p className="text-sm text-gray-900 dark:text-gray-100 font-mono bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg">
+                        {userProfile.curr_abbr || 'Not set'}
+                      </p>
+                    </div>
+
+                    {/* Website */}
+                    {userProfile.home_page && (
+                      <div className="space-y-2 md:col-span-2">
+                        <div className="flex items-center space-x-2">
+                          <GlobeAltIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Website</label>
+                        </div>
+                        <a 
+                          href={userProfile.home_page.startsWith('http') ? userProfile.home_page : `https://${userProfile.home_page}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg block"
+                        >
+                          {userProfile.home_page}
+                        </a>
+                      </div>
+                    )}
+
+                    {/* Bio */}
+                    {userProfile.profile && (
+                      <div className="space-y-2 md:col-span-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label>
+                        <p className="text-sm text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg">
+                          {userProfile.profile}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Failed to load profile information</p>
+                    <Button
+                      onClick={fetchUserProfile}
+                      variant="secondary"
+                      size="sm"
+                      className="mt-2"
+                    >
+                      Retry
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-
-          {/* Advanced Settings */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex items-center mb-4">
-              <CogIcon className="h-6 w-6 text-gray-400 mr-3" />
-              <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Advanced</h2>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  API Rate Limit (seconds)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={settings.apiRateLimitSeconds}
-                  onChange={(e) => setSettings(prev => ({ ...prev, apiRateLimitSeconds: Number(e.target.value) }))}
-                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
-                  placeholder="1.2"
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Delay between API calls to respect Discogs limits</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Log Retention (days)
-                </label>
-                <input
-                  type="number"
-                  value={settings.logRetentionDays}
-                  onChange={(e) => setSettings(prev => ({ ...prev, logRetentionDays: Number(e.target.value) }))}
-                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
-                  placeholder="90"
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">How long to keep run logs and history</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <Button
-            onClick={handleSaveSettings}
-            variant="primary"
-            size="lg"
-          >
-            Save Settings
-          </Button>
+          )}
         </div>
       </div>
     </DashboardLayout>
   )
 }
+

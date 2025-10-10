@@ -5,11 +5,13 @@ import {
   FunnelIcon,
   XMarkIcon,
   AdjustmentsHorizontalIcon,
+  InformationCircleIcon,
 } from '@heroicons/react/24/outline'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 export interface FilterState {
-  status: string
-  format: string
+  status: string // underpriced, overpriced, fairly_priced, all
+  priceDirection: string // increase, decrease, all
   condition: string
   priceRange: {
     min: number | null
@@ -28,29 +30,27 @@ interface FiltersBarProps {
 
 const statusOptions = [
   { value: '', label: 'All Status' },
-  { value: 'For Sale', label: 'For Sale' },
-  { value: 'Draft', label: 'Draft' },
-  { value: 'Sold', label: 'Sold' },
+  { value: 'underpriced', label: 'Underpriced' },
+  { value: 'overpriced', label: 'Overpriced' },
+  { value: 'fairly_priced', label: 'Fairly Priced' },
 ]
 
-const formatOptions = [
-  { value: '', label: 'All Formats' },
-  { value: 'Vinyl', label: 'Vinyl' },
-  { value: 'CD', label: 'CD' },
-  { value: 'Cassette', label: 'Cassette' },
-  { value: 'Digital', label: 'Digital' },
-  { value: 'Other', label: 'Other' },
+const priceDirectionOptions = [
+  { value: '', label: 'All Changes' },
+  { value: 'increase', label: 'Price Increase' },
+  { value: 'decrease', label: 'Price Decrease' },
 ]
 
 const conditionOptions = [
   { value: '', label: 'All Conditions' },
-  { value: 'Mint', label: 'Mint' },
-  { value: 'Near Mint', label: 'Near Mint' },
-  { value: 'Very Good Plus', label: 'Very Good Plus' },
-  { value: 'Very Good', label: 'Very Good' },
-  { value: 'Good', label: 'Good' },
-  { value: 'Fair', label: 'Fair' },
-  { value: 'Poor', label: 'Poor' },
+  { value: 'M', label: 'Mint (M)' },
+  { value: 'NM', label: 'Near Mint (NM)' },
+  { value: 'VG+', label: 'Very Good Plus (VG+)' },
+  { value: 'VG', label: 'Very Good (VG)' },
+  { value: 'G+', label: 'Good Plus (G+)' },
+  { value: 'G', label: 'Good (G)' },
+  { value: 'F', label: 'Fair (F)' },
+  { value: 'P', label: 'Poor (P)' },
 ]
 
 export function FiltersBar({ 
@@ -82,7 +82,7 @@ export function FiltersBar({
 
   const hasActiveFilters = 
     filters.status !== '' ||
-    filters.format !== '' ||
+    filters.priceDirection !== '' ||
     filters.condition !== '' ||
     filters.priceRange.min !== null ||
     filters.priceRange.max !== null ||
@@ -90,24 +90,43 @@ export function FiltersBar({
 
   // This component now renders just the filters button and expandable panel
   return (
-    <>
+    <div className="relative">
       {/* Filters Button */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 dark:focus:border-primary-400 transition-colors"
+      <Tooltip 
+        content={
+          <div>
+            <p className="font-medium mb-1">Filter Inventory</p>
+            <p className="text-xs opacity-90">
+              Filter your pricing suggestions by status, price direction, condition, price range, and flagged items.
+            </p>
+          </div>
+        }
+        position="bottom"
       >
-        <FunnelIcon className="h-4 w-4 mr-2" />
-        Filters
-        {hasActiveFilters && (
-          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 dark:bg-primary-900/50 text-primary-800 dark:text-primary-200">
-            Active
-          </span>
-        )}
-      </button>
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 dark:focus:border-primary-400 transition-colors"
+        >
+          <FunnelIcon className="h-4 w-4 mr-2" />
+          Filters
+          {hasActiveFilters && (
+            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 dark:bg-primary-900/50 text-primary-800 dark:text-primary-200">
+              Active
+            </span>
+          )}
+        </button>
+      </Tooltip>
 
       {/* Expandable Filters Panel */}
       {isExpanded && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 p-6">
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => setIsExpanded(false)}
+          />
+          
+          <div className="absolute top-full left-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 p-6 min-w-[600px] max-w-[800px]">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Filter Inventory</h3>
@@ -139,7 +158,7 @@ export function FiltersBar({
             {/* Status Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Status
+                Pricing Status
               </label>
               <select
                 value={filters.status}
@@ -154,17 +173,17 @@ export function FiltersBar({
               </select>
             </div>
 
-            {/* Format Filter */}
+            {/* Price Direction Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Format
+                Price Direction
               </label>
               <select
-                value={filters.format}
-                onChange={(e) => handleFilterChange('format', e.target.value)}
+                value={filters.priceDirection}
+                onChange={(e) => handleFilterChange('priceDirection', e.target.value)}
                 className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
               >
-                {formatOptions.map((option) => (
+                {priceDirectionOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -219,17 +238,29 @@ export function FiltersBar({
 
             {/* Flagged Only Toggle */}
             <div className="flex items-end">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={filters.showFlaggedOnly}
-                  onChange={(e) => handleFilterChange('showFlaggedOnly', e.target.checked)}
-                  className="h-4 w-4 text-primary-600 dark:text-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                  Show flagged only
-                </span>
-              </label>
+              <Tooltip 
+                content={
+                  <div>
+                    <p className="font-medium mb-1">Show Flagged Items Only</p>
+                    <p className="text-xs opacity-90">
+                      Display only items that have been flagged for manual review due to unusual price changes or low confidence scores.
+                    </p>
+                  </div>
+                }
+                position="top"
+              >
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={filters.showFlaggedOnly}
+                    onChange={(e) => handleFilterChange('showFlaggedOnly', e.target.checked)}
+                    className="h-4 w-4 text-primary-600 dark:text-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    Show flagged only
+                  </span>
+                </label>
+              </Tooltip>
             </div>
           </div>
 
@@ -250,11 +281,11 @@ export function FiltersBar({
                   </span>
                 )}
                 
-                {filters.format && (
+                {filters.priceDirection && (
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200">
-                    Format: {filters.format}
+                    Direction: {filters.priceDirection === 'increase' ? 'Increase' : 'Decrease'}
                     <button
-                      onClick={() => handleFilterChange('format', '')}
+                      onClick={() => handleFilterChange('priceDirection', '')}
                       className="ml-1 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
                     >
                       <XMarkIcon className="h-3 w-3" />
@@ -300,8 +331,9 @@ export function FiltersBar({
               </div>
             </div>
           )}
-        </div>
+          </div>
+        </>
       )}
-    </>
+    </div>
   )
 }

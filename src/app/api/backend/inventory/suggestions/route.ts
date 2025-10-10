@@ -2,20 +2,30 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization')
+    // Get session ID from query parameters
+    const { searchParams } = new URL(request.url)
+    const sessionId = searchParams.get('session_id')
     
-    const response = await fetch(`${process.env.BACKEND_URL || 'http://127.0.0.1:8000'}/inventory/suggestions`, {
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: 'Session ID required' },
+        { status: 401 }
+      )
+    }
+    
+    const response = await fetch(`http://127.0.0.1:8000/inventory/suggestions?session_id=${sessionId}`, {
       method: 'GET',
       headers: {
-        'Authorization': authHeader || '',
+        'Content-Type': 'application/json',
       },
     })
 
+    const data = await response.json()
+
     if (!response.ok) {
-      throw new Error('Backend request failed')
+      return NextResponse.json(data, { status: response.status })
     }
 
-    const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
     console.error('API route error:', error)
