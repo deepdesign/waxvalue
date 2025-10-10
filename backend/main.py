@@ -147,19 +147,27 @@ class ListingSnapshot(BaseModel):
     http_status: Optional[int] = None
     created_at: str = datetime.now().isoformat()
 
-# Dependency to get current user from token
-async def get_current_user(authorization: str = Header(None)) -> User:
-    """Extract user from authorization header"""
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid authorization header")
+# Session storage for user sessions
+sessions_db = {}
+
+# Dependency to get current user from session_id
+async def get_current_user(session_id: Optional[str] = Query(None), authorization: str = Header(None)) -> User:
+    """Extract user from session_id or authorization header"""
+    # Try session_id first (primary method)
+    if session_id and session_id in sessions_db:
+        user_id = sessions_db[session_id]
+        if user_id in users_db:
+            return users_db[user_id]
     
-    token = authorization.replace("Bearer ", "")
-    user_id = token.split("-")[-1] if "-" in token else None
+    # Fallback to Bearer token
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.replace("Bearer ", "")
+        user_id = token.split("-")[-1] if "-" in token else None
+        
+        if user_id and user_id in users_db:
+            return users_db[user_id]
     
-    if not user_id or user_id not in users_db:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    
-    return users_db[user_id]
+    raise HTTPException(status_code=401, detail="Invalid authorization header")
 
 def get_discogs_client(user: User) -> DiscogsClient:
     """Get authenticated Discogs client for user"""
@@ -596,10 +604,16 @@ async def verify_discogs_auth(verification_data: dict, session_id: Optional[str]
         )
         users_db[str(user_id)] = user
         
+        # Create session for this user
+        if session_id:
+            sessions_db[session_id] = str(user_id)
+            logger.info(f"Session created: {session_id} -> user {user_id}")
+        
         logger.info(f"OAuth verified for user: {username} (ID: {user_id})")
 
         return {
             "user": user.dict(),
+            "session_id": session_id,
             "message": "Discogs authentication successful"
         }
 

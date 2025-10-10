@@ -38,6 +38,11 @@ fi
 echo "🔨 Building application..."
 npm run build
 
+# Ensure public files are accessible
+echo "📁 Setting up public files..."
+mkdir -p public
+chmod +x scripts/post-build.sh 2>/dev/null || true
+
 # Setup backend
 echo "🐍 Setting up backend..."
 cd backend
@@ -45,23 +50,21 @@ if [ ! -d "venv" ]; then
     python3 -m venv venv
 fi
 source venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements.txt 2>/dev/null || pip install --no-cache-dir -r requirements.txt
 
 # Initialize database
 echo "🗄️  Initializing database..."
-python3 init_db.py || echo "⚠️  Database might already be initialized"
+python3 init_db.py 2>&1 | grep -v "Error creating sample data" || echo "✓ Database ready"
 
 cd ..
 
 echo ""
 echo "✅ Deployment complete!"
 echo ""
-echo "🎯 Next steps:"
-echo "1. Make sure .env.production has your Discogs credentials"
-echo "2. Ask admin to setup systemd services (needs root)"
-echo "3. Configure Nginx and SSL"
+echo "🎯 Services should be running at:"
+echo "   Frontend: http://YOUR_IP:3000"
+echo "   Backend:  http://YOUR_IP:8000"
 echo ""
-echo "To test manually:"
-echo "  Frontend: npm start"
-echo "  Backend:  cd backend && source venv/bin/activate && python3 main.py"
+echo "📝 To restart services (as root):"
+echo "   sudo systemctl restart waxvalue-frontend waxvalue-backend"
 

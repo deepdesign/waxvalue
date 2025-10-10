@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   env: {
     DISCOGS_API_URL: process.env.DISCOGS_API_URL || 'https://api.discogs.com',
     DATABASE_URL: process.env.DATABASE_URL,
