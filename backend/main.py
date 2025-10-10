@@ -251,7 +251,11 @@ def compute_target_price(listing: Dict[str, Any], strategy: Dict[str, Any],
         # Try to find exact condition match
         if media_condition in price_suggestions:
             condition_price_data = price_suggestions[media_condition]
-            discogs_suggested_price = condition_price_data.get("value", 0)
+            # Handle both dict and direct float values
+            if isinstance(condition_price_data, dict):
+                discogs_suggested_price = condition_price_data.get("value", 0)
+            else:
+                discogs_suggested_price = float(condition_price_data) if condition_price_data else 0
         else:
             # Try to find similar condition if exact match not found
             condition_mapping = {
@@ -268,7 +272,11 @@ def compute_target_price(listing: Dict[str, Any], strategy: Dict[str, Any],
             for discogs_condition in condition_mapping.get(media_condition, []):
                 if discogs_condition in price_suggestions:
                     condition_price_data = price_suggestions[discogs_condition]
-                    discogs_suggested_price = condition_price_data.get("value", 0)
+                    # Handle both dict and direct float values
+                    if isinstance(condition_price_data, dict):
+                        discogs_suggested_price = condition_price_data.get("value", 0)
+                    else:
+                        discogs_suggested_price = float(condition_price_data) if condition_price_data else 0
                     break
         
         if not discogs_suggested_price:
