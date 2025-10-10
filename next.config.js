@@ -6,6 +6,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  output: 'standalone',
   env: {
     DISCOGS_API_URL: process.env.DISCOGS_API_URL || 'https://api.discogs.com',
     DATABASE_URL: process.env.DATABASE_URL,
