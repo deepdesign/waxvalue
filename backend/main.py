@@ -27,7 +27,7 @@ app = FastAPI(title="WaxValue API", version="1.0.0")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://waxvalue.com"],
+    allow_origins=["http://localhost:3000", "https://waxvalue.com", "http://93.127.200.187"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -533,8 +533,11 @@ async def setup_discogs_auth(session_id: Optional[str] = Query(None)):
         raise HTTPException(status_code=500, detail="Discogs credentials not configured")
 
     try:
+        # Use production callback URL
+        callback_url = os.getenv("NEXT_PUBLIC_APP_URL", "http://93.127.200.187") + "/auth/callback"
+        
         oauth = DiscogsOAuth(consumer_key, consumer_secret)
-        request_token, request_token_secret = oauth.get_request_token()
+        request_token, request_token_secret = oauth.get_request_token(callback_url)
         auth_url = oauth.get_authorize_url(request_token)
 
         # Store tokens in session storage if session_id provided
