@@ -291,6 +291,11 @@ def compute_target_price(listing: Dict[str, Any], strategy: Dict[str, Any],
                 "market_analysis": None
             }
         
+        # Ensure discogs_suggested_price is a number
+        if isinstance(discogs_suggested_price, dict):
+            discogs_suggested_price = discogs_suggested_price.get("value", 0)
+        discogs_suggested_price = float(discogs_suggested_price) if discogs_suggested_price else 0
+        
         # Analyze pricing status compared to Discogs recommendation
         price_difference = current_price - discogs_suggested_price
         price_difference_pct = (price_difference / max(discogs_suggested_price, 0.01)) * 100
