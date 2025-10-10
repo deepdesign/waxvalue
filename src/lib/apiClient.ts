@@ -191,25 +191,4 @@ export class ApiClient {
     });
   }
 
-  // Logs endpoints
-  async getLogs() {
-    return this.request('/logs');
-  }
-
-  async getLogDetails(logId: string) {
-    return this.request(`/logs/${logId}`);
-  }
-
-  // Metrics endpoints
-  async getMetricsDistribution() {
-    return this.request('/metrics/distribution');
-  }
-
-  async getMetricsPortfolio() {
-    return this.request('/metrics/portfolio');
-  }
-
-  async getMetricsTrends() {
-    return this.request('/metrics/trends');
-  }
 }

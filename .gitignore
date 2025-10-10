@@ -121,3 +121,8 @@ backend/__pycache__/
 backend/.env
 backend/venv/
 backend/*.pyc
+
+# Runtime/temporary files
+sessions.json
+backend/sessions.json
+backend/discogs_rate_limit.json
