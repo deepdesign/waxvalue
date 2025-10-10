@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { listingId: string } }
+  { params }: { params: Promise<{ listingId: string }> }
 ) {
+  const { listingId } = await params
   try {
     const { searchParams } = new URL(request.url)
     const sessionId = searchParams.get('session_id')
-    const listingId = params.listingId
     
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 })

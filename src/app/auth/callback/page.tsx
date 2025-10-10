@@ -1,12 +1,15 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { useApp } from '@/components/Providers'
 
-export default function AuthCallbackPage() {
+// Force dynamic rendering - don't pre-render this page
+export const dynamic = 'force-dynamic'
+
+function AuthCallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { setUser } = useApp()
@@ -167,6 +170,18 @@ export default function AuthCallbackPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    }>
+      <AuthCallbackContent />
+    </Suspense>
   )
 }
 
