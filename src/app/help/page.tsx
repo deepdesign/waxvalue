@@ -101,10 +101,10 @@ export default function HelpPage() {
                   <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Running a pricing analysis</h3>
                   <div className="space-y-2">
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Click "Refresh Analysis" on the Dashboard to analyse your inventory. Waxvalue will:
+                      Click &ldquo;Refresh Analysis&rdquo; on the Dashboard to analyse your inventory. Waxvalue will:
                     </p>
                     <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400 ml-2">
-                      <li>Fetch all your "For Sale" items from Discogs</li>
+                      <li>Fetch all your &ldquo;For Sale&rdquo; items from Discogs</li>
                       <li>Get market-based price suggestions for each item</li>
                       <li>Display suggestions sorted by largest potential price increase</li>
                       <li>Let you review, adjust, and apply changes individually or in bulk</li>
@@ -119,15 +119,15 @@ export default function HelpPage() {
                   <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">How pricing suggestions work</h3>
                   <div className="space-y-2">
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Waxvalue uses Discogs' official price suggestion API to provide accurate, market-based recommendations.
+                      Waxvalue uses Discogs&apos; official price suggestion API to provide accurate, market-based recommendations.
                     </p>
                     <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded p-3 text-xs text-blue-800 dark:text-blue-200">
                       <p className="font-medium mb-1">How suggestions are calculated:</p>
                       <ul className="list-disc list-inside space-y-1">
                         <li><strong>Release ID:</strong> Identifies the exact release in the Discogs database</li>
-                        <li><strong>Condition Matching:</strong> Matches your item's exact condition (media and sleeve) to market data</li>
-                        <li><strong>Market Data:</strong> Uses Discogs' official price suggestion API based on recent sales and current listings</li>
-                        <li><strong>Accurate Pricing:</strong> Suggestions reflect the actual market value for your item's specific condition</li>
+                        <li><strong>Condition Matching:</strong> Matches your item&apos;s exact condition (media and sleeve) to market data</li>
+                        <li><strong>Market Data:</strong> Uses Discogs&apos; official price suggestion API based on recent sales and current listings</li>
+                        <li><strong>Accurate Pricing:</strong> Suggestions reflect the actual market value for your item&apos;s specific condition</li>
                       </ul>
                     </div>
                     <div className="bg-gray-50 dark:bg-gray-700 rounded p-3 text-xs text-gray-700 dark:text-gray-300">
@@ -148,9 +148,9 @@ export default function HelpPage() {
                       You can apply price changes individually or in bulk:
                     </p>
                     <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400 ml-2">
-                      <li><strong>Individual:</strong> Click the blue "Apply" button on any row</li>
+                      <li><strong>Individual:</strong> Click the blue &ldquo;Apply&rdquo; button on any row</li>
                       <li><strong>Adjust before applying:</strong> Use ⬆️⬇️ buttons to fine-tune the suggested price</li>
-                      <li><strong>Bulk apply:</strong> Check multiple items and click "Apply to selected"</li>
+                      <li><strong>Bulk apply:</strong> Check multiple items and click &ldquo;Apply to selected&rdquo;</li>
                       <li><strong>Visual feedback:</strong> Applied items show green checkmark and fade out after 2 seconds</li>
                     </ul>
                   </div>
@@ -167,7 +167,7 @@ export default function HelpPage() {
                       <ul className="list-disc list-inside space-y-1">
                         <li>Your OAuth tokens are removed from Waxvalue</li>
                         <li>Waxvalue can no longer access your Discogs account</li>
-                        <li>You can reconnect anytime using "Continue with Discogs"</li>
+                        <li>You can reconnect anytime using &ldquo;Continue with Discogs&rdquo;</li>
                         <li>Your session data is cleared</li>
                       </ul>
                     </div>

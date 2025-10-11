@@ -1,0 +1,260 @@
+openapi: 3.0.3
+info:
+  title: Discogs Auto-Repricer API
+  version: "1.0.0"
+  description: >
+    Backend endpoint to apply approved (or safe auto-applied) price updates to Discogs
+    listings. Enforces automation rules, safeguards, and logs every action.
+
+paths:
+  /reprice:
+    post:
+      summary: Apply repricing updates to Discogs listings
+      description: |
+        Applies approved price changes, and—if automation is enabled—auto-applies increases
+        up to the configured threshold. Decreases and large increases are flagged for manual
+        approval. When `dry_run=true`, no Discogs writes occur; the server simulates and logs
+        decisions only.
+
+        Server-side rules:
+        - Decreases are never auto-applied.
+        - Increases auto-apply only if automation is enabled and the increase ≤ threshold, and
+          the change stays within floor, ceiling, and max-change bounds.
+        - Increases above threshold are flagged.
+        - When `approved_listing_ids` are provided, they are treated as user-approved unless they
+          violate safeguards.
+      operationId: reprice
+      parameters:
+        - in: query
+          name: dry_run
+          description: If true, simulate only—do not update Discogs.
+          required: false
+          schema:
+            type: boolean
+            default: true
+        - in: query
+          name: scope
+          description: Scope of the operation when no explicit `approved_listing_ids` are provided.
+          required: false
+          schema:
+            $ref: '#/components/schemas/RepriceScope'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RepriceRequest'
+            examples:
+              approveSelected:
+                summary: Apply a set of user-approved listings
+                value:
+                  approved_listing_ids: [12345, 23456, 34567]
+                  strategy_id: "median_plus_8pct"
+                  params: { offset_value: 8 }
+              selectionWithFilters:
+                summary: Operate on a filtered selection (plus explicit approvals)
+                value:
+                  scope: "selection"
+                  filters: { status: "For Sale", media: ["Very Good Plus (VG+)"] }
+                  approved_listing_ids: [12345, 34567]
+              singleItem:
+                summary: Operate on one item with a specific strategy
+                value:
+                  scope: "item"
+                  listing_id: 12345
+                  strategy_id: "undercut_cheapest"
+                  params: { offset_type: "absolute", offset_value: 0.5 }
+      responses:
+        '200':
+          description: Run completed—items contain per-listing decisions and HTTP outcomes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepriceResponse'
+              examples:
+                ok:
+                  summary: Typical successful run
+                  value:
+                    run_id: 42
+                    dry_run: false
+                    summary:
+                      scanned: 27
+                      auto_applied: 9
+                      user_applied: 7
+                      flagged: 5
+                      declined: 4
+                      errors: 2
+                    items:
+                      - listing_id: 12345
+                        old_price: 25.0
+                        new_price: 27.5
+                        currency: "AUD"
+                        decision: "user_applied"
+                        reason: "anchor:median +8%"
+                        confidence: 0.82
+                        discogs_status: "For Sale"
+                        http_status: 200
+                        ratelimit_remaining: "58"
+                        ratelimit_reset: "10"
+        '400':
+          description: Bad request—payload invalid or missing required fields.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorised—server lacks valid Discogs credentials or user session is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error—e.g. currency mismatch or out-of-bounds prices.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error—unexpected failure; see logs and run history.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    RepriceScope:
+      type: string
+      enum: [global, selection, item]
+      default: global
+
+    Decision:
+      type: string
+      description: Outcome for the listing in this run.
+      enum:
+        - auto_applied      # automation enabled and increase ≤ threshold; all safeguards passed
+        - user_applied      # explicitly approved by user in this call
+        - flagged           # needs manual approval (e.g. decrease or increase > threshold, or safeguard violation)
+        - declined          # user declined change
+        - simulated         # dry-run only
+
+    RepriceRequest:
+      type: object
+      properties:
+        scope:
+          $ref: '#/components/schemas/RepriceScope'
+        filters:
+          type: object
+          additionalProperties: true
+          description: Filter object used when scope is 'selection' (e.g. status, media, format).
+        listing_id:
+          type: integer
+          description: Listing ID when scope is 'item'.
+        approved_listing_ids:
+          type: array
+          description: Explicit list of user-approved listings to apply in this call.
+          items:
+            type: integer
+        strategy_id:
+          type: string
+          description: Strategy identifier to use for calculation on this run.
+        params:
+          type: object
+          additionalProperties: true
+          description: Optional per-run parameter overrides for the chosen strategy.
+      required: []
+      additionalProperties: false
+
+    RepriceItemResult:
+      type: object
+      properties:
+        listing_id:
+          type: integer
+        old_price:
+          type: number
+          format: float
+        new_price:
+          type: number
+          format: float
+        currency:
+          type: string
+          description: ISO currency code (must match seller account currency on Discogs).
+        decision:
+          $ref: '#/components/schemas/Decision'
+        reason:
+          type: string
+          description: Human-readable rationale (e.g. 'anchor:median +8%'; includes safeguard reasons when flagged).
+        confidence:
+          type: number
+          format: float
+          description: 0.0–1.0 confidence derived from market sample size and dispersion.
+        discogs_status:
+          type: string
+          nullable: true
+          description: Listing status post-update where available (e.g. 'For Sale').
+        http_status:
+          type: integer
+          nullable: true
+          description: HTTP status returned by Discogs PUT (omitted in dry-run).
+        ratelimit_remaining:
+          type: string
+          nullable: true
+        ratelimit_reset:
+          type: string
+          nullable: true
+      required:
+        - listing_id
+        - old_price
+        - new_price
+        - currency
+        - decision
+        - reason
+        - confidence
+
+    RepriceResponse:
+      type: object
+      properties:
+        run_id:
+          type: integer
+          description: Identifier for this run in the server's audit log.
+        dry_run:
+          type: boolean
+        summary:
+          type: object
+          properties:
+            scanned:
+              type: integer
+            auto_applied:
+              type: integer
+            user_applied:
+              type: integer
+            flagged:
+              type: integer
+            declined:
+              type: integer
+            errors:
+              type: integer
+          required: [scanned, auto_applied, user_applied, flagged, declined, errors]
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RepriceItemResult'
+      required:
+        - run_id
+        - dry_run
+        - summary
+        - items
+
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "error"
+        error:
+          type: string
+          example: "discogs_access_token_failed"
+        detail:
+          type: string
+          example: "HTTP 401 invalid verifier or request token"
+      required: [status, error]

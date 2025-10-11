@@ -195,7 +195,7 @@ export function LoginForm({ onAuthSuccess, onSwitchToSignup }: LoginFormProps) {
       {/* Switch to Signup */}
       <div className="text-center">
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <button
             onClick={onSwitchToSignup}
             className="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300"

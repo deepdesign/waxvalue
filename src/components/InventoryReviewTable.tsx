@@ -1712,7 +1712,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                     <li>Check your Discogs seller settings are configured</li>
                     <li>Ensure your selling currency is set on Discogs</li>
                     <li>Some rare items may not have market data</li>
-                    <li>Items with no recent sales won't get suggestions</li>
+                    <li>Items with no recent sales won&apos;t get suggestions</li>
                   </ul>
                   <a 
                     href="/help" 

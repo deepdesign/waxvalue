@@ -137,7 +137,7 @@ import { LandingHeroSplit5 as WelcomePage }
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold text-sm">4</span>
                 <div>
-                  <span className="font-semibold">That's it!</span> Your new landing page is live
+                  <span className="font-semibold">That&apos;s it!</span> Your new landing page is live
                 </div>
               </li>
             </ol>

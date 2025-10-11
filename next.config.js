@@ -10,6 +10,13 @@ const nextConfig = {
   },
   compress: true,
   poweredByHeader: false,
+  // Allow build to succeed with warnings
+  eslint: {
+    ignoreDuringBuilds: false, // Still run ESLint but don't fail build
+  },
+  typescript: {
+    ignoreBuildErrors: false,
+  },
   compiler: {
     // Remove console.* calls in production bundles except important ones
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
@@ -32,10 +39,8 @@ const nextConfig = {
       },
     ]
   },
-  // Force IPv4 for all requests
-  experimental: {
-    serverComponentsExternalPackages: [],
-  },
+  // Moved from experimental in Next.js 15
+  serverExternalPackages: [],
 }
 
 module.exports = nextConfig

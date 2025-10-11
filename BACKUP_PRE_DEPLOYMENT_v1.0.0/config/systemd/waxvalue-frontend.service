@@ -1,0 +1,34 @@
+[Unit]
+Description=WaxValue Frontend (Next.js)
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=waxvalue
+Group=waxvalue
+WorkingDirectory=/home/waxvalue/waxvalue
+Environment=NODE_ENV=production
+EnvironmentFile=/home/waxvalue/waxvalue/.env.production
+ExecStart=/usr/bin/npm start
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=waxvalue-frontend
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/waxvalue/waxvalue/.next
+ReadWritePaths=/var/log/waxvalue
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target

@@ -289,7 +289,7 @@ export function AutomationRulesCard() {
                   ))}
                 </div>
                 <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  Don't auto-apply suggestions for these conditions
+                  Don&apos;t auto-apply suggestions for these conditions
                 </p>
               </div>
             </div>

@@ -255,7 +255,7 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
             
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Complete your connection</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-              Great! You've authorized Waxvalue on Discogs. Enter the verification code below to complete the connection.
+              Great! You&apos;ve authorized Waxvalue on Discogs. Enter the verification code below to complete the connection.
             </p>
             
             <div className="space-y-4">
@@ -305,7 +305,7 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Connect your Discogs account</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
               Link your Discogs account to unlock automated pricing suggestions and market analysis. 
-              You'll be redirected to Discogs to authorize Waxvalue access to your account.
+              You&apos;ll be redirected to Discogs to authorize Waxvalue access to your account.
             </p>
             
             <div className="space-y-3">
@@ -331,7 +331,7 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
               </Button>
               
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                <p>After connecting, you'll receive an authorization code to complete the setup.</p>
+                <p>After connecting, you&apos;ll receive an authorization code to complete the setup.</p>
               </div>
             </div>
           </div>
