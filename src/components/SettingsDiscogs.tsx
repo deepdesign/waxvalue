@@ -186,7 +186,7 @@ export function SettingsDiscogs({ user, onConnectionChange }: SettingsDiscogsPro
     return (
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-gray-900">Discogs Account</h3>
+          <h3 className="text-lg font-medium text-gray-900">Discogs account</h3>
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
             <CheckCircleIcon className="h-3 w-3 mr-1" />
             Connected
@@ -209,7 +209,7 @@ export function SettingsDiscogs({ user, onConnectionChange }: SettingsDiscogsPro
               <ExclamationTriangleIcon className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
               <div className="text-sm text-blue-800">
                 <p className="font-medium mb-1">What this means:</p>
-                <p>WaxValue can now read your Discogs listings and suggest price updates based on current market data. You maintain full control over all changes.</p>
+                <p>Waxvalue can now read your Discogs listings and suggest price updates based on current market data. You maintain full control over all changes.</p>
               </div>
             </div>
           </div>
@@ -242,7 +242,7 @@ export function SettingsDiscogs({ user, onConnectionChange }: SettingsDiscogsPro
               <CheckCircleIcon className="h-5 w-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" />
               <div className="text-sm text-green-800">
                 <p className="font-medium mb-1">Ready to connect to Discogs!</p>
-                <p>Click the button below to start the authorization process. You&apos;ll be redirected to Discogs to authorize WaxValue to access your account.</p>
+                <p>Click the button below to start the authorization process. You&apos;ll be redirected to Discogs to authorize Waxvalue to access your account.</p>
               </div>
             </div>
           </div>
@@ -271,7 +271,7 @@ export function SettingsDiscogs({ user, onConnectionChange }: SettingsDiscogsPro
               <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" />
               <div className="text-sm text-yellow-800">
                 <p className="font-medium mb-1">Ready to authorize:</p>
-                <p>Click the button below to open Discogs in a new tab and authorize WaxValue to access your account.</p>
+                <p>Click the button below to open Discogs in a new tab and authorize Waxvalue to access your account.</p>
               </div>
             </div>
           </div>

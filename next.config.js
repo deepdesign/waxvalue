@@ -1,12 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  output: 'standalone',
   env: {
     DISCOGS_API_URL: process.env.DISCOGS_API_URL || 'https://api.discogs.com',
     DATABASE_URL: process.env.DATABASE_URL,
@@ -31,10 +24,11 @@ const nextConfig = {
     },
   },
   async rewrites() {
+    const backendUrl = process.env.BACKEND_URL || 'http://127.0.0.1:8000'
     return [
       {
         source: '/api/backend/:path*',
-        destination: 'http://127.0.0.1:8000/:path*',
+        destination: `${backendUrl}/:path*`,
       },
     ]
   },

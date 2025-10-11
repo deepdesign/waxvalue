@@ -35,10 +35,10 @@ export function SettingsCard() {
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
       <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Display & Analysis Settings
+          Display and analysis settings
         </h3>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          Customize how you view and analyze your inventory
+          Customise how you view and analyse your inventory
         </p>
       </div>
 
@@ -46,7 +46,7 @@ export function SettingsCard() {
         {/* Table Display Settings */}
         <div className="space-y-4">
           <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            Table Display
+            Table display
           </h4>
 
           {/* Items Per Page */}
@@ -109,10 +109,10 @@ export function SettingsCard() {
         {/* Analysis Settings */}
         <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
           <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            Analysis Preferences
+            Analysis preferences
           </h4>
 
-          {/* Auto-analyze */}
+          {/* Auto-analyse */}
           <div className="flex items-start">
             <div className="flex items-center h-5">
               <input
@@ -120,12 +120,12 @@ export function SettingsCard() {
                 type="checkbox"
                 checked={settings.autoAnalyzeOnLogin || false}
                 onChange={(e) => handleChange('autoAnalyzeOnLogin', e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                className="table-checkbox"
               />
             </div>
             <div className="ml-3">
               <label htmlFor="autoAnalyze" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Auto-analyze on login
+                Auto-analyse on login
               </label>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Automatically run pricing analysis when you first log in
@@ -163,7 +163,7 @@ export function SettingsCard() {
                 type="checkbox"
                 checked={settings.showOnlyUnderpriced || false}
                 onChange={(e) => handleChange('showOnlyUnderpriced', e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                className="table-checkbox"
               />
             </div>
             <div className="ml-3">

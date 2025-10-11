@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { buildBackendUrl } from '@/lib/api-config'
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    const response = await fetch(`http://127.0.0.1:8000/dashboard/summary?session_id=${sessionId}`, {
+    const response = await fetch(buildBackendUrl(`dashboard/summary?session_id=${sessionId}`), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

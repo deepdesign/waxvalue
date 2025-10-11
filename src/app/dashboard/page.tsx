@@ -13,29 +13,31 @@ import { DiscogsConnectionCard } from '@/components/DiscogsConnectionCard'
 import { AuthGuard } from '@/components/AuthGuard'
 import { ChartBarIcon } from '@heroicons/react/24/outline'
 import { Tooltip } from '@/components/ui/Tooltip'
+import { loadFilterSettings, saveFilterSettings } from '@/lib/filterSettings'
 
 export default function DashboardPage() {
   const { user, isLoading } = useApp()
   const router = useRouter()
   const inventoryTableRef = useRef<InventoryReviewTableRef>(null)
-  const [filters, setFilters] = useState<FilterState>({
-    status: '',
-    priceDirection: '',
-    condition: '',
-    priceRange: { min: null, max: null },
-    showFlaggedOnly: false,
-  })
+  const [filters, setFilters] = useState<FilterState>(loadFilterSettings())
   const [hasAutoFetched, setHasAutoFetched] = useState(false)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
+  // Save filters whenever they change
+  useEffect(() => {
+    saveFilterSettings(filters)
+  }, [filters])
+
   const handleClearFilters = () => {
-    setFilters({
+    const defaultFilters = {
       status: '',
       priceDirection: '',
       condition: '',
       priceRange: { min: null, max: null },
       showFlaggedOnly: false,
-    })
+    }
+    setFilters(defaultFilters)
+    saveFilterSettings(defaultFilters)
   }
 
   const handleSimulate = () => {
@@ -44,14 +46,18 @@ export default function DashboardPage() {
     setTimeout(() => setRefreshTrigger(prev => prev + 1), 2000)
   }
 
-  // Auto-fetch data when user connects to Discogs
+  // Auto-fetch data when user connects to Discogs (only on first connection, not on refresh)
   useEffect(() => {
     const isConnected = user?.discogsUserId && user?.accessToken && user?.accessTokenSecret
-    if (isConnected && !hasAutoFetched) {
+    // Check if we already have data in context before auto-fetching
+    const hasExistingData = localStorage.getItem('waxvalue_has_data') === 'true'
+    
+    if (isConnected && !hasAutoFetched && !hasExistingData) {
       // Auto-fetch data after a short delay to ensure everything is loaded
       const timer = setTimeout(() => {
         inventoryTableRef.current?.simulate()
         setHasAutoFetched(true)
+        localStorage.setItem('waxvalue_has_data', 'true')
         // Trigger refresh of summary cards after auto-fetch
         setTimeout(() => setRefreshTrigger(prev => prev + 1), 3000)
       }, 1000)

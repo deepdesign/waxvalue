@@ -20,7 +20,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Global lock to prevent concurrent analysis
-analysis_lock = {}  # session_id -> is_running
+# Format: {session_id: {'locked': True, 'start_time': timestamp}}
+analysis_lock = {}
 
 def get_user_inventory_all_pages(client: DiscogsClient, username: str, first_page_data: Dict[str, Any] = None) -> List[Dict[str, Any]]:
     """Fetch all pages of user inventory"""
@@ -78,10 +79,16 @@ def get_user_inventory_all_pages(client: DiscogsClient, username: str, first_pag
 # Initialize FastAPI app
 app = FastAPI(title="WaxValue Backend", version="1.0.0")
 
-# CORS middleware
+# CORS middleware - use environment variable for frontend URL
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+allowed_origins = [FRONTEND_URL]
+# Add alternate localhost variants for local development
+if "localhost" in FRONTEND_URL or "127.0.0.1" in FRONTEND_URL:
+    allowed_origins.extend(["http://localhost:3000", "http://127.0.0.1:3000"])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -115,6 +122,7 @@ class User(BaseModel):
     email: str
     firstName: Optional[str] = None
     lastName: Optional[str] = None
+    avatar: Optional[str] = None
     discogsUserId: Optional[int] = None
     accessToken: Optional[str] = None
     accessTokenSecret: Optional[str] = None
@@ -280,7 +288,9 @@ async def setup_auth():
     
     try:
         oauth = DiscogsOAuth(consumer_key, consumer_secret)
-        request_token, request_token_secret = oauth.get_request_token("http://localhost:3000/auth/callback")
+        # Use environment variable for callback URL
+        callback_url = f"{FRONTEND_URL}/auth/callback"
+        request_token, request_token_secret = oauth.get_request_token(callback_url)
         auth_url = oauth.get_authorize_url(request_token)
         
         logger.info(f"OAuth setup complete, returning auth URL")
@@ -331,6 +341,8 @@ async def verify_auth(verification: dict, session_id: str = None):
         
         try:
             user_info = client.get_user_info()
+            logger.info(f"🔍 user_info from Discogs: {user_info.keys()}")
+            logger.info(f"🔍 avatar_url in user_info: {user_info.get('avatar_url')}")
         except Exception as e:
             logger.error(f"Failed to get user info from Discogs: {e}")
             user_info = {"username": "discogs_user", "id": 1}
@@ -354,7 +366,9 @@ async def verify_auth(verification: dict, session_id: str = None):
                     "priceChangeThreshold": 10.0,
                     "maxPriceIncrease": 50.0,
                     "minPriceDecrease": -25.0
-                }
+                },
+                "logs": [],
+                "suggestions": []
             })
         
         session = session_manager.get_session(session_id)
@@ -367,6 +381,7 @@ async def verify_auth(verification: dict, session_id: str = None):
             "email": user_info.get("email", user_data.get("email")),
             "firstName": user_info.get("first_name"),
             "lastName": user_info.get("last_name"),
+            "avatar": user_info.get("avatar_url"),
             "accessToken": access_token,
             "accessTokenSecret": access_token_secret
         })
@@ -374,8 +389,15 @@ async def verify_auth(verification: dict, session_id: str = None):
         # Save updated session data
         session_manager.update_session_data(session_id, "user", user_data)
         
+        # Debug logging
+        logger.info(f"Updated user_data: {user_data}")
+        logger.info(f"Avatar in user_data: {user_data.get('avatar')}")
+        
+        user_response = User(**user_data)
+        logger.info(f"User model avatar: {user_response.avatar}")
+        
         return {
-            "user": User(**user_data),
+            "user": user_response,
             "message": "Account connected successfully"
         }
     except Exception as e:
@@ -409,7 +431,7 @@ async def disconnect_auth(session_id: str = None):
 # Dashboard endpoints
 @app.get("/inventory/count")
 async def get_inventory_count(session_id: str = None):
-    """Get count of For Sale items in user's inventory"""
+    """Get count of For Sale items in user's inventory - instant from profile"""
     user = require_auth(session_id)
     require_discogs_auth(user)
     
@@ -425,39 +447,18 @@ async def get_inventory_count(session_id: str = None):
             access_token_secret=user.accessTokenSecret
         )
         
-        # Get user inventory count - use pagination data for fast count
+        # Get instant count from user profile (single API call, no pagination needed)
         try:
-            # Get first page to get pagination info and sample of listings
-            inventory = client.get_user_inventory(user.username, per_page=100)
-            pagination = inventory.get("pagination", {})
-            total_listings = pagination.get("items", 0)
+            user_profile = client.get_user_profile(user.username)
+            total_for_sale = user_profile.get('num_for_sale', 0)
+            total_listings = user_profile.get('num_listing', 0)  # Total inventory (all statuses)
             
-            # Get a sample of listings to estimate For Sale percentage
-            sample_listings = inventory.get("listings", [])
-            if sample_listings:
-                # Count For Sale items in the sample
-                sample_for_sale = len([listing for listing in sample_listings if listing.get("status") == "For Sale"])
-                sample_size = len(sample_listings)
-                
-                # Estimate total For Sale items based on sample
-                if sample_size > 0:
-                    for_sale_percentage = sample_for_sale / sample_size
-                    estimated_for_sale = int(total_listings * for_sale_percentage)
-                else:
-                    estimated_for_sale = 0
-                
-                logger.info(f"Total listings: {total_listings}, Sample size: {sample_size}, For Sale in sample: {sample_for_sale}, Estimated For Sale: {estimated_for_sale}")
-                
-                return {
-                    "totalForSale": estimated_for_sale,
-                    "totalListings": total_listings
-                }
-            else:
-                # No listings found
-                return {
-                    "totalForSale": 0,
-                    "totalListings": 0
-                }
+            logger.info(f"Instant count from profile: {total_for_sale} For Sale, {total_listings} total listings")
+            
+            return {
+                "totalForSale": total_for_sale,
+                "totalListings": total_listings
+            }
                 
         except Exception as e:
             logger.error(f"Error fetching inventory count: {e}")
@@ -488,18 +489,14 @@ async def get_dashboard_summary(session_id: str = None):
             access_token_secret=user.accessTokenSecret
         )
         
-        # Get user inventory count (For Sale items only) - fetch all pages for accurate count
+        # Get user inventory count (For Sale items only) - use instant profile call
         try:
-            all_listings = get_user_inventory_all_pages(client, user.username)
-            logger.info(f"Fetched {len(all_listings)} total listings for dashboard summary")
-            
-            # Count only "For Sale" items
-            for_sale_count = len([listing for listing in all_listings if listing.get("status") == "For Sale"])
-            total_listings = for_sale_count
-            logger.info(f"Dashboard summary: {total_listings} For Sale items")
+            user_profile = client.get_user_profile(user.username)
+            total_listings = user_profile.get('num_for_sale', 0)
+            logger.info(f"Dashboard summary: {total_listings} For Sale items (from profile)")
         except Exception as e:
-            logger.error(f"Error fetching inventory for dashboard: {e}")
-            # Fallback to basic count if pagination fails
+            logger.error(f"Error fetching profile for dashboard: {e}")
+            # Fallback to pagination count if profile fails
             try:
                 inventory = client.get_user_inventory(user.username, per_page=1)
                 basic_count = inventory.get("pagination", {}).get("items", 0)
@@ -553,16 +550,76 @@ async def get_suggestions_stream(session_id: str = None):
     user = require_auth(session_id)
     require_discogs_auth(user)
     
-    # Check if analysis is already running for this session
-    if analysis_lock.get(session_id, False):
-        logger.warning(f"Analysis already running for session {session_id[:10]}... - rejecting duplicate request")
-        async def already_running():
-            yield f"data: {json.dumps({'type': 'error', 'error': 'Analysis already in progress'})}\n\n"
-        return StreamingResponse(already_running(), media_type="text/plain")
+    # Check for existing complete cached data
+    session = session_manager.get_session(session_id)
+    cached_suggestions = session.get("suggestions", [])
+    analysis_complete = session.get("analysis_complete", None)
     
-    async def generate_suggestions():
+    # Backward compatibility: verify if existing suggestions are complete
+    if cached_suggestions and analysis_complete is None:
+        logger.info(f"Found {len(cached_suggestions)} cached suggestions without completion flag - verifying...")
+        try:
+            consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
+            consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
+            
+            client = DiscogsClient(
+                consumer_key=consumer_key,
+                consumer_secret=consumer_secret,
+                access_token=user.accessToken,
+                access_token_secret=user.accessTokenSecret
+            )
+            
+            user_profile = client.get_user_profile(user.username)
+            expected_count = user_profile.get('num_for_sale', 0)
+            
+            if len(cached_suggestions) == expected_count:
+                logger.info(f"Cached suggestions count matches expected ({expected_count}) - marking as complete")
+                session_manager.update_session_data(session_id, "analysis_complete", True)
+                analysis_complete = True
+            else:
+                logger.info(f"Cached suggestions ({len(cached_suggestions)}) doesn't match expected ({expected_count}) - will refresh")
+                analysis_complete = False
+        except Exception as e:
+            logger.warning(f"Could not verify cached suggestions: {e}")
+            analysis_complete = False
+    
+    # If we have complete cached data, return it via streaming format
+    if cached_suggestions and analysis_complete:
+        logger.info(f"Returning {len(cached_suggestions)} complete cached suggestions via streaming")
+        
+        async def stream_cached():
+            # Send instant total
+            yield f"data: {json.dumps({'type': 'total', 'total': len(cached_suggestions)})}\n\n"
+            
+            # Send completion with all suggestions
+            yield f"data: {json.dumps({'type': 'complete', 'suggestions': cached_suggestions, 'totalItems': len(cached_suggestions)})}\n\n"
+        
+        return StreamingResponse(stream_cached(), media_type="text/event-stream")
+    
+    # Check if analysis is already running for this session (with timeout)
+    LOCK_TIMEOUT = 600  # 10 minutes
+    current_time = time.time()
+    
+    if session_id in analysis_lock:
+        lock_data = analysis_lock[session_id]
+        lock_age = current_time - lock_data.get('start_time', current_time)
+        
+        if lock_age < LOCK_TIMEOUT:
+            # Lock is still valid
+            logger.warning(f"Analysis already running for session {session_id[:10]}... (running for {int(lock_age)}s) - rejecting duplicate request")
+            async def already_running():
+                yield f"data: {json.dumps({'type': 'error', 'error': 'Analysis already in progress'})}\n\n"
+            return StreamingResponse(already_running(), media_type="text/event-stream")
+        else:
+            # Lock expired, clear it
+            logger.warning(f"Analysis lock expired for session {session_id[:10]}... (age: {int(lock_age)}s), clearing stale lock")
+            del analysis_lock[session_id]
+    
+    def generate_suggestions():
         # Set lock to prevent concurrent analysis
-        analysis_lock[session_id] = True
+        analysis_lock[session_id] = {'locked': True, 'start_time': time.time()}
+        # Reset analysis_complete flag to indicate fresh analysis
+        session_manager.update_session_data(session_id, "analysis_complete", False)
         logger.info(f"Started analysis for session {session_id[:10]}... (lock acquired)")
         
         try:
@@ -586,9 +643,10 @@ async def get_suggestions_stream(session_id: str = None):
                 return
             
             # Get user profile to get instant "For Sale" count
+            # Use direct profile endpoint instead of get_user_info() to avoid 2 API calls
             logger.info("Getting user profile for instant count...")
             try:
-                user_profile = client.get_user_info()
+                user_profile = client.get_user_profile(username)
                 instant_for_sale_count = user_profile.get('num_for_sale', 0)
                 logger.info(f"User profile shows {instant_for_sale_count} For Sale items")
                 
@@ -817,6 +875,7 @@ async def get_suggestions_stream(session_id: str = None):
             
             # Save suggestions to session for persistence
             session_manager.update_session_data(session_id, "suggestions", [s.dict() for s in suggestions])
+            session_manager.update_session_data(session_id, "analysis_complete", True)
             logger.info(f"Saved {len(suggestions)} suggestions to session")
             
             # Send completion
@@ -831,7 +890,7 @@ async def get_suggestions_stream(session_id: str = None):
                 del analysis_lock[session_id]
                 logger.info(f"Analysis completed for session {session_id[:10]}... (lock released)")
     
-    return StreamingResponse(generate_suggestions(), media_type="text/plain")
+    return StreamingResponse(generate_suggestions(), media_type="text/event-stream")
 
 @app.get("/inventory/suggestions")
 async def get_suggestions(session_id: str = None):
@@ -843,8 +902,41 @@ async def get_suggestions(session_id: str = None):
         # Check if we have cached suggestions in the session first
         session = session_manager.get_session(session_id)
         cached_suggestions = session.get("suggestions", [])
+        analysis_complete = session.get("analysis_complete", None)
         
-        if cached_suggestions:
+        # Backward compatibility: if analysis_complete flag doesn't exist but we have suggestions,
+        # verify completeness by checking count against user profile
+        if cached_suggestions and analysis_complete is None:
+            logger.info(f"Found {len(cached_suggestions)} cached suggestions without completion flag - verifying...")
+            try:
+                # Initialize Discogs client
+                consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
+                consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
+                
+                client = DiscogsClient(
+                    consumer_key=consumer_key,
+                    consumer_secret=consumer_secret,
+                    access_token=user.accessToken,
+                    access_token_secret=user.accessTokenSecret
+                )
+                
+                user_profile = client.get_user_profile(user.username)
+                expected_count = user_profile.get('num_for_sale', 0)
+                
+                # If cached count matches expected count, mark as complete
+                if len(cached_suggestions) == expected_count:
+                    logger.info(f"Cached suggestions count matches expected ({expected_count}) - marking as complete")
+                    session_manager.update_session_data(session_id, "analysis_complete", True)
+                    analysis_complete = True
+                else:
+                    logger.info(f"Cached suggestions ({len(cached_suggestions)}) doesn't match expected ({expected_count}) - incomplete")
+                    analysis_complete = False
+            except Exception as e:
+                logger.warning(f"Could not verify cached suggestions: {e}")
+                analysis_complete = False
+        
+        # Only return cached suggestions if the analysis was completed
+        if cached_suggestions and analysis_complete:
             logger.info(f"Returning {len(cached_suggestions)} cached suggestions from session")
             return {
                 "suggestions": cached_suggestions,
@@ -852,6 +944,10 @@ async def get_suggestions(session_id: str = None):
                 "totalItems": len(cached_suggestions),
                 "message": f"Found {len(cached_suggestions)} pricing suggestions (cached)"
             }
+        
+        # If we have partial results but analysis not complete, don't return them
+        if cached_suggestions and not analysis_complete:
+            logger.info(f"Ignoring {len(cached_suggestions)} partial cached suggestions - analysis incomplete")
         
         logger.info("No cached suggestions, running fresh analysis...")
         
@@ -1528,6 +1624,7 @@ async def get_user_profile(session_id: str = None):
             "location": profile.get("location"),
             "profile": profile.get("profile"),
             "curr_abbr": profile.get("curr_abbr"),
+            "avatar": profile.get("avatar_url"),
             "id": profile.get("id"),
             "resource_url": profile.get("resource_url")
         }
@@ -1539,6 +1636,52 @@ async def get_user_profile(session_id: str = None):
         logger.error(f"Error getting user profile: {e}")
         logger.error(f"User data: {user}")
         raise HTTPException(status_code=500, detail=f"Failed to get user profile: {str(e)}")
+
+@app.post("/auth/refresh-avatar")
+async def refresh_avatar(session_id: str = None):
+    """Refresh user's avatar from Discogs and update session"""
+    user = require_auth(session_id)
+    require_discogs_auth(user)
+    
+    try:
+        # Initialize Discogs client
+        consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
+        consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
+        
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
+        
+        # Get user profile from Discogs (includes avatar_url)
+        logger.info(f"Refreshing avatar for user: {user.username}")
+        profile = client.get_user_info()
+        avatar_url = profile.get("avatar_url")
+        
+        if avatar_url:
+            # Update session with avatar
+            session = session_manager.get_session(session_id)
+            user_data = session["user"]
+            user_data["avatar"] = avatar_url
+            session_manager.update_session_data(session_id, "user", user_data)
+            
+            logger.info(f"Avatar updated for user {user.username}: {avatar_url}")
+            return {
+                "avatar": avatar_url,
+                "message": "Avatar refreshed successfully"
+            }
+        else:
+            logger.warning(f"No avatar found for user {user.username}")
+            return {
+                "avatar": None,
+                "message": "No avatar available"
+            }
+        
+    except Exception as e:
+        logger.error(f"Error refreshing avatar: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to refresh avatar: {str(e)}")
 
 @app.get("/logs")
 async def get_logs(session_id: str = None):

@@ -43,7 +43,7 @@ export default function AutomationPage() {
             <ExclamationTriangleIcon className="h-6 w-6 text-yellow-600 dark:text-yellow-400 mt-0.5 mr-3 flex-shrink-0" />
             <div>
               <h3 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
-                Automation Features Coming Soon
+                Automation features coming soon
               </h3>
               <p className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
                 Automated pricing updates are currently in development. Configure your preferences below and they will take effect once automation goes live. All automation features include multiple safety guardrails to protect your inventory.
@@ -59,7 +59,7 @@ export default function AutomationPage() {
           {/* What's Included */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              How Automation Will Work
+              How automation will work
             </h3>
             
             <div className="space-y-4">
@@ -73,10 +73,10 @@ export default function AutomationPage() {
                 </div>
                 <div className="ml-4">
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    Daily Price Analysis
+                    Daily price analysis
                   </h4>
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    WaxValue will analyze your inventory daily and identify pricing opportunities based on real market data
+                    Waxvalue will analyse your inventory daily and identify pricing opportunities based on real market data
                   </p>
                 </div>
               </div>
@@ -91,7 +91,7 @@ export default function AutomationPage() {
                 </div>
                 <div className="ml-4">
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    Safe Auto-Apply
+                    Safe auto-apply
                   </h4>
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     Only price increases within your threshold will auto-apply. Price decreases and large changes always require your approval
@@ -109,7 +109,7 @@ export default function AutomationPage() {
                 </div>
                 <div className="ml-4">
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    Full Activity Log
+                    Full activity log
                   </h4>
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     Every automated change is logged with before/after prices, timestamps, and the ability to review or reverse changes

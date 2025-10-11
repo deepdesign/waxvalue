@@ -18,6 +18,7 @@ export interface PriceSuggestion {
   title: string
   label: string
   imageUrl?: string
+  originalIndex?: number  // For stable sort order
   release?: any
 }
 

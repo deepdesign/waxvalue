@@ -1,4 +1,4 @@
-// API Client for WaxValue - Real Discogs Integration Only
+// API Client for waxvalue - Real Discogs Integration Only
 // No mock data - uses real Discogs API and user sessions
 
 export type RepriceScope = 'global' | 'selection' | 'item';

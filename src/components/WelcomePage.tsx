@@ -49,7 +49,7 @@ export function WelcomePage() {
             <div className="flex justify-center mb-8">
               <img 
                 src="/svg/light/waxvalue-horizontal-light.svg" 
-                alt="WaxValue" 
+                alt="waxvalue" 
                 className="h-24 w-auto"
               />
             </div>
@@ -134,7 +134,7 @@ export function WelcomePage() {
                 2
               </div>
                 <h3 className="font-semibold text-gray-900 mb-2">Fetch Inventory</h3>
-                <p className="text-sm text-gray-600">We analyze your current listings and market data</p>
+                <p className="text-sm text-gray-600">We analyse your current listings and market data</p>
               </div>
               
               <div className="text-center">
@@ -158,7 +158,7 @@ export function WelcomePage() {
 
         {/* CTA Section */}
         <div className="py-16 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to optimize your Discogs pricing?</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to optimise your Discogs pricing?</h2>
           <p className="text-gray-600 mb-8">Connect your Discogs account to get started in seconds.</p>
           <Button
             onClick={handleConnectDiscogs}

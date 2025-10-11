@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { buildBackendUrl } from '@/lib/api-config'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
     
     const body = await request.json()
     
-    const response = await fetch(`http://127.0.0.1:8000/inventory/apply?session_id=${sessionId}`, {
+    const response = await fetch(buildBackendUrl(`inventory/apply?session_id=${sessionId}`), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

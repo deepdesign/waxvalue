@@ -6,6 +6,7 @@ import {
   ShieldCheckIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
+import { loadAutomationRules, saveAutomationRules } from '@/lib/automationRules'
 
 // Simple Toggle Switch Component
 function Toggle({ checked, onChange, className = '' }: { checked: boolean; onChange: (checked: boolean) => void; className?: string }) {
@@ -30,19 +31,7 @@ function Toggle({ checked, onChange, className = '' }: { checked: boolean; onCha
 }
 
 export function AutomationRulesCard() {
-  const [rules, setRules] = useState({
-    enabled: false,
-    autoApplyIncreases: false,
-    autoApplyThreshold: 10, // Only auto-apply if increase is less than X%
-    maxPriceChange: 20, // Never change price more than $X
-    minPriceFloor: 1, // Never set price below $X
-    maxPriceCeiling: 1000, // Never set price above $X
-    excludeConditions: [] as string[],
-    onlyUnderpriced: true,
-    batchLimit: 50, // Max items to update per run
-    requireReview: true,
-  })
-
+  const [rules, setRules] = useState(loadAutomationRules())
   const [hasChanges, setHasChanges] = useState(false)
 
   const handleToggle = (key: keyof typeof rules, value: any) => {
@@ -51,17 +40,17 @@ export function AutomationRulesCard() {
   }
 
   const handleSave = () => {
-    // Save to localStorage for now (would be backend in production)
-    localStorage.setItem('waxvalue_automation_rules', JSON.stringify(rules))
+    saveAutomationRules(rules)
     toast.success('Automation rules saved successfully')
     setHasChanges(false)
+    
+    // Trigger storage event for other components
+    window.dispatchEvent(new Event('storage'))
   }
 
   const handleReset = () => {
-    const saved = localStorage.getItem('waxvalue_automation_rules')
-    if (saved) {
-      setRules(JSON.parse(saved))
-    }
+    const savedRules = loadAutomationRules()
+    setRules(savedRules)
     setHasChanges(false)
   }
 
@@ -72,7 +61,7 @@ export function AutomationRulesCard() {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Auto-Apply Rules
+              Auto-apply rules
             </h3>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
               Automatically apply price suggestions that meet your criteria
@@ -163,7 +152,7 @@ export function AutomationRulesCard() {
                       id="onlyUnderpriced"
                       checked={rules.onlyUnderpriced}
                       onChange={(e) => handleToggle('onlyUnderpriced', e.target.checked)}
-                      className="h-4 w-4 mt-0.5 rounded border-gray-300 dark:border-gray-600 text-primary-600"
+                      className="table-checkbox mt-0.5"
                     />
                     <div className="ml-3">
                       <label htmlFor="onlyUnderpriced" className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -291,7 +280,7 @@ export function AutomationRulesCard() {
                             : rules.excludeConditions.filter(c => c !== condition)
                           handleToggle('excludeConditions', newConditions)
                         }}
-                        className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
+                        className="table-checkbox"
                       />
                       <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                         {condition}

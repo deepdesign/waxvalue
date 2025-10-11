@@ -169,7 +169,13 @@ div.table-container-fix,
 
 /* Fade-out animation for applied items */
 .fade-out-row {
-  animation: fadeOutCollapse 500ms ease-out forwards;
+  animation: fadeOutCollapse 300ms ease-out forwards;
+}
+
+/* Smooth row repositioning after apply - creates a slide effect */
+tbody tr,
+.card {
+  transition: transform 200ms ease-in-out, opacity 200ms ease-in-out, background-color 150ms ease-in-out;
 }
 
 /* Custom checkbox styling for table */
@@ -187,8 +193,8 @@ input[type="checkbox"].table-checkbox {
 }
 
 .dark input[type="checkbox"].table-checkbox {
-  border-color: rgb(55 65 81); /* gray-700 */
-  background-color: rgb(17 24 39); /* gray-900 - matches main site background */
+  border-color: rgb(107 114 128); /* gray-500 - 2 shades lighter */
+  background-color: rgb(55 65 81); /* gray-700 - 2 shades lighter */
 }
 
 input[type="checkbox"].table-checkbox:hover {
@@ -196,7 +202,7 @@ input[type="checkbox"].table-checkbox:hover {
 }
 
 .dark input[type="checkbox"].table-checkbox:hover {
-  border-color: rgb(107 114 128); /* gray-500 */
+  border-color: rgb(156 163 175); /* gray-400 - lighter on hover */
 }
 
 input[type="checkbox"].table-checkbox:checked {

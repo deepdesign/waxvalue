@@ -53,7 +53,7 @@ export function AuthPage() {
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {mode === 'login' 
                 ? 'Sign in to your account to continue' 
-                : 'Get started with WaxValue today'
+                : 'Get started with Waxvalue today'
               }
             </p>
           </div>
@@ -73,7 +73,7 @@ export function AuthPage() {
       </div>
       
       <p className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
-        By using WaxValue, you agree to our{' '}
+        By using Waxvalue, you agree to our{' '}
         <Link href="/terms" className="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300">
           Terms of Service
         </Link>{' '}

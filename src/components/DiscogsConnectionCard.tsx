@@ -74,9 +74,9 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
       // Redirect to Discogs authorization page in the same window
       window.location.href = result.authUrl
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Connection error:', error)
-      alert(`Failed to connect to Discogs: ${error.message}`)
+      alert(`Failed to connect to Discogs: ${error?.message || 'Unknown error'}`)
     } finally {
       setIsConnecting(false)
     }
@@ -171,7 +171,7 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Discogs Connection</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Discogs connection</h2>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage your Discogs account integration</p>
         </div>
         <div className="p-6">
@@ -184,7 +184,7 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
             <div className="ml-4 flex-1">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Discogs Account</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Discogs account</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">Connected</p>
                 </div>
                 <div className="text-right">
@@ -241,7 +241,7 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Discogs Connection</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Discogs connection</h2>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Connect your Discogs account to enable automated pricing</p>
       </div>
       <div className="p-6">
@@ -253,9 +253,9 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
               </div>
             </div>
             
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Complete Your Connection</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Complete your connection</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-              Great! You've authorized WaxValue on Discogs. Enter the verification code below to complete the connection.
+              Great! You've authorized Waxvalue on Discogs. Enter the verification code below to complete the connection.
             </p>
             
             <div className="space-y-4">
@@ -302,10 +302,10 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
               </div>
             </div>
             
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Connect Your Discogs Account</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Connect your Discogs account</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
               Link your Discogs account to unlock automated pricing suggestions and market analysis. 
-              You'll be redirected to Discogs to authorize WaxValue access to your account.
+              You'll be redirected to Discogs to authorize Waxvalue access to your account.
             </p>
             
             <div className="space-y-3">

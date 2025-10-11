@@ -11,7 +11,7 @@ import { Tooltip } from '@/components/ui/Tooltip'
 
 export interface FilterState {
   status: string // underpriced, overpriced, fairly_priced, all
-  priceDirection: string // increase, decrease, all
+  priceDirection: string // underpriced, overpriced, all
   condition: string
   priceRange: {
     min: number | null
@@ -32,13 +32,13 @@ const statusOptions = [
   { value: '', label: 'All Status' },
   { value: 'underpriced', label: 'Underpriced' },
   { value: 'overpriced', label: 'Overpriced' },
-  { value: 'fairly_priced', label: 'Fairly Priced' },
+  { value: 'fairly_priced', label: 'Fairly priced' },
 ]
 
 const priceDirectionOptions = [
   { value: '', label: 'All Changes' },
-  { value: 'increase', label: 'Price Increase' },
-  { value: 'decrease', label: 'Price Decrease' },
+  { value: 'underpriced', label: 'Underpriced' },
+  { value: 'overpriced', label: 'Overpriced' },
 ]
 
 const conditionOptions = [
@@ -254,7 +254,7 @@ export function FiltersBar({
                     type="checkbox"
                     checked={filters.showFlaggedOnly}
                     onChange={(e) => handleFilterChange('showFlaggedOnly', e.target.checked)}
-                    className="h-4 w-4 text-primary-600 dark:text-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
+                    className="table-checkbox"
                   />
                   <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                     Show flagged only
@@ -283,7 +283,7 @@ export function FiltersBar({
                 
                 {filters.priceDirection && (
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200">
-                    Direction: {filters.priceDirection === 'increase' ? 'Increase' : 'Decrease'}
+                    {filters.priceDirection === 'underpriced' ? 'Underpriced' : 'Overpriced'}
                     <button
                       onClick={() => handleFilterChange('priceDirection', '')}
                       className="ml-1 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"

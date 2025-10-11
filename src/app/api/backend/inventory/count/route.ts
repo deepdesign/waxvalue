@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { buildBackendUrl } from '@/lib/api-config'
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 })
     }
     
-    const response = await fetch(`http://127.0.0.1:8000/inventory/count?session_id=${sessionId}`, {
+    const response = await fetch(buildBackendUrl(`inventory/count?session_id=${sessionId}`), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

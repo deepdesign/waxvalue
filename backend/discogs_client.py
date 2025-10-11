@@ -488,6 +488,19 @@ class DiscogsClient:
         response = self._make_request('DELETE', endpoint)
         return True  # DELETE returns empty response on success
     
+    def get_user_profile(self, username: str) -> Dict[str, Any]:
+        """
+        Get user profile by username (single API call)
+        
+        Args:
+            username: Discogs username
+            
+        Returns:
+            User profile including num_for_sale, num_collection, etc.
+        """
+        endpoint = f"/users/{username}"
+        return self._make_request('GET', endpoint)
+    
     def get_user_info(self) -> Dict[str, Any]:
         """
         Get authenticated user's information using the correct Discogs API endpoint
@@ -508,8 +521,7 @@ class DiscogsClient:
                 username = identity_response['username']
                 try:
                     # Get full profile information
-                    profile_endpoint = f"/users/{username}"
-                    profile_response = self._make_request('GET', profile_endpoint)
+                    profile_response = self.get_user_profile(username)
                     logger.info(f"Got profile response: {profile_response}")
                     logger.info(f"Profile response keys: {list(profile_response.keys()) if isinstance(profile_response, dict) else 'Not a dict'}")
                     

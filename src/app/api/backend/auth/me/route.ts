@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { buildBackendUrl } from '@/lib/api-config'
 
 export async function GET(request: NextRequest) {
   try {

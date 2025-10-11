@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { buildBackendUrl } from '@/lib/api-config'
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,10 +14,10 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    const response = await fetch(`http://127.0.0.1:8000/inventory/suggestions/stream?session_id=${sessionId}`, {
+    const response = await fetch(buildBackendUrl(`inventory/suggestions/stream?session_id=${sessionId}`), {
       method: 'GET',
       headers: {
-        'Content-Type': 'text/plain',
+        'Accept': 'text/event-stream',
       },
     })
 
@@ -28,13 +29,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Return the streaming response
+    // Return the streaming response with correct SSE headers
     return new NextResponse(response.body, {
       status: response.status,
       headers: {
-        'Content-Type': 'text/plain',
-        'Cache-Control': 'no-cache',
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache, no-transform',
         'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no',
       },
     })
   } catch (error) {

@@ -141,7 +141,7 @@ export default function SettingsPage() {
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Discogs Profile</h2>
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Discogs profile</h2>
                     <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Your Discogs account information and preferences</p>
                   </div>
                   {userProfile?.username && (

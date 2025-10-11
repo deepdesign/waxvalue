@@ -73,7 +73,7 @@ jspm_packages/
 
 # Gatsby files
 .cache/
-# public - REMOVED: We need public folder for Next.js assets
+public
 
 # Storybook build outputs
 .out

@@ -3,7 +3,7 @@
 import { useApp } from '@/components/Providers'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { WelcomePage } from '@/components/WelcomePage'
+import { LandingHeroSplit4 } from '@/components/landing-alternatives'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 
 export default function Home() {
@@ -21,7 +21,7 @@ export default function Home() {
   }
 
   if (!user) {
-    return <WelcomePage />
+    return <LandingHeroSplit4 />
   }
 
   return null

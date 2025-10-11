@@ -51,6 +51,11 @@ export function Providers({ children }: { children: ReactNode }) {
             const userData = JSON.parse(storedUser)
             setUser(userData)
             setIsLoading(false)
+            
+            // If user has Discogs connection but no avatar, fetch it
+            if (userData.discogsUserId && !userData.avatar) {
+              fetchAvatarInBackground(userData)
+            }
             return
           } catch (parseError) {
             console.error('Failed to parse stored user data:', parseError)
@@ -67,6 +72,11 @@ export function Providers({ children }: { children: ReactNode }) {
             const userData = await response.json()
             setUser(userData)
             localStorage.setItem('waxvalue_user', JSON.stringify(userData))
+            
+            // If user has Discogs connection but no avatar, fetch it
+            if (userData.discogsUserId && !userData.avatar) {
+              fetchAvatarInBackground(userData)
+            }
           }
         }
       } catch (error) {
@@ -76,6 +86,28 @@ export function Providers({ children }: { children: ReactNode }) {
         localStorage.removeItem('waxvalue_token')
       } finally {
         setIsLoading(false)
+      }
+    }
+
+    // Fetch avatar in background and update user
+    const fetchAvatarInBackground = async (currentUser: User) => {
+      try {
+        const response = await fetch('/api/backend/auth/refresh-avatar', {
+          method: 'POST',
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.avatar) {
+            const updatedUser = { ...currentUser, avatar: data.avatar }
+            setUser(updatedUser)
+            localStorage.setItem('waxvalue_user', JSON.stringify(updatedUser))
+            console.log('Avatar refreshed successfully')
+          }
+        }
+      } catch (error) {
+        console.error('Failed to refresh avatar:', error)
+        // Non-critical error, don't show to user
       }
     }
 

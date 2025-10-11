@@ -115,6 +115,7 @@ class User(BaseModel):
     email: str
     firstName: Optional[str] = None
     lastName: Optional[str] = None
+    avatar: Optional[str] = None
     discogsUserId: Optional[int] = None
     accessToken: Optional[str] = None
     accessTokenSecret: Optional[str] = None
@@ -331,6 +332,8 @@ async def verify_auth(verification: dict, session_id: str = None):
         
         try:
             user_info = client.get_user_info()
+            logger.info(f"🔍 user_info from Discogs: {user_info.keys()}")
+            logger.info(f"🔍 avatar_url in user_info: {user_info.get('avatar_url')}")
         except Exception as e:
             logger.error(f"Failed to get user info from Discogs: {e}")
             user_info = {"username": "discogs_user", "id": 1}
@@ -354,7 +357,9 @@ async def verify_auth(verification: dict, session_id: str = None):
                     "priceChangeThreshold": 10.0,
                     "maxPriceIncrease": 50.0,
                     "minPriceDecrease": -25.0
-                }
+                },
+                "logs": [],
+                "suggestions": []
             })
         
         session = session_manager.get_session(session_id)
@@ -367,6 +372,7 @@ async def verify_auth(verification: dict, session_id: str = None):
             "email": user_info.get("email", user_data.get("email")),
             "firstName": user_info.get("first_name"),
             "lastName": user_info.get("last_name"),
+            "avatar": user_info.get("avatar_url"),
             "accessToken": access_token,
             "accessTokenSecret": access_token_secret
         })
@@ -374,8 +380,15 @@ async def verify_auth(verification: dict, session_id: str = None):
         # Save updated session data
         session_manager.update_session_data(session_id, "user", user_data)
         
+        # Debug logging
+        logger.info(f"🔍 Updated user_data: {user_data}")
+        logger.info(f"🔍 Avatar in user_data: {user_data.get('avatar')}")
+        
+        user_response = User(**user_data)
+        logger.info(f"🔍 User model avatar: {user_response.avatar}")
+        
         return {
-            "user": User(**user_data),
+            "user": user_response,
             "message": "Account connected successfully"
         }
     except Exception as e:

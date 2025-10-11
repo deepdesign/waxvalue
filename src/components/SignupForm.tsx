@@ -251,7 +251,7 @@ export function SignupForm({ onAuthSuccess, onSwitchToLogin }: SignupFormProps) 
               type="checkbox"
               checked={agreedToTerms}
               onChange={(e) => setAgreedToTerms(e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-400 dark:bg-gray-700"
+              className="table-checkbox mt-1"
             />
             <label htmlFor="terms" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               I agree to the{' '}

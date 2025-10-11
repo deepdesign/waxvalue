@@ -40,13 +40,15 @@ export function Logo({
       sm: 'h-12',
       md: 'h-16',
       lg: 'h-20',
-      xl: 'h-24'
+      xl: 'h-24',
+      '2xl': 'h-32'
     },
     brandmark: {
       sm: 'h-8',
       md: 'h-12',
       lg: 'h-16',
-      xl: 'h-20'
+      xl: 'h-20',
+      '2xl': 'h-24'
     }
   }
   
@@ -81,7 +83,7 @@ export function Logo({
       <img
         key={logoPath}
         src={logoPath}
-        alt="WaxValue"
+        alt="waxvalue"
         className="w-auto h-full object-contain"
       />
     </div>

@@ -29,7 +29,7 @@ export function OnboardingBanner({ onDismiss }: OnboardingBannerProps) {
             Connect your Discogs account to get started
           </h3>
           <p className="mt-1 text-sm text-blue-700">
-            WaxValue requires a Discogs connection to analyze your inventory and provide pricing suggestions. 
+            Waxvalue requires a Discogs connection to analyse your inventory and provide pricing suggestions. 
             This is the only way to access the app&apos;s core functionality.
           </p>
           <div className="mt-3">

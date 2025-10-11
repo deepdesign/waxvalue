@@ -6,7 +6,10 @@ export interface User {
   email: string
   firstName?: string
   lastName?: string
+  name?: string
+  avatar?: string
   accessToken?: string
+  accessTokenSecret?: string
   createdAt: string
   updatedAt: string
 }
@@ -86,6 +89,8 @@ export interface PriceSuggestion {
   title?: string
   label?: string
   imageUrl?: string
+  originalIndex?: number  // For stable sort order during user interactions
+  originalPrice?: number  // Original price before applying changes (for "Recently Updated" display)
   // Legacy fields for compatibility
   confidence?: 'high' | 'medium' | 'low'
   reasoning?: string

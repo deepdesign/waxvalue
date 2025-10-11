@@ -83,7 +83,7 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
       localStorage.setItem('waxvalue_token', result.token)
       
       onRegisterSuccess(result.user)
-      toast.success('Account created successfully! Welcome to WaxValue!')
+      toast.success('Account created successfully! Welcome to Waxvalue!')
     } catch (error) {
       console.error('Registration error:', error)
       toast.error(error instanceof Error ? error.message : 'Registration failed')
@@ -95,8 +95,8 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-600 p-6 max-w-md mx-auto">
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Create Account</h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">Join WaxValue and start optimizing your Discogs pricing</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Create account</h2>
+        <p className="text-gray-600 dark:text-gray-400 mt-2">Join Waxvalue and start optimising your Discogs pricing</p>
       </div>
 
       <form onSubmit={handleSubmit(handleRegister)} className="space-y-6">
@@ -225,7 +225,7 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
                 {...register('agreeToTerms')}
                 id="agreeToTerms"
                 type="checkbox"
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                className="table-checkbox"
               />
             </div>
             <div className="ml-3 text-sm">
@@ -252,7 +252,7 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFor
           loadingText="Creating account..."
           className="w-full"
         >
-          Create Account
+          Create account
         </Button>
       </form>
 

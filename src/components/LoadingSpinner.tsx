@@ -16,7 +16,7 @@ export function LoadingSpinner() {
             <path className="wave-line wave-line-9" d="M48.91,15l-0.12,0A1,1,0,0,0,48,16v6a1,1,0,1,0,2,0s0,0,0,0V16a1,1,0,0,0-1-1H48.91Z"/>
           </svg>
         </div>
-        <p className="text-gray-600 dark:text-gray-400">Loading WaxValue...</p>
+        <p className="text-gray-600 dark:text-gray-400">Loading Waxvalue...</p>
       </div>
     </div>
   )

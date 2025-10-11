@@ -24,7 +24,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Automation', href: '/automation', icon: CpuChipIcon },
   { name: 'Settings', href: '/settings', icon: CogIcon },
-  { name: 'Help & Support', href: '/help', icon: QuestionMarkCircleIcon },
+  { name: 'Help & support', href: '/help', icon: QuestionMarkCircleIcon },
 ]
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -33,6 +33,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { user, logout } = useApp()
+  
+  // Debug: Log user data to console
+  useEffect(() => {
+    if (user) {
+      console.log('🔍 DashboardLayout user data:', user)
+      console.log('🔍 User avatar:', user.avatar)
+    }
+  }, [user])
 
   // Monitor background analysis progress
   useEffect(() => {
@@ -135,9 +143,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="flex-shrink-0">
                 {user?.avatar ? (
                   <img
-                    className="h-8 w-8 rounded-full"
+                    className="h-8 w-8 rounded-full object-cover"
                     src={user.avatar}
                     alt={user.name || user.username}
+                    onError={(e) => {
+                      console.error('Avatar failed to load:', user.avatar)
+                      e.currentTarget.style.display = 'none'
+                    }}
                   />
                 ) : (
                   <div className="h-8 w-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
@@ -209,9 +221,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="flex-shrink-0">
                 {user?.avatar ? (
                   <img
-                    className="h-8 w-8 rounded-full"
+                    className="h-8 w-8 rounded-full object-cover"
                     src={user.avatar}
                     alt={user.name || user.username}
+                    onError={(e) => {
+                      console.error('Avatar failed to load:', user.avatar)
+                      e.currentTarget.style.display = 'none'
+                    }}
                   />
                 ) : (
                   <div className="h-8 w-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">

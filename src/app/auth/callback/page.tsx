@@ -62,7 +62,7 @@ function AuthCallbackContent() {
           console.log('Created new session ID for OAuth flow:', sessionId.substring(0, 10) + '...')
         }
 
-        // Verify the authorization with the backend
+        // Verify the authorisation with the backend
         const response = await fetch(`/api/backend/auth/verify?session_id=${sessionId}`, {
           method: 'POST',
           headers: {
@@ -78,10 +78,15 @@ function AuthCallbackContent() {
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
           console.error('Verification failed:', response.status, errorData)
-          throw new Error(errorData.detail || `Failed to verify authorization: ${response.status}`)
+          throw new Error(errorData.detail || `Failed to verify authorisation: ${response.status}`)
         }
 
         const result = await response.json()
+        
+        // Debug logging
+        console.log('OAuth result:', result)
+        console.log('User data:', result.user)
+        console.log('Avatar URL:', result.user?.avatar)
 
         // Update user state in both localStorage and React context
         localStorage.setItem('waxvalue_user', JSON.stringify(result.user))
@@ -102,7 +107,7 @@ function AuthCallbackContent() {
       } catch (error) {
         console.error('Auth callback error:', error)
         setStatus('error')
-        setMessage(error instanceof Error ? error.message : 'Failed to complete authorization')
+        setMessage(error instanceof Error ? error.message : 'Failed to complete authorisation')
       }
     }
 
@@ -117,10 +122,10 @@ function AuthCallbackContent() {
             <>
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                Completing Authorization...
+                Completing authorisation...
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                Please wait while we complete your Discogs authorization.
+                Please wait while we complete your Discogs authorisation.
               </p>
             </>
           )}
@@ -129,7 +134,7 @@ function AuthCallbackContent() {
             <>
               <CheckCircleIcon className="h-12 w-12 text-green-600 mx-auto mb-4" />
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                Authorization Successful!
+                Authorisation Successful!
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
                 {message}
@@ -144,7 +149,7 @@ function AuthCallbackContent() {
             <>
               <ExclamationTriangleIcon className="h-12 w-12 text-red-600 mx-auto mb-4" />
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                Authorization Failed
+                Authorisation Failed
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
                 {message}
