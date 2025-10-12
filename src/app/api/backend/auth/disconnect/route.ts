@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    const response = await fetch(`${process.env.BACKEND_URL || 'http://127.0.0.1:8000'}/auth/disconnect?session_id=${sessionId}`, {
+    const response = await fetch(buildBackendUrl(`auth/disconnect?session_id=${sessionId}`), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
