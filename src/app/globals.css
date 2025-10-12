@@ -18,28 +18,24 @@
     @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200;
   }
   
-  /* Smooth transitions for theme changes */
+  /* Smooth transitions for theme changes and prevent text selection by default */
   * {
     @apply transition-colors duration-200;
-  }
-  
-  /* Prevent text selection on UI elements */
-  button, [role="button"], .card, th, .no-select, 
-  label, h1, h2, h3, h4, h5, h6,
-  [class*="badge"], [class*="chip"], [class*="tag"],
-  nav, header, footer, aside {
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
   }
   
-  /* Allow text selection only in content areas */
-  p, td, input, textarea, [contenteditable="true"], .allow-select {
-    user-select: text;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
+  /* Allow text selection only in content areas and inputs */
+  p, td, li, input, textarea, pre, code,
+  [contenteditable="true"], .allow-select,
+  [class*="prose"], [class*="content"],
+  .text-selectable {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
   }
   
   /* Ensure proper contrast in dark mode */
