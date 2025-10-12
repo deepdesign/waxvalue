@@ -180,11 +180,20 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
       })
     }
     
+    // Check if analysis is still running (restored from localStorage)
+    const progressData = localStorage.getItem('waxvalue_analysis_progress')
+    const analysisStillRunning = progressData ? JSON.parse(progressData).isRunning : false
+    
     // Only fetch suggestions if we haven't initialized yet
     // This prevents unnecessary refetches when navigating back to the dashboard
     if (!hasInitialized) {
       // Don't set loading true here - let fetchSuggestions handle it
       // This prevents flickering when cached data is returned instantly
+      fetchSuggestions()
+    } else if (analysisStillRunning) {
+      // Analysis is still running from a previous session - restore loading state
+      setIsLoading(true)
+      // Trigger fetch to get latest progress
       fetchSuggestions()
     } else {
       // We already have data, ensure loading is false and clear any progress
@@ -847,8 +856,12 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   // Handle "already in progress" gracefully - keep loading state active
                   if (data.error?.includes('already in progress')) {
                     console.info('Analysis already running, will continue polling')
-                    // Don't set isLoading(false) - keep showing loading screen
-                    // The analysis is still running, just not started by this request
+                    // Ensure isImporting stays true to keep loading screen visible
+                    setProcessingProgress(prev => ({
+                      ...prev,
+                      isImporting: true
+                    }))
+                    // Keep isLoading true and return to prevent completion
                     return
                   }
                   throw new Error(data.error)
