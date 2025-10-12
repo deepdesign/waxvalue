@@ -605,11 +605,44 @@ async def get_suggestions_stream(session_id: str = None):
         lock_age = current_time - lock_data.get('start_time', current_time)
         
         if lock_age < LOCK_TIMEOUT:
-            # Lock is still valid
-            logger.warning(f"Analysis already running for session {session_id[:10]}... (running for {int(lock_age)}s) - rejecting duplicate request")
-            async def already_running():
-                yield f"data: {json.dumps({'type': 'error', 'error': 'Analysis already in progress'})}\n\n"
-            return StreamingResponse(already_running(), media_type="text/event-stream")
+            # Lock is still valid - stream current progress from session data
+            logger.warning(f"Analysis already running for session {session_id[:10]}... (running for {int(lock_age)}s) - will stream current progress")
+            
+            async def stream_current_progress():
+                # Get current suggestions from session to show progress
+                session_suggestions = session_manager.get_session_data(session_id, "suggestions") or []
+                session_total = session_manager.get_session_data(session_id, "inventory_count") or 0
+                
+                # Send total if we have it
+                if session_total > 0:
+                    yield f"data: {json.dumps({'type': 'total', 'total': session_total})}\n\n"
+                
+                # Send current progress
+                current_count = len(session_suggestions)
+                if current_count > 0 and session_total > 0:
+                    yield f"data: {json.dumps({'type': 'progress', 'current': current_count, 'total': session_total})}\n\n"
+                
+                # Stream existing suggestions so far
+                for suggestion in session_suggestions:
+                    yield f"data: {json.dumps({'type': 'suggestion', 'suggestion': suggestion})}\n\n"
+                
+                # Keep connection open and poll for updates until analysis completes
+                while session_id in analysis_lock:
+                    await asyncio.sleep(2)
+                    # Check if analysis completed
+                    updated_suggestions = session_manager.get_session_data(session_id, "suggestions") or []
+                    if len(updated_suggestions) > current_count:
+                        # New suggestions added - stream them
+                        for suggestion in updated_suggestions[current_count:]:
+                            yield f"data: {json.dumps({'type': 'suggestion', 'suggestion': suggestion})}\n\n"
+                        current_count = len(updated_suggestions)
+                        yield f"data: {json.dumps({'type': 'progress', 'current': current_count, 'total': session_total})}\n\n"
+                
+                # Analysis complete - send final event
+                final_suggestions = session_manager.get_session_data(session_id, "suggestions") or []
+                yield f"data: {json.dumps({'type': 'complete', 'suggestions': final_suggestions, 'totalItems': len(final_suggestions)})}\n\n"
+            
+            return StreamingResponse(stream_current_progress(), media_type="text/event-stream")
         else:
             # Lock expired, clear it
             logger.warning(f"Analysis lock expired for session {session_id[:10]}... (age: {int(lock_age)}s), clearing stale lock")
