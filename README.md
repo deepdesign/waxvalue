@@ -1,10 +1,10 @@
-# Waxvalue - Discogs Pricing Optimization
+# Waxvalue - Discogs pricing optimisation
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![Status](https://img.shields.io/badge/status-production--ready-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-A professional web application that helps Discogs sellers optimize their pricing using real-time market data analysis.
+A professional web application that helps Discogs sellers optimise their pricing using real-time market data analysis.
 
 ---
 
@@ -12,7 +12,7 @@ A professional web application that helps Discogs sellers optimize their pricing
 
 Waxvalue connects to your Discogs account and analyses your entire inventory against current market data. It identifies underpriced and overpriced items, then lets you adjust prices in bulk with one click.
 
-**Key Benefits:**
+**Key benefits:**
 - 📊 Scan your entire catalogue for mispriced items
 - 💰 Identify underpriced items leaving money on the table
 - ⚡ Update prices in bulk with visual confirmation
@@ -23,32 +23,32 @@ Waxvalue connects to your Discogs account and analyses your entire inventory aga
 
 ## ✨ Features
 
-### Core Functionality
-- **Discogs OAuth Integration** - Secure authentication with Gravatar avatar support
-- **Real-time Analysis** - Server-Sent Events (SSE) streaming for live progress
-- **Smart Pricing** - Condition-specific recommendations based on market data
-- **Bulk Operations** - Apply or decline multiple price changes at once
-- **Advanced Filtering** - Filter by status, condition, price range with persistence
-- **Smart Sorting** - Default sort by price delta (underpriced items first)
+### Core functionality
+- **Discogs OAuth integration** - Secure authentication with Gravatar avatar support
+- **Real-time analysis** - Server-Sent Events (SSE) streaming for live progress
+- **Smart pricing** - Condition-specific recommendations based on market data
+- **Bulk operations** - Apply or decline multiple price changes at once
+- **Advanced filtering** - Filter by status, condition, price range with persistence
+- **Smart sorting** - Default sort by price delta (underpriced items first)
 
-### User Experience
-- **Loading Screen** - 65 randomized vinyl facts to educate while processing
-- **Visual Feedback** - Animated row repositioning with 2-second green highlight
-- **Settings Persistence** - Filters and preferences saved across sessions
-- **Responsive Design** - Optimized for desktop, tablet, and mobile
-- **Dark Mode** - Full dark theme support
+### User experience
+- **Loading screen** - 65 randomised vinyl facts to educate while processing
+- **Visual feedback** - Animated row repositioning with 2-second green highlight
+- **Settings persistence** - Filters and preferences saved across sessions
+- **Responsive design** - Optimised for desktop, tablet, and mobile
+- **Dark mode** - Full dark theme support
 - **British English** - Proper spelling and grammar throughout
 
-### Landing Pages
+### Landing pages
 - **Hero Split v4** - Production default landing page
 - **Gradient Wave** - Alternative landing with animated gradients
 - **Preview Gallery** - Compare designs at `/landing-preview`
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick start
 
-### Local Development
+### Local development
 
 **Prerequisites:**
 - Node.js 18+
@@ -85,7 +85,7 @@ python main-dev.py
 
 ---
 
-## 📦 Production Deployment
+## 📦 Production deployment
 
 Waxvalue is production-ready and tested. See deployment guides:
 
@@ -100,7 +100,7 @@ bash deploy-final.sh
 
 ---
 
-## 🛠 Technology Stack
+## 🛠 Technology stack
 
 ### Frontend
 - **Framework:** Next.js 15.5.4 (React 19)
@@ -127,7 +127,7 @@ bash deploy-final.sh
 
 ## ⚙️ Configuration
 
-### Backend Environment (`backend/.env`)
+### Backend environment (`backend/.env`)
 
 ```bash
 DISCOGS_CONSUMER_KEY=your_consumer_key
@@ -138,7 +138,7 @@ SESSION_SECRET=your_random_secret_key
 LOG_LEVEL=INFO
 ```
 
-### Frontend Environment (`.env.production`)
+### Frontend environment (`.env.production`)
 
 ```bash
 NEXT_PUBLIC_BACKEND_URL=https://yourdomain.com/api/backend
@@ -150,7 +150,7 @@ See [docs/ENV_TEMPLATE.md](docs/ENV_TEMPLATE.md) for complete configuration.
 
 ## 📚 Documentation
 
-### Getting Started
+### Getting started
 - [Quick Start Guide](#-quick-start)
 - [Environment Setup](docs/ENV_TEMPLATE.md)
 - [Development Guidelines](docs/development/DEVELOPMENT_GUIDELINES.md)
@@ -172,22 +172,22 @@ See [docs/ENV_TEMPLATE.md](docs/ENV_TEMPLATE.md) for complete configuration.
 
 ---
 
-## 🎨 Features in Detail
+## 🎨 Features in detail
 
-### Pricing Analysis
-- Fetches all "For Sale" items from your Discogs inventory
-- Uses Discogs' official price suggestion API
+### Pricing analysis
+- Fetches all &ldquo;For Sale&rdquo; items from your Discogs inventory
+- Uses Discogs&apos; official price suggestion API
 - Matches exact item condition (media + sleeve) to market data
 - Classifies as underpriced (10%+ higher), overpriced (10%+ lower), or fairly priced
 - Real-time progress with Server-Sent Events
 
-### Apply Flow
-1. User clicks "Apply" → Button turns green with checkmark
+### Apply flow
+1. User clicks &ldquo;Apply&rdquo; → Button turns green with checkmark
 2. 2-second pause for visual confirmation
 3. Row smoothly animates to new sorted position (200ms transition)
 4. Applied rows show subtle green tint
 
-### Filtering & Sorting
+### Filtering and sorting
 - Filter by status, condition, price range
 - Default sort: underpriced items first (largest delta to smallest)
 - Filters persist across browser sessions
@@ -207,7 +207,7 @@ npm run lint         # Run ESLint
 npm run type-check   # TypeScript validation
 ```
 
-### Project Structure
+### Project structure
 
 ```
 waxvalue/
@@ -247,7 +247,7 @@ npm run build  # Should complete with 31 pages generated
 
 ---
 
-## 📊 Production Statistics
+## 📊 Production statistics
 
 - **Build Size:** 102 kB (gzipped)
 - **Pages:** 31 static pages
