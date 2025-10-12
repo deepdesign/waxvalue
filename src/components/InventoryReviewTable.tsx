@@ -428,9 +428,11 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         ...prev,
         isImporting: false
       }))
-    } finally {
       setIsLoading(false)
+      localStorage.removeItem('waxvalue_analysis_progress')
     }
+    // NOTE: No finally block - isLoading(false) is set explicitly only when analysis completes or fails
+    // This prevents the loading screen from closing during polling
   }
 
   const filteredAndSortedSuggestions = useMemo(() => {
