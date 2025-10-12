@@ -354,27 +354,26 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   break
                   
                 case 'error':
-                  // Handle "already in progress" gracefully - load cached suggestions
+                  // Handle "already in progress" gracefully - keep loading state active
                   if (data.error?.includes('already in progress')) {
-                    console.info('Analysis already running, loading cached suggestions...')
-                    // Try to load cached suggestions from the non-streaming endpoint
+                    console.info('Analysis already running, will continue polling')
+                    // Don't set isLoading(false) - keep showing loading screen
+                    // The analysis is still running, just not started by this request
+                    // Load any cached suggestions to show partial progress
                     try {
                       const cachedResponse = await fetch(`/api/backend/inventory/suggestions?session_id=${sessionId}`)
                       if (cachedResponse.ok) {
                         const cachedData = await cachedResponse.json()
-                        setSuggestions(cachedData.suggestions || [])
-                        setRepriceResults(cachedData.repriceResults || [])
-                        setHasInitialized(true)
-                        console.info(`Loaded ${cachedData.suggestions?.length || 0} cached suggestions`)
+                        if (cachedData.suggestions && cachedData.suggestions.length > 0) {
+                          setSuggestions(cachedData.suggestions)
+                          setRepriceResults(cachedData.repriceResults || [])
+                          console.info(`Loaded ${cachedData.suggestions.length} cached suggestions while analysis continues`)
+                        }
                       }
                     } catch (cacheError) {
                       console.warn('Could not load cached suggestions:', cacheError)
                     }
-                    setProcessingProgress(prev => ({
-                      ...prev,
-                      isImporting: false
-                    }))
-                    setIsLoading(false)
+                    // Keep loading state and isImporting true so loading screen stays visible
                     return
                   }
                   throw new Error(data.error)
@@ -822,10 +821,11 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   break
                   
                 case 'error':
-                  // Handle "already in progress" gracefully
+                  // Handle "already in progress" gracefully - keep loading state active
                   if (data.error?.includes('already in progress')) {
-                    console.info('Analysis already running, skipping duplicate request')
-                    setIsLoading(false)
+                    console.info('Analysis already running, will continue polling')
+                    // Don't set isLoading(false) - keep showing loading screen
+                    // The analysis is still running, just not started by this request
                     return
                   }
                   throw new Error(data.error)
