@@ -24,11 +24,22 @@
   }
   
   /* Prevent text selection on UI elements */
-  button, [role="button"], .card, th, .no-select {
+  button, [role="button"], .card, th, .no-select, 
+  label, h1, h2, h3, h4, h5, h6,
+  [class*="badge"], [class*="chip"], [class*="tag"],
+  nav, header, footer, aside {
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+  }
+  
+  /* Allow text selection only in content areas */
+  p, td, input, textarea, [contenteditable="true"], .allow-select {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
   }
   
   /* Ensure proper contrast in dark mode */
