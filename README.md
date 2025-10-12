@@ -39,10 +39,10 @@ Waxvalue connects to your Discogs account and analyses your entire inventory aga
 - **Dark mode** - Full dark theme support
 - **British English** - Proper spelling and grammar throughout
 
-### Landing pages
-- **Hero Split v4** - Production default landing page
-- **Gradient Wave** - Alternative landing with animated gradients
-- **Preview Gallery** - Compare designs at `/landing-preview`
+### Landing page
+- Modern, responsive design with animated gradients
+- Edge-to-edge hero imagery
+- Single call-to-action (Connect with Discogs)
 
 ---
 
