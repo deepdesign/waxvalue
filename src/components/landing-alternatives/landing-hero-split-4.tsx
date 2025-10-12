@@ -26,7 +26,7 @@ export function LandingHeroSplit4() {
     <div className="min-h-screen bg-white dark:bg-gray-900">
       <div className="grid lg:grid-cols-2 min-h-screen">
         {/* Left Content */}
-        <div className="flex items-center px-8 lg:px-16 py-8 lg:py-12">
+        <div className="flex flex-col justify-between px-8 lg:px-16 py-8 lg:py-12">
           <div className="max-w-xl animate-fade-in-up mt-0 lg:-mt-28">
             {/* Logo */}
             <div className="mb-6 lg:mb-12">
@@ -83,6 +83,13 @@ export function LandingHeroSplit4() {
               🔒 Secure OAuth • No password required • Free to start
             </p>
           </div>
+
+          {/* Copyright */}
+          <div className="max-w-xl">
+            <p className="text-xs text-gray-600 dark:text-gray-400">
+              © {new Date().getFullYear()} Deep Design Australia Pty Ltd. All rights reserved.
+            </p>
+          </div>
         </div>
 
         {/* Right Hero Image */}
@@ -103,13 +110,6 @@ export function LandingHeroSplit4() {
           <div className="absolute top-20 right-20 w-32 h-32 bg-white/10 backdrop-blur-sm rounded-full animate-float-delayed"></div>
           <div className="absolute bottom-32 left-16 w-24 h-24 bg-white/10 backdrop-blur-sm rounded-full animate-float"></div>
         </div>
-      </div>
-
-      {/* Footer Copyright */}
-      <div className="absolute bottom-0 left-0 right-0 py-4 px-8">
-        <p className="text-xs text-center text-gray-600 dark:text-gray-400">
-          © {new Date().getFullYear()} Deep Design Australia Pty Ltd. All rights reserved.
-        </p>
       </div>
 
       <style jsx>{`
