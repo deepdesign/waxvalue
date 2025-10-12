@@ -986,9 +986,9 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
   }
 
 
-  // Show loading card ONLY if we're actively loading AND have no data yet
-  // Don't show on refresh if we already have cached suggestions
-  if (isLoading && suggestions.length === 0 && processingProgress.isImporting) {
+  // Show loading card when actively importing data (analysis running)
+  // This ensures users see the fun facts loading screen during analysis
+  if (isLoading && processingProgress.isImporting) {
     return (
       <div className="space-y-6">
         {/* Main Loading Card */}
