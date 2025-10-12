@@ -1,0 +1,92 @@
+===============================================
+VPS STATUS CHECK INSTRUCTIONS
+===============================================
+
+STEP 1: Connect to your VPS
+-----------------------------
+Open PowerShell and run:
+
+ssh -p 65002 u728332901@195.35.15.194
+
+Password: Babylon1!
+
+
+STEP 2: Check what's installed
+-------------------------------
+Once connected, run these commands:
+
+# Check Node.js
+node --version
+npm --version
+
+# Check Python
+python3 --version
+pip3 --version
+
+# Check Nginx
+nginx -v
+sudo systemctl status nginx
+
+# Check PM2
+pm2 --version
+pm2 list
+
+# Check Certbot
+certbot --version
+
+
+STEP 3: Check for old installations
+------------------------------------
+ls -la ~
+ls -la ~/waxvalue 2>/dev/null || echo "No waxvalue directory"
+
+
+STEP 4: Check disk space
+-------------------------
+df -h ~
+
+
+STEP 5: Check Nginx configs
+----------------------------
+ls -la /etc/nginx/sites-enabled/
+
+
+===============================================
+WHAT TO LOOK FOR
+===============================================
+
+GOOD SIGNS:
+  - Node.js v18+ installed
+  - Python 3.11+ installed
+  - Nginx installed and running
+  - PM2 installed
+  - Plenty of disk space
+  - No old waxvalue directory (or ready to clean)
+
+BAD SIGNS:
+  - Missing dependencies (will need install)
+  - PM2 processes still running old app
+  - Old waxvalue directory with conflicts
+  - Disk space < 5GB free
+
+===============================================
+NEXT STEPS BASED ON RESULTS
+===============================================
+
+IF CLEAN (no old waxvalue):
+  -> Ready to deploy!
+  -> Follow DEPLOY_INSTRUCTIONS.md
+
+IF HAS OLD INSTALLATION:
+  -> Run: bash clean-vps-remote.sh
+  -> OR manually: 
+     pm2 delete all
+     mv ~/waxvalue ~/waxvalue.old.backup
+     sudo rm /etc/nginx/sites-enabled/waxvalue
+
+IF MISSING DEPENDENCIES:
+  -> Run: bash deploy-final.sh
+  -> This will install everything needed
+
+===============================================
+

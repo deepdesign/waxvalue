@@ -126,3 +126,14 @@ backend/*.pyc
 sessions.json
 backend/sessions.json
 backend/discogs_rate_limit.json
+backend/sessions.backup.json
+
+# Backups
+*.zip
+*BACKUP*/
+LOCAL_BACKUP*/
+deploy-temp/
+deploy-package/
+
+# Deployment temporary files
+READY_TO_DEPLOY.txt

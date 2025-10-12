@@ -1,0 +1,41 @@
+========================================
+QUICK VPS CLEANUP COMMANDS
+========================================
+
+SSH into VPS:
+ssh -p 65002 u728332901@195.35.15.194
+Password: Babylon1!
+
+Then run these commands:
+========================================
+
+# 1. Stop old services
+pm2 delete all
+
+# 2. Remove old installation (no backup needed)
+rm -rf ~/waxvalue
+
+# 3. Remove old Nginx config
+sudo rm -f /etc/nginx/sites-enabled/waxvalue
+sudo rm -f /etc/nginx/sites-available/waxvalue
+
+# 4. Clean ports (kill orphaned processes)
+sudo lsof -ti:3000 | xargs sudo kill -9 2>/dev/null || true
+sudo lsof -ti:8000 | xargs sudo kill -9 2>/dev/null || true
+
+# 5. Create fresh directory
+mkdir -p ~/waxvalue
+
+# 6. Verify clean
+ls -la ~ | grep waxvalue
+pm2 list
+
+========================================
+VPS IS NOW CLEAN AND READY!
+========================================
+
+Next: Upload project files to ~/waxvalue
+Then: Run bash deploy-final.sh
+
+========================================
+
