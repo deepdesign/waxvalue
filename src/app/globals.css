@@ -18,33 +18,40 @@
     @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200;
   }
   
-  /* Smooth transitions for theme changes and prevent text selection by default */
+  /* Smooth transitions for theme changes */
   * {
     @apply transition-colors duration-200;
+  }
+  
+  /* NO I-BEAM CURSOR ANYWHERE - default cursor for all elements */
+  * {
+    cursor: default !important;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
   }
   
-  /* Allow text selection only in specific content elements */
-  input, textarea, pre, code,
-  [contenteditable="true"], .allow-select,
-  [class*="prose"], 
-  .text-selectable {
+  /* Only show text cursor in actual input fields */
+  input, textarea, [contenteditable="true"] {
+    cursor: text !important;
     user-select: text !important;
     -webkit-user-select: text !important;
     -moz-user-select: text !important;
     -ms-user-select: text !important;
   }
   
-  /* Paragraphs and list items - allow selection but prevent cursor on click */
-  p, td, li {
+  /* Allow text selection on content (but keep default cursor, not I-beam) */
+  p, td, li, pre, code, .allow-select {
     user-select: text;
     -webkit-user-select: text;
     -moz-user-select: text;
     -ms-user-select: text;
-    cursor: default;
+  }
+  
+  /* Buttons should show pointer cursor */
+  button, [role="button"], a {
+    cursor: pointer !important;
   }
   
   /* Ensure proper contrast in dark mode */
