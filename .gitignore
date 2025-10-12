@@ -137,3 +137,12 @@ deploy-package/
 
 # Deployment temporary files
 READY_TO_DEPLOY.txt
+
+# Production environment files (contain sensitive credentials)
+config/production.env.backend
+config/production.env.backend.complete
+config/production.env.frontend
+backend/sessions*.json
+
+# Allow template files
+!config/*.template
