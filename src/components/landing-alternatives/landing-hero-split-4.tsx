@@ -27,7 +27,8 @@ export function LandingHeroSplit4() {
       <div className="grid lg:grid-cols-2 min-h-screen">
         {/* Left Content */}
         <div className="flex flex-col justify-between px-8 lg:px-16 py-8 lg:py-12">
-          <div className="max-w-xl animate-fade-in-up mt-0 lg:-mt-28">
+          <div className="flex-1 flex items-center">
+            <div className="max-w-xl animate-fade-in-up">
             {/* Logo */}
             <div className="mb-6 lg:mb-12">
               <img 
@@ -82,6 +83,7 @@ export function LandingHeroSplit4() {
             <p className="text-sm text-gray-500 dark:text-gray-400">
               🔒 Secure OAuth • No password required • Free to start
             </p>
+            </div>
           </div>
 
           {/* Copyright */}
