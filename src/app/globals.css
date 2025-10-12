@@ -27,15 +27,24 @@
     -ms-user-select: none;
   }
   
-  /* Allow text selection only in content areas and inputs */
-  p, td, li, input, textarea, pre, code,
+  /* Allow text selection only in specific content elements */
+  input, textarea, pre, code,
   [contenteditable="true"], .allow-select,
-  [class*="prose"], [class*="content"],
+  [class*="prose"], 
   .text-selectable {
     user-select: text !important;
     -webkit-user-select: text !important;
     -moz-user-select: text !important;
     -ms-user-select: text !important;
+  }
+  
+  /* Paragraphs and list items - allow selection but prevent cursor on click */
+  p, td, li {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    cursor: default;
   }
   
   /* Ensure proper contrast in dark mode */
