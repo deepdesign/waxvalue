@@ -288,7 +288,7 @@ This project is licensed under the MIT License.
 **Development:** October 2025  
 **Product designer:** [jamescutts.me](https://www.jamescutts.me)  
 **Framework:** Next.js 15 + FastAPI  
-**Design:** TailAdmin + Tailwind CSS  
+**UI kit:** Tailwind CSS  
 **API:** Discogs Official API  
 
 ---
