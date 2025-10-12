@@ -377,8 +377,11 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   // Handle "already in progress" gracefully - keep loading state active
                   if (data.error?.includes('already in progress')) {
                     console.info('Analysis already running, will continue polling')
-                    // Don't set isLoading(false) - keep showing loading screen
-                    // The analysis is still running, just not started by this request
+                    // Ensure isImporting stays true to keep loading screen visible
+                    setProcessingProgress(prev => ({
+                      ...prev,
+                      isImporting: true
+                    }))
                     // Load any cached suggestions to show partial progress
                     try {
                       const cachedResponse = await fetch(`/api/backend/inventory/suggestions?session_id=${sessionId}`)
@@ -393,7 +396,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                     } catch (cacheError) {
                       console.warn('Could not load cached suggestions:', cacheError)
                     }
-                    // Keep loading state and isImporting true so loading screen stays visible
+                    // Keep isLoading true and return to prevent finally block from running
                     return
                   }
                   throw new Error(data.error)
