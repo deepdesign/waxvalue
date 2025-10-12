@@ -47,6 +47,7 @@ export function WelcomePage() {
         <div className="py-20">
           <div className="text-center">
             <div className="flex justify-center mb-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
                 src="/svg/light/waxvalue-horizontal-light.svg" 
                 alt="waxvalue" 

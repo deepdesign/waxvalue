@@ -192,11 +192,13 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
 
     window.addEventListener('storage', handleStorageChange)
     return () => window.removeEventListener('storage', handleStorageChange)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
 
 
   // Expose the simulate function to parent component
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useImperativeHandle(ref, () => ({
     simulate: handleSimulateSelection,
     isLoading

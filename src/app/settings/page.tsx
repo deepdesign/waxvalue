@@ -76,6 +76,7 @@ export default function SettingsPage() {
     } else if (user?.accessToken) {
       fetchUserProfile()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, isLoading, router])
 
   const handleDisconnectAccount = async () => {
