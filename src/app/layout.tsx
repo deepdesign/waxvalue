@@ -36,6 +36,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <style dangerouslySetInnerHTML={{__html: `
+          * { cursor: default !important; user-select: none !important; }
+          input, textarea, [contenteditable="true"] { cursor: text !important; user-select: text !important; }
+          button, [role="button"], a { cursor: pointer !important; }
+          p, td, li, pre, code { user-select: text !important; }
+        `}} />
+      </head>
       <body className={inter.className}>
         <Providers>
           {children}
