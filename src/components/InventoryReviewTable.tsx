@@ -841,11 +841,22 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         }
       }
       
-      // Calculate actionable insights - count items that need price changes
-      // Use actualTotalItems for the total count (set during analysis), fallback to suggestions length
-      const totalAnalyzed = actualTotalItems || suggestions.length || newSuggestions.length
+      // Check if analysis is actually complete - if stream ended without 'complete' event, keep polling
+      const progressData = localStorage.getItem('waxvalue_analysis_progress')
+      if (progressData) {
+        const progress = JSON.parse(progressData)
+        if (progress.isRunning) {
+          // Analysis is still running - keep loading screen visible and poll for updates
+          console.info('Stream ended but analysis still running, polling for completion...')
+          setTimeout(() => {
+            fetchSuggestions() // Poll again
+          }, 3000) // Poll every 3 seconds
+          return // Keep loading screen visible, don't run finally block
+        }
+      }
       
-      // Count from the actual suggestions that were just set
+      // Analysis is complete - calculate actionable insights
+      const totalAnalyzed = actualTotalItems || suggestions.length || newSuggestions.length
       const allSuggestions = suggestions.length > 0 ? suggestions : newSuggestions
       const needsAction = allSuggestions.filter(s => s.status === 'overpriced' || s.status === 'underpriced').length
       
@@ -854,6 +865,11 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
       } else if (totalAnalyzed > 0) {
         toast.success(`Analysis complete! All ${totalAnalyzed} items are fairly priced.`)
       }
+      
+      // Analysis complete - hide loading screen
+      setIsLoading(false)
+      setProcessingProgress(prev => ({ ...prev, isImporting: false }))
+      localStorage.removeItem('waxvalue_analysis_progress')
     } catch (error: any) {
       console.error('Analysis failed:', error)
       toast.error('Failed to run pricing analysis. Make sure you are connected to Discogs.')
@@ -861,11 +877,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         ...prev,
         isImporting: false
       }))
-      // Clear background progress tracking
-      localStorage.removeItem('waxvalue_analysis_progress')
-    } finally {
       setIsLoading(false)
-      // Clear background progress tracking on completion
       localStorage.removeItem('waxvalue_analysis_progress')
     }
   }
