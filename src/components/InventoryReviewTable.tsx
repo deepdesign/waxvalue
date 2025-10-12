@@ -58,12 +58,32 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
   // Local component state
   const [repriceResults, setRepriceResults] = useState<RepriceItemResult[]>([])
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set())
-  const [processingProgress, setProcessingProgress] = useState({
-    current: 0,
-    total: 0,
-    startTime: 0,
-    estimatedTimeRemaining: 0,
-    isImporting: false
+  const [processingProgress, setProcessingProgress] = useState(() => {
+    // Restore progress from localStorage on mount
+    try {
+      const saved = localStorage.getItem('waxvalue_analysis_progress')
+      if (saved) {
+        const progress = JSON.parse(saved)
+        if (progress.isRunning) {
+          return {
+            current: progress.current || 0,
+            total: progress.total || 0,
+            startTime: progress.startTime || Date.now(),
+            estimatedTimeRemaining: 0,
+            isImporting: true
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Failed to restore progress:', e)
+    }
+    return {
+      current: 0,
+      total: 0,
+      startTime: 0,
+      estimatedTimeRemaining: 0,
+      isImporting: false
+    }
   })
   const [hasProcessedInitial, setHasProcessedInitial] = useState(false)
   const [lastRunDate, setLastRunDate] = useState<string | null>(null)
