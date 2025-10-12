@@ -223,7 +223,7 @@ export default function HelpPage() {
                   className="flex items-center text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 transition-colors"
                 >
                   <LinkIcon className="h-4 w-4 mr-2" />
-                  James Cutts
+                  jamescutts.me
                 </a>
               </div>
             </div>
