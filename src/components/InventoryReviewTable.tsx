@@ -1138,7 +1138,8 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         </div>
       )}
 
-      {/* Desktop Table - TailAdmin Pattern */}
+      {/* Desktop Table - TailAdmin Pattern - Only show when we have data or are loading */}
+      {(filteredAndSortedSuggestions.length > 0 || isLoading) && (
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 hidden lg:block">
         {/* Header */}
         <div className="p-6 border-b border-gray-100 dark:border-gray-700">
@@ -1660,8 +1661,10 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
           </div>
         )}
       </div>
+      )}
 
-      {/* Mobile Card Layout */}
+      {/* Mobile Card Layout - Only show when we have data or are loading */}
+      {(filteredAndSortedSuggestions.length > 0 || isLoading) && (
       <div className="lg:hidden space-y-4">
         {/* Mobile Header */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -1925,6 +1928,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
           </div>
         )}
       </div>
+      )}
     </div>
   )
 })
