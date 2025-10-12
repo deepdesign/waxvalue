@@ -82,6 +82,10 @@ export function AuthPage() {
           Privacy Policy
         </Link>
       </p>
+      
+      <p className="mt-4 text-center text-xs text-gray-500 dark:text-gray-500">
+        © {new Date().getFullYear()} Deep Design Australia Pty Ltd
+      </p>
     </div>
   )
 }

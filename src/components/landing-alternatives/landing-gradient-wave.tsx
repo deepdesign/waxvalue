@@ -128,6 +128,13 @@ export function LandingGradientWave() {
         </div>
       </div>
 
+      {/* Footer Copyright */}
+      <div className="relative z-10 py-6">
+        <p className="text-xs text-center text-white/60">
+          © {new Date().getFullYear()} Deep Design Australia Pty Ltd. All rights reserved.
+        </p>
+      </div>
+
       <style jsx>{`
         @keyframes wave {
           0%, 100% { transform: translateX(0); }

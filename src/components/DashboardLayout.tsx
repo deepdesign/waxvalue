@@ -252,6 +252,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
             </div>
           </div>
+          
+          {/* Copyright */}
+          <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
+            <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+              © {new Date().getFullYear()} Deep Design Australia Pty Ltd
+            </p>
+          </div>
         </div>
       </div>
 

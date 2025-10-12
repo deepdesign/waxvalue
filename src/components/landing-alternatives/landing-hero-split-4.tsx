@@ -105,6 +105,13 @@ export function LandingHeroSplit4() {
         </div>
       </div>
 
+      {/* Footer Copyright */}
+      <div className="absolute bottom-0 left-0 right-0 py-4 px-8">
+        <p className="text-xs text-center text-gray-600 dark:text-gray-400">
+          © {new Date().getFullYear()} Deep Design Australia Pty Ltd. All rights reserved.
+        </p>
+      </div>
+
       <style jsx>{`
         @keyframes fade-in-up {
           from {
