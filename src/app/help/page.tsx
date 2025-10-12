@@ -203,20 +203,6 @@ export default function HelpPage() {
                   Discogs OAuth apps
                 </a>
                 <a
-                  href="/settings"
-                  className="flex items-center text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 transition-colors"
-                >
-                  <LinkIcon className="h-4 w-4 mr-2" />
-                  Waxvalue settings
-                </a>
-                <a
-                  href="/dashboard"
-                  className="flex items-center text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 transition-colors"
-                >
-                  <LinkIcon className="h-4 w-4 mr-2" />
-                  Dashboard
-                </a>
-                <a
                   href="https://www.jamescutts.me"
                   target="_blank"
                   rel="noopener noreferrer"
