@@ -267,7 +267,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="hidden lg:flex xl:hidden fixed inset-y-0 w-16 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
         <div className="flex flex-col flex-grow">
           <div className="flex items-center justify-center px-2 mt-[35px] mb-[20px] select-none">
-            <Logo size="sm" className="pointer-events-none" />
+            <Logo size="sm" variant="brandmark" className="pointer-events-none" />
           </div>
           <nav className="flex-1 px-2 py-4 space-y-1" role="navigation" aria-label="Main navigation">
             {navigation.map((item) => {
@@ -304,7 +304,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </Tooltip>
           </div>
           
-          <div className="border-t border-gray-200 dark:border-gray-700 p-2">
+          {/* User profile section hidden in collapsed sidebar */}
+          <div className="border-t border-gray-200 dark:border-gray-700 p-2 hidden">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <img

@@ -1636,38 +1636,41 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                       target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
                     }}
                   />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                      {suggestion.title || 'Unknown Title'}
-                    </h3>
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">
-                      {typeof suggestion.artist === 'object' ? (suggestion.artist as any)?.name : suggestion.artist || 'Unknown Artist'}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      {suggestion.label || 'Unknown Label'}
-                    </p>
-                  </div>
+                   <div className="flex-1 min-w-0">
+                     <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                       {suggestion.title || 'Unknown Title'}
+                     </h3>
+                     <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate mb-1">
+                       {typeof suggestion.artist === 'object' ? (suggestion.artist as any)?.name : suggestion.artist || 'Unknown Artist'}
+                     </p>
+                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                       {suggestion.label || 'Unknown Label'}
+                     </p>
+                   </div>
                 </div>
               </div>
               
-              {/* Condition Row - Aligned with thumbnail */}
-              <div className="flex items-center gap-1 mb-3">
-                <div className="w-14"></div> {/* Spacer to align with thumbnail */}
-                <div className="text-xs space-x-2">
-                  {suggestion.condition.split(', ').map((part, index) => (
-                    <span key={index}>
-                      {part.includes(':') ? (
-                        <>
-                          <span className="text-gray-500 dark:text-gray-400">{part.split(':')[0]}:</span>
-                          <span className="text-gray-900 dark:text-gray-100">{part.split(':')[1]}</span>
-                        </>
-                      ) : (
-                        <span className="text-gray-900 dark:text-gray-100">{part}</span>
-                      )}
-                    </span>
-                  ))}
-                </div>
-              </div>
+               {/* Condition Row - Aligned with thumbnail */}
+               <div className="flex items-center gap-1 mb-3">
+                 <div className="w-4"></div> {/* Spacer for checkbox */}
+                 <div className="w-2"></div> {/* Spacer for gap-3 */}
+                 <div className="w-14"></div> {/* Spacer for thumbnail */}
+                 <div className="w-2"></div> {/* Spacer for gap-2 */}
+                 <div className="text-xs space-x-2">
+                   {suggestion.condition.split(', ').map((part, index) => (
+                     <span key={index}>
+                       {part.includes(':') ? (
+                         <>
+                           <span className="text-gray-500 dark:text-gray-400">{part.split(':')[0]}:</span>
+                           <span className="text-gray-900 dark:text-gray-100">{part.split(':')[1]}</span>
+                         </>
+                       ) : (
+                         <span className="text-gray-900 dark:text-gray-100">{part}</span>
+                       )}
+                     </span>
+                   ))}
+                 </div>
+               </div>
               
               <div className="grid grid-cols-3 gap-3 text-xs mb-3">
                 <div>
