@@ -1595,18 +1595,29 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   : 'bg-gray-50/50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700'
               }`}
             >
-              {/* Discogs Link - Top Right */}
-              <a
-                href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="absolute top-3 right-3 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
-                title={`View on Discogs: ${suggestion.listingId}`}
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </a>
+              {/* Discogs Link and ID - Top Right */}
+              <div className="absolute top-3 right-3 flex items-center gap-2">
+                <a
+                  href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-xs font-mono"
+                  title={`View on Discogs: ${suggestion.listingId}`}
+                >
+                  {suggestion.listingId}
+                </a>
+                <a
+                  href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+                  title={`View on Discogs: ${suggestion.listingId}`}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              </div>
 
               <div className="flex items-start gap-3 mb-3">
                 <input
@@ -1650,11 +1661,6 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                           </span>
                         ))}
                       </div>
-                    </div>
-                    <div className="mt-1">
-                      <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                        ID: {suggestion.listingId}
-                      </span>
                     </div>
                   </div>
                 </div>
