@@ -1888,16 +1888,17 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
             )}
           </div>
         ) : (
-          <div className="space-y-4">
-            {paginatedSuggestions.map((suggestion) => (
-            <div 
-              key={suggestion.listingId} 
-              className={`card min-w-0 overflow-hidden ${
-                appliedItems.has(suggestion.listingId)
-                  ? 'bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800'
-                  : ''
-              }`}
-            >
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+            <div className="space-y-4">
+              {paginatedSuggestions.map((suggestion) => (
+              <div 
+                key={suggestion.listingId} 
+                className={`bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 min-w-0 overflow-hidden ${
+                  appliedItems.has(suggestion.listingId)
+                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                    : ''
+                }`}
+              >
               <div className="flex items-start justify-between mb-4 min-w-0">
                 <div className="flex items-start space-x-2 sm:space-x-3 flex-1 min-w-0">
                   <input
@@ -2037,6 +2038,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
               </div>
             </div>
             ))}
+            </div>
           </div>
         )}
         
