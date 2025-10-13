@@ -1547,7 +1547,7 @@ async def bulk_apply_price_suggestions(request: dict, session_id: str = None):
                 
                 logger.info(f"Bulk apply: Discogs API response for listing {listing_id}: status={status_code}, result={result}")
                 
-                if status_code in [200, 201]:
+                if status_code in [200, 201, 204]:
                     results.append({"listingId": listing_id, "success": True, "newPrice": new_price})
                     successful_updates += 1
                     
