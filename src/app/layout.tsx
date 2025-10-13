@@ -39,18 +39,18 @@ export default function RootLayout({
       <body className={inter.className} style={{ cursor: 'default' }}>
         <style dangerouslySetInnerHTML={{__html: `
           *, *::before, *::after { 
-            cursor: default !important; 
+            cursor: default;
             user-select: none !important;
             -webkit-user-select: none !important;
             -moz-user-select: none !important;
           }
-          input, textarea, [contenteditable="true"] { 
+          button, a, [role="button"], input[type="checkbox"], input[type="radio"], label { 
+            cursor: pointer !important; 
+          }
+          input[type="text"], input[type="email"], input[type="password"], input[type="search"], input[type="url"], textarea, [contenteditable="true"] { 
             cursor: text !important; 
             user-select: text !important;
             -webkit-user-select: text !important;
-          }
-          button, [role="button"], a, [onclick] { 
-            cursor: pointer !important; 
           }
         `}} />
         <Providers>
