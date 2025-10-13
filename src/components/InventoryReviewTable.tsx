@@ -213,7 +213,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
       // Don't override if user has manually changed sorting
       if (newSettings.defaultSort) {
         setSortConfig({
-          key: newSettings.defaultSort as 'currentPrice' | 'priceDelta' | null,
+          key: newSettings.defaultSort as 'currentPrice' | 'priceDelta' | 'priceDeltaReverse' | 'currentPriceHigh' | 'currentPriceLow' | 'artist' | 'condition' | 'status' | null,
           direction: 'desc'
         })
       }
