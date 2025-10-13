@@ -532,8 +532,8 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
           aValue = statusOrder[a.status] ?? 3
           bValue = statusOrder[b.status] ?? 3
         } else if (sortConfig.key === 'artist') {
-          aValue = (a.artist as string || '').toLowerCase()
-          bValue = (b.artist as string || '').toLowerCase()
+          aValue = (a.artist?.name || a.artist || '').toString().toLowerCase()
+          bValue = (b.artist?.name || b.artist || '').toString().toLowerCase()
         } else if (sortConfig.key === 'condition') {
           // Sort condition by quality: Mint → Near Mint → Very Good+ → Very Good → Good
           const conditionOrder = { 'M': 0, 'NM': 1, 'VG+': 2, 'VG': 3, 'G+': 4, 'G': 5 }
