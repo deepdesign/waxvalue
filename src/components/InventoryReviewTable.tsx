@@ -568,9 +568,11 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
     try {
       setIsApplying(true)
       const listingIds = Array.from(selectedItems)
+      console.log('Bulk apply starting for listings:', listingIds)
       
       // Use the bulk apply API method
       const result = await api.bulkApply(listingIds) as any
+      console.log('Bulk apply result:', result)
       
       // Show success message
       if (result.successful_updates > 0) {
