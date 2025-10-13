@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useTheme } from 'next-themes'
 import { SunIcon, MoonIcon, ComputerDesktopIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
 import { Tooltip } from './ui/Tooltip'
@@ -8,12 +8,43 @@ import { Tooltip } from './ui/Tooltip'
 export function DarkModeToggleCollapsed() {
   const [mounted, setMounted] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
+  const [dropdownPosition, setDropdownPosition] = useState<'left' | 'right'>('right')
+  const buttonRef = useRef<HTMLButtonElement>(null)
   const { theme, setTheme } = useTheme()
 
   // Handle hydration
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Calculate dropdown position to avoid screen edge clipping
+  const calculatePosition = () => {
+    if (buttonRef.current) {
+      const buttonRect = buttonRef.current.getBoundingClientRect()
+      const dropdownWidth = 128 // w-32 = 128px
+      const spaceOnRight = window.innerWidth - buttonRect.right
+      const spaceOnLeft = buttonRect.left
+      
+      // Position dropdown to the left if there's not enough space on the right
+      if (spaceOnRight < dropdownWidth && spaceOnLeft > dropdownWidth) {
+        setDropdownPosition('left')
+      } else {
+        setDropdownPosition('right')
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (isOpen) {
+      calculatePosition()
+      
+      // Recalculate on window resize
+      const handleResize = () => calculatePosition()
+      window.addEventListener('resize', handleResize)
+      
+      return () => window.removeEventListener('resize', handleResize)
+    }
+  }, [isOpen])
 
   if (!mounted) {
     // Prevent hydration mismatch by showing a placeholder
@@ -51,6 +82,7 @@ export function DarkModeToggleCollapsed() {
   return (
     <div className="relative">
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className="w-8 h-8 flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
         aria-label="Theme selector"
@@ -61,7 +93,11 @@ export function DarkModeToggleCollapsed() {
 
       {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute left-10 top-0 z-50 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1">
+        <div className={`absolute top-0 z-50 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 ${
+          dropdownPosition === 'left' 
+            ? 'right-10' 
+            : 'left-10'
+        }`}>
           <button
             onClick={() => {
               setTheme('light')
