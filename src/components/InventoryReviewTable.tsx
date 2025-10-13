@@ -1651,6 +1651,11 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                         ))}
                       </div>
                     </div>
+                    <div className="mt-1">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                        ID: {suggestion.listingId}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
