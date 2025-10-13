@@ -387,6 +387,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   })
                   setHasProcessedInitial(true)
                   setHasInitialized(true)
+                  setIsLoading(false) // Stop loading when analysis completes
                   // Mark that we have data (prevents auto-fetch on refresh and flicker)
                   localStorage.setItem('waxvalue_has_data', 'true')
                   // Clear progress from localStorage as analysis is complete
@@ -859,6 +860,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   })
                   setHasProcessedInitial(true)
                   setHasInitialized(true)
+                  setIsLoading(false) // Stop loading when analysis completes
                   // Mark that we have data (prevents auto-fetch on refresh and flicker)
                   localStorage.setItem('waxvalue_has_data', 'true')
                   // Clear progress from localStorage as analysis is complete
@@ -1374,20 +1376,20 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   />
                 </th>
                 <th className="w-64 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  Release
+                  RELEASE
                 </th>
                 <th className="w-20 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  Condition
+                  CONDITION
                 </th>
                 <th className="w-20 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  Item ID
+                  ITEM ID
                 </th>
                 <th className="w-20 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   <button
                     onClick={() => handleSort('currentPrice')}
                     className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                   >
-                    Current Price
+                    CURRENT PRICE
                     <svg className={`w-3 h-3 transition-transform ${
                       sortConfig.key === 'currentPrice' && sortConfig.direction === 'asc' ? 'rotate-180' : ''
                     }`} fill="currentColor" viewBox="0 0 20 20">
@@ -1400,7 +1402,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                     onClick={() => handleSort('priceDelta')}
                     className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                   >
-                    Suggested Price
+                    SUGGESTED PRICE
                     <svg className={`w-3 h-3 transition-transform ${
                       sortConfig.key === 'priceDelta' && sortConfig.direction === 'asc' ? 'rotate-180' : ''
                     }`} fill="currentColor" viewBox="0 0 20 20">
@@ -1409,7 +1411,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   </button>
                 </th>
                 <th className="w-24 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  Actions
+                  ACTIONS
                 </th>
               </tr>
             </thead>
@@ -1812,4 +1814,4 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
 })
 
 InventoryReviewTable.displayName = 'InventoryReviewTable'
-
+
