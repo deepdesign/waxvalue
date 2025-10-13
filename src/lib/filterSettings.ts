@@ -6,7 +6,7 @@ const DEFAULT_FILTERS: FilterState = {
   condition: '',
   priceRange: { min: null, max: null },
   showFlaggedOnly: false,
-  showFairlyPriced: false,
+  showFairlyPriced: true,
 }
 
 export const loadFilterSettings = (): FilterState => {

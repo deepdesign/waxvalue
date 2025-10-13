@@ -272,7 +272,7 @@ export function FiltersBar({
                   <div>
                     <p className="font-medium mb-1">Show Fairly Priced Items</p>
                     <p className="text-xs opacity-90">
-                      Display items that are priced within the minimum change threshold. Most users prefer to hide these to focus on items needing price changes.
+                      Display items that are priced within the minimum change threshold. Checked by default to show all items.
                     </p>
                   </div>
                 }
@@ -281,12 +281,19 @@ export function FiltersBar({
                 <label className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={filters.showFairlyPriced}
+                    checked={filters.showFairlyPriced !== false}
                     onChange={(e) => handleFilterChange('showFairlyPriced', e.target.checked)}
                     className="table-checkbox"
                   />
                   <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                    Show fairly priced
+                    Show fairly priced{' '}
+                    <a
+                      href="/settings"
+                      className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 underline"
+                      title="Adjust threshold in settings"
+                    >
+                      ($1 threshold)
+                    </a>
                   </span>
                 </label>
               </Tooltip>

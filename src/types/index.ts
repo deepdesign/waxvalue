@@ -178,7 +178,7 @@ export interface FilterState {
   }
   priceDirection?: 'increase' | 'decrease' | ''
   showFlaggedOnly?: boolean
-  showFairlyPriced?: boolean
+  ignorePriceThresholds?: boolean
 }
 
 // API Response Types

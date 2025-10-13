@@ -78,11 +78,11 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
       console.error('Failed to restore progress:', e)
     }
     return {
-      current: 0,
-      total: 0,
-      startTime: 0,
-      estimatedTimeRemaining: 0,
-      isImporting: false
+    current: 0,
+    total: 0,
+    startTime: 0,
+    estimatedTimeRemaining: 0,
+    isImporting: false
     }
   })
   const [hasProcessedInitial, setHasProcessedInitial] = useState(false)
@@ -330,27 +330,27 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
       }
 
       try {
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          
-          buffer += decoder.decode(value, { stream: true })
-          const lines = buffer.split('\n')
-          buffer = lines.pop() || '' // Keep incomplete line in buffer
-          
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.slice(6))
-                
-                switch (data.type) {
-                  case 'total':
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || '' // Keep incomplete line in buffer
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6))
+              
+              switch (data.type) {
+                case 'total':
                     setProcessingProgress(prev => ({
                       ...prev,
                       total: data.total
                     }))
-                    setInventoryCount(data.total)
-                    setActualTotalItems(data.total)
+                  setInventoryCount(data.total)
+                  setActualTotalItems(data.total)
                     // Save to localStorage for banner
                     localStorage.setItem('waxvalue_analysis_progress', JSON.stringify({
                       isRunning: true,
@@ -358,9 +358,9 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                       total: data.total,
                       startTime: processingProgress.startTime
                     }))
-                    break
-                    
-                  case 'progress':
+                  break
+                  
+                case 'progress':
                     setProcessingProgress(prev => ({
                       ...prev,
                       current: data.current,
@@ -373,20 +373,20 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                       total: data.total,
                       startTime: processingProgress.startTime
                     }))
-                    break
-                    
-                  case 'suggestion':
-                    newSuggestions.push(data.suggestion)
-                    break
-                    
-                  case 'complete':
+                  break
+                  
+                case 'suggestion':
+                  newSuggestions.push(data.suggestion)
+                  break
+                  
+                case 'complete':
                     // Add originalIndex to maintain stable sort order during user interactions
                     const suggestionsWithIndex = (data.suggestions || []).map((s: any, index: number) => ({
                       ...s,
                       originalIndex: index
                     }))
                     setSuggestions(suggestionsWithIndex)
-                    setRepriceResults(data.repriceResults || [])
+                  setRepriceResults(data.repriceResults || [])
                     setProcessingProgress({
                       current: data.totalItems,
                       total: data.totalItems,
@@ -394,18 +394,18 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                       estimatedTimeRemaining: 0,
                       isImporting: false
                     })
-                    setHasProcessedInitial(true)
-                    setHasInitialized(true)
+                  setHasProcessedInitial(true)
+                  setHasInitialized(true)
                     setIsLoading(false) // Stop loading when analysis completes
                     // Mark that we have data (prevents auto-fetch on refresh and flicker)
                     localStorage.setItem('waxvalue_has_data', 'true')
-                    // Clear progress from localStorage as analysis is complete
-                    localStorage.removeItem('waxvalue_analysis_progress')
-                    break
-                    
-                  case 'error':
+                  // Clear progress from localStorage as analysis is complete
+                  localStorage.removeItem('waxvalue_analysis_progress')
+                  break
+                  
+                case 'error':
                     // Handle "already in progress" gracefully - keep loading state active
-                    if (data.error?.includes('already in progress')) {
+                  if (data.error?.includes('already in progress')) {
                       console.info('Analysis already running, will continue polling')
                       // Ensure isImporting stays true to keep loading screen visible
                       setProcessingProgress(prev => ({
@@ -413,32 +413,32 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                         isImporting: true
                       }))
                       // Load any cached suggestions to show partial progress
-                      try {
-                        const cachedResponse = await fetch(`/api/backend/inventory/suggestions?session_id=${sessionId}`)
-                        if (cachedResponse.ok) {
-                          const cachedData = await cachedResponse.json()
+                    try {
+                      const cachedResponse = await fetch(`/api/backend/inventory/suggestions?session_id=${sessionId}`)
+                      if (cachedResponse.ok) {
+                        const cachedData = await cachedResponse.json()
                           if (cachedData.suggestions && cachedData.suggestions.length > 0) {
                             setSuggestions(cachedData.suggestions)
-                            setRepriceResults(cachedData.repriceResults || [])
+                        setRepriceResults(cachedData.repriceResults || [])
                             console.info(`Loaded ${cachedData.suggestions.length} cached suggestions while analysis continues`)
                           }
-                        }
-                      } catch (cacheError) {
-                        console.warn('Could not load cached suggestions:', cacheError)
                       }
-                      // Keep isLoading true and return to prevent finally block from running
-                      return
+                    } catch (cacheError) {
+                      console.warn('Could not load cached suggestions:', cacheError)
                     }
-                    throw new Error(data.error)
-                    
-                  case 'status':
-                    // Optional: could show status messages
-                    break
-                }
-              } catch (parseError) {
-                console.error('Error parsing streaming data:', parseError)
+                      // Keep isLoading true and return to prevent finally block from running
+                    return
+                  }
+                  throw new Error(data.error)
+                  
+                case 'status':
+                  // Optional: could show status messages
+                  break
               }
+            } catch (parseError) {
+              console.error('Error parsing streaming data:', parseError)
             }
+          }
           }
         }
       } finally {
@@ -468,7 +468,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
     let filtered = suggestions.filter((suggestion) => {
       if (!filters) return true
 
-      // Show fairly priced filter (hide items within threshold)
+      // Show fairly priced filter (hide items within threshold when unchecked)
       if (filters.showFairlyPriced === false) {
         const priceDifference = Math.abs(suggestion.suggestedPrice - suggestion.currentPrice)
         if (priceDifference < (userSettings.minPriceChangeThreshold || 1)) return false
@@ -618,18 +618,18 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         
         // STEP 3: After 2000ms pause (user sees green buttons for 2 seconds), THEN update data and trigger re-sort
         setTimeout(() => {
-          setSuggestions(prevSuggestions => 
-            prevSuggestions.map(s => {
-              if (listingIds.includes(s.listingId)) {
-                return {
-                  ...s,
+        setSuggestions(prevSuggestions => 
+          prevSuggestions.map(s => {
+            if (listingIds.includes(s.listingId)) {
+              return {
+                ...s,
                   currentPrice: s.suggestedPrice, // Update price - triggers re-sort
                   status: 'fairly_priced' as const // Update status
-                }
               }
-              return s
-            })
-          )
+            }
+            return s
+          })
+        )
         }, 2000)
       }
       
@@ -706,17 +706,17 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
       
       // STEP 3: After 2000ms pause (user sees green button for 2 seconds), THEN update actual data and trigger re-sort
       setTimeout(() => {
-        setSuggestions(prevSuggestions => 
-          prevSuggestions.map(s => 
-            s.listingId === listingId 
-              ? { 
-                  ...s,
+      setSuggestions(prevSuggestions => 
+        prevSuggestions.map(s => 
+          s.listingId === listingId 
+            ? { 
+                ...s,
                   currentPrice: s.suggestedPrice, // Update price - triggers re-sort
-                  status: 'fairly_priced' as const // Update status
-                }
-              : s
-          )
+                status: 'fairly_priced' as const // Update status
+              }
+            : s
         )
+      )
       }, 2000)
       
     } catch (error: any) {
@@ -1084,78 +1084,78 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
     return (
       <div className="space-y-6">
         {/* Main Loading Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-12">
-          <div className="flex flex-col items-center justify-center text-center max-w-md mx-auto">
-            {/* Spinner */}
-            <div className="relative mb-6">
-              <svg className="wave-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 38.05">
-                <path className="wave-line wave-line-1" d="M0.91,15L0.78,15A1,1,0,0,0,0,16v6a1,1,0,1,0,2,0s0,0,0,0V16a1,1,0,0,0-1-1H0.91Z"/>
-                <path className="wave-line wave-line-2" d="M6.91,9L6.78,9A1,1,0,0,0,6,10V28a1,1,0,1,0,2,0s0,0,0,0V10A1,1,0,0,0,7,9H6.91Z"/>
-                <path className="wave-line wave-line-3" d="M12.91,0L12.78,0A1,1,0,0,0,12,1V37a1,1,0,1,0,2,0s0,0,0,0V1a1,1,0,0,0-1-1H12.91Z"/>
-                <path className="wave-line wave-line-4" d="M18.91,10l-0.12,0A1,1,0,0,0,18,11V27a1,1,0,1,0,2,0s0,0,0,0V11a1,1,0,0,0-1-1H18.91Z"/>
-                <path className="wave-line wave-line-5" d="M24.91,15l-0.12,0A1,1,0,0,0,24,16v6a1,1,0,0,0,2,0s0,0,0,0V16a1,1,0,0,0-1-1H24.91Z"/>
-                <path className="wave-line wave-line-6" d="M30.91,10l-0.12,0A1,1,0,0,0,30,11V27a1,1,0,1,0,2,0s0,0,0,0V11a1,1,0,0,0-1-1H30.91Z"/>
-                <path className="wave-line wave-line-7" d="M36.91,0L36.78,0A1,1,0,0,0,36,1V37a1,1,0,1,0,2,0s0,0,0,0V1a1,1,0,0,0-1-1H36.91Z"/>
-                <path className="wave-line wave-line-8" d="M42.91,9L42.78,9A1,1,0,0,0,42,10V28a1,1,0,1,0,2,0s0,0,0,0V10a1,1,0,0,0-1-1H42.91Z"/>
-                <path className="wave-line wave-line-9" d="M48.91,15l-0.12,0A1,1,0,0,0,48,16v6a1,1,0,1,0,2,0s0,0,0,0V16a1,1,0,0,0-1-1H48.91Z"/>
-              </svg>
-            </div>
-            
-            {/* Loading Message */}
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              Analysing your inventory
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Pulling data from Discogs and calculating pricing suggestions. 
-              <br />
-              Due to API rate limits, this may take a few minutes for larger inventories.
-            </p>
-            
-            {/* Progress Indicator with Gradient */}
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-3 overflow-hidden">
-              <div 
-                className="h-3 rounded-full transition-all duration-500 ease-out bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500"
-                style={{
-                  width: `${isCountingInventory ? 25 : processingProgress.total > 0 ? Math.min((processingProgress.current / processingProgress.total) * 100, 100) : 0}%`
-                }}
-              ></div>
-            </div>
-            
-            {/* Progress Details */}
-            <div className="space-y-1">
-              {isCountingInventory ? (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Counting your inventory items...
-                </p>
-              ) : processingProgress.isImporting && processingProgress.total > 0 ? (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Processing {processingProgress.current} of {processingProgress.total} items
-                </p>
-              ) : processingProgress.total > 0 ? (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Processing {processingProgress.current} of {processingProgress.total} items
-                </p>
-              ) : (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Analysing your Discogs inventory...
-                </p>
-              )}
-              {processingProgress.estimatedTimeRemaining > 0 && !isCountingInventory && (
-                <p className="text-xs text-gray-500 dark:text-gray-500">
-                  Estimated time remaining: {Math.ceil(processingProgress.estimatedTimeRemaining / 1000)} seconds
-                </p>
-              )}
-              <p className="text-xs text-gray-500 dark:text-gray-500">
-                {isCountingInventory 
-                  ? 'Getting inventory count from Discogs...'
-                  : inventoryCount > 0 
-                    ? `Found ${inventoryCount} items for sale in your inventory`
-                    : 'Fetching inventory data from Discogs...'
-                }
-              </p>
-            </div>
-            
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-12">
+        <div className="flex flex-col items-center justify-center text-center max-w-md mx-auto">
+          {/* Spinner */}
+          <div className="relative mb-6">
+            <svg className="wave-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 38.05">
+              <path className="wave-line wave-line-1" d="M0.91,15L0.78,15A1,1,0,0,0,0,16v6a1,1,0,1,0,2,0s0,0,0,0V16a1,1,0,0,0-1-1H0.91Z"/>
+              <path className="wave-line wave-line-2" d="M6.91,9L6.78,9A1,1,0,0,0,6,10V28a1,1,0,1,0,2,0s0,0,0,0V10A1,1,0,0,0,7,9H6.91Z"/>
+              <path className="wave-line wave-line-3" d="M12.91,0L12.78,0A1,1,0,0,0,12,1V37a1,1,0,1,0,2,0s0,0,0,0V1a1,1,0,0,0-1-1H12.91Z"/>
+              <path className="wave-line wave-line-4" d="M18.91,10l-0.12,0A1,1,0,0,0,18,11V27a1,1,0,1,0,2,0s0,0,0,0V11a1,1,0,0,0-1-1H18.91Z"/>
+              <path className="wave-line wave-line-5" d="M24.91,15l-0.12,0A1,1,0,0,0,24,16v6a1,1,0,0,0,2,0s0,0,0,0V16a1,1,0,0,0-1-1H24.91Z"/>
+              <path className="wave-line wave-line-6" d="M30.91,10l-0.12,0A1,1,0,0,0,30,11V27a1,1,0,1,0,2,0s0,0,0,0V11a1,1,0,0,0-1-1H30.91Z"/>
+              <path className="wave-line wave-line-7" d="M36.91,0L36.78,0A1,1,0,0,0,36,1V37a1,1,0,1,0,2,0s0,0,0,0V1a1,1,0,0,0-1-1H36.91Z"/>
+              <path className="wave-line wave-line-8" d="M42.91,9L42.78,9A1,1,0,0,0,42,10V28a1,1,0,1,0,2,0s0,0,0,0V10a1,1,0,0,0-1-1H42.91Z"/>
+              <path className="wave-line wave-line-9" d="M48.91,15l-0.12,0A1,1,0,0,0,48,16v6a1,1,0,1,0,2,0s0,0,0,0V16a1,1,0,0,0-1-1H48.91Z"/>
+            </svg>
           </div>
+          
+          {/* Loading Message */}
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Analysing your inventory
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Pulling data from Discogs and calculating pricing suggestions. 
+            <br />
+            Due to API rate limits, this may take a few minutes for larger inventories.
+          </p>
+          
+            {/* Progress Indicator with Gradient */}
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-3 overflow-hidden">
+            <div 
+                className="h-3 rounded-full transition-all duration-500 ease-out bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500"
+              style={{
+                width: `${isCountingInventory ? 25 : processingProgress.total > 0 ? Math.min((processingProgress.current / processingProgress.total) * 100, 100) : 0}%`
+              }}
+            ></div>
+          </div>
+          
+          {/* Progress Details */}
+          <div className="space-y-1">
+            {isCountingInventory ? (
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Counting your inventory items...
+              </p>
+            ) : processingProgress.isImporting && processingProgress.total > 0 ? (
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Processing {processingProgress.current} of {processingProgress.total} items
+              </p>
+            ) : processingProgress.total > 0 ? (
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Processing {processingProgress.current} of {processingProgress.total} items
+              </p>
+            ) : (
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Analysing your Discogs inventory...
+              </p>
+            )}
+            {processingProgress.estimatedTimeRemaining > 0 && !isCountingInventory && (
+              <p className="text-xs text-gray-500 dark:text-gray-500">
+                Estimated time remaining: {Math.ceil(processingProgress.estimatedTimeRemaining / 1000)} seconds
+              </p>
+            )}
+            <p className="text-xs text-gray-500 dark:text-gray-500">
+              {isCountingInventory 
+                ? 'Getting inventory count from Discogs...'
+                : inventoryCount > 0 
+                  ? `Found ${inventoryCount} items for sale in your inventory`
+                  : 'Fetching inventory data from Discogs...'
+              }
+            </p>
+          </div>
+          
+        </div>
         </div>
 
         {/* Vinyl Facts Card */}
@@ -1242,62 +1242,62 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
             
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-                {/* Price Direction Button Group */}
+              {/* Price Direction Button Group */}
                 <div className="grid grid-cols-3 sm:inline-flex rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-theme-xs overflow-hidden">
-                  <button
-                    onClick={() => {
-                      const newFilters = { ...filters, priceDirection: '' }
-                      setFilters(newFilters)
-                      onFiltersChange?.(newFilters)
-                    }}
+                <button
+                  onClick={() => {
+                    const newFilters = { ...filters, priceDirection: '' }
+                    setFilters(newFilters)
+                    onFiltersChange?.(newFilters)
+                  }}
                     className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors ${
-                      !filters?.priceDirection
-                        ? 'bg-primary-600 dark:bg-primary-500 text-white'
-                        : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
+                    !filters?.priceDirection
+                      ? 'bg-primary-600 dark:bg-primary-500 text-white'
+                      : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
                     } sm:rounded-l-lg`}
-                  >
-                    All
-                  </button>
-                  <button
-                    onClick={() => {
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => {
                       const newFilters = { ...filters, priceDirection: 'underpriced' }
-                      setFilters(newFilters)
-                      onFiltersChange?.(newFilters)
-                    }}
+                    setFilters(newFilters)
+                    onFiltersChange?.(newFilters)
+                  }}
                     className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors sm:border-l border-gray-200 dark:border-gray-700 ${
                       filters?.priceDirection === 'underpriced'
-                        ? 'bg-primary-600 dark:bg-primary-500 text-white'
-                        : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
+                      ? 'bg-primary-600 dark:bg-primary-500 text-white'
+                      : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
                     }`}
-                  >
+                >
                     Underpriced
-                  </button>
-                  <button
-                    onClick={() => {
+                </button>
+                <button
+                  onClick={() => {
                       const newFilters = { ...filters, priceDirection: 'overpriced' }
-                      setFilters(newFilters)
-                      onFiltersChange?.(newFilters)
-                    }}
+                    setFilters(newFilters)
+                    onFiltersChange?.(newFilters)
+                  }}
                     className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors sm:border-l border-gray-200 dark:border-gray-700 sm:rounded-r-lg ${
                       filters?.priceDirection === 'overpriced'
-                        ? 'bg-primary-600 dark:bg-primary-500 text-white'
-                        : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
+                      ? 'bg-primary-600 dark:bg-primary-500 text-white'
+                      : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
                     }`}
-                  >
+                >
                     Overpriced
-                  </button>
-                </div>
+                </button>
+              </div>
 
                 {/* Show Fairly Priced Checkbox */}
                 <div className="flex items-center">
-                  <Tooltip 
-                    content="Show items that are priced within the minimum change threshold. Most users prefer to hide these to focus on items needing price changes."
+              <Tooltip 
+                    content="Show items that are priced within the minimum change threshold. Unchecked to focus on items needing significant price changes."
                     position="top"
                   >
                     <label className="flex items-center">
                       <input
                         type="checkbox"
-                        checked={filters?.showFairlyPriced || false}
+                        checked={filters?.showFairlyPriced !== false}
                         onChange={(e) => {
                           const newFilters = { ...filters, showFairlyPriced: e.target.checked }
                           setFilters(newFilters)
@@ -1306,7 +1306,14 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                         className="table-checkbox"
                       />
                       <span className="ml-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
-                        Show fairly priced
+                        Show fairly priced{' '}
+                        <a
+                          href="/settings"
+                          className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 underline"
+                          title="Adjust threshold in settings"
+                        >
+                          (${userSettings.minPriceChangeThreshold || 1} threshold)
+                        </a>
                       </span>
                     </label>
                   </Tooltip>
@@ -1411,10 +1418,10 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                 <th className="w-20 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   ITEM ID
                 </th>
-                <th className="w-20 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <th className="w-20 px-6 py-3 text-right text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   <button
                     onClick={() => handleSort('currentPrice')}
-                    className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                    className="flex items-center justify-end gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors w-full"
                   >
                     CURRENT PRICE
                     <svg className={`w-3 h-3 transition-transform ${
@@ -1424,10 +1431,10 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                     </svg>
                   </button>
                 </th>
-                <th className="w-20 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <th className="w-20 px-6 py-3 text-right text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   <button
                     onClick={() => handleSort('priceDelta')}
-                    className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                    className="flex items-center justify-end gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors w-full"
                   >
                     SUGGESTED PRICE
                     <svg className={`w-3 h-3 transition-transform ${
@@ -1521,10 +1528,10 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                       </svg>
                     </a>
                   </td>
-                  <td className="w-20 px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                  <td className="w-20 px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-right">
                     <div className="font-medium">
                       {appliedItems.has(suggestion.listingId) && suggestion.originalPrice ? (
-                        <div className="flex flex-col">
+                        <div className="flex flex-col items-end">
                           <span className="text-gray-400 dark:text-gray-500 line-through text-xs">
                             {formatCurrency(suggestion.originalPrice, suggestion.currency)}
                           </span>
@@ -1537,9 +1544,9 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                       )}
                     </div>
                   </td>
-                  <td className="w-20 px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-1">
-                      <div className="flex-1">
+                  <td className="w-20 px-6 py-4 whitespace-nowrap text-right">
+                    <div className="flex items-center space-x-1 justify-end">
+                      <div className="flex-1 text-right">
                         <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           {formatCurrency(suggestion.suggestedPrice, suggestion.currency)}
                         </div>
@@ -1615,7 +1622,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
             </tbody>
           </table>
         </div>
-
+        
         {/* Mobile Card List */}
         <div className="xl:hidden px-4 py-4 space-y-3">
           {paginatedSuggestions.map((suggestion) => (
@@ -1705,11 +1712,11 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                </div>
               
               <div className="grid grid-cols-3 gap-3 text-xs mb-3">
-                <div>
+                <div className="text-right">
                   <div className="text-gray-500 dark:text-gray-400 mb-1">Current</div>
                   <div className="font-medium text-gray-900 dark:text-gray-100">
                     {appliedItems.has(suggestion.listingId) && suggestion.originalPrice ? (
-                      <div className="flex flex-col">
+                      <div className="flex flex-col items-end">
                         <span className="line-through text-gray-400 dark:text-gray-500">
                           {formatCurrency(suggestion.originalPrice, suggestion.currency)}
                         </span>
@@ -1722,13 +1729,13 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                     )}
                   </div>
                 </div>
-                <div>
+                <div className="text-right">
                   <div className="text-gray-500 dark:text-gray-400 mb-1">Suggested</div>
                   <div className="font-medium text-gray-900 dark:text-gray-100">
                     {formatCurrency(suggestion.suggestedPrice, suggestion.currency)}
                   </div>
                 </div>
-                <div>
+                <div className="text-right">
                   <div className="text-gray-500 dark:text-gray-400 mb-1">Change</div>
                   <div className={`font-medium ${
                     suggestion.suggestedPrice > suggestion.currentPrice 
@@ -1876,8 +1883,8 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
             )}
           </div>
         )}
-      </div>
-      )}
+              </div>
+            )}
     </div>
   )
 })

@@ -68,7 +68,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     condition: '',
     priceRange: { min: null, max: null },
     showFlaggedOnly: false,
-    showFairlyPriced: false,
+    showFairlyPriced: true,
   })
 
   return (
