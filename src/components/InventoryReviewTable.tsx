@@ -610,7 +610,12 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
       }
       
       if (result.errors > 0) {
-        toast.error(`${result.errors} items failed to update`)
+        console.error('Bulk apply errors:', result.results)
+        const failedItems = result.results?.filter((r: any) => !r.success) || []
+        const errorMsg = failedItems.length > 0 && failedItems[0].error 
+          ? failedItems[0].error 
+          : 'Unknown error'
+        toast.error(`${result.errors} items failed to update: ${errorMsg}`)
       }
       
       // Clear selection after successful apply
