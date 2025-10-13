@@ -23,17 +23,22 @@
     @apply transition-colors duration-200;
   }
   
-  /* NO I-BEAM CURSOR ANYWHERE - default cursor for all elements */
+  /* NO I-BEAM CURSOR ANYWHERE - default cursor for most elements */
   * {
-    cursor: default !important;
+    cursor: default;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
   }
   
-  /* Only show text cursor in actual input fields */
-  input, textarea, [contenteditable="true"] {
+  /* Interactive elements should have pointer cursor */
+  button, a, [role="button"], input[type="checkbox"], input[type="radio"], label {
+    cursor: pointer;
+  }
+  
+  /* Only show text cursor in actual text input fields */
+  input[type="text"], input[type="email"], input[type="password"], input[type="search"], input[type="url"], textarea, [contenteditable="true"] {
     cursor: text !important;
     user-select: text !important;
     -webkit-user-select: text !important;
