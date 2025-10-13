@@ -1137,35 +1137,6 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
 
   return (
     <div className="space-y-6">
-      {/* Bulk Actions */}
-      {selectedItems.size > 0 && (
-        <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
-          <Tooltip 
-            content={
-              <div>
-                <p className="font-medium mb-1">Apply selected changes</p>
-                <p className="text-xs opacity-90">
-                  Apply the suggested price changes to all selected items. This will update their prices on Discogs.
-                </p>
-              </div>
-            }
-            position="bottom"
-          >
-            <Button
-              onClick={handleBulkApply}
-              disabled={isApplying}
-              variant="primary"
-              loading={isApplying}
-              loadingText={`Applying...`}
-              className="w-full sm:w-auto"
-            >
-              <CheckIcon className="h-4 w-4 mr-2" />
-              Apply Selected ({selectedItems.size})
-            </Button>
-          </Tooltip>
-        </div>
-      )}
-
       {/* Pricing Suggestions Table - Responsive */}
       {(filteredAndSortedSuggestions.length > 0 || isLoading) && (
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
