@@ -1570,12 +1570,25 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
           {paginatedSuggestions.map((suggestion) => (
             <div 
               key={suggestion.listingId} 
-              className={`rounded-lg border p-3 ${
+              className={`rounded-lg border p-3 relative ${
                 appliedItems.has(suggestion.listingId)
                   ? 'bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800'
                   : 'bg-gray-50/50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700'
               }`}
             >
+              {/* Discogs Link - Top Right */}
+              <a
+                href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute top-3 right-3 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+                title={`View on Discogs: ${suggestion.listingId}`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+
               <div className="flex items-start gap-3 mb-3">
                 <input
                   type="checkbox"
@@ -1583,7 +1596,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   onChange={() => handleSelectItem(suggestion.listingId)}
                   className="table-checkbox mt-1 flex-shrink-0"
                 />
-                <div className="flex gap-2 flex-1 min-w-0">
+                <div className="flex gap-2 flex-1 min-w-0 pr-8">
                   <img
                     className="h-14 w-14 rounded object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
                     src={suggestion.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'}
@@ -1597,19 +1610,27 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                       {suggestion.title || 'Unknown Title'}
                     </h3>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">
                       {typeof suggestion.artist === 'object' ? (suggestion.artist as any)?.name : suggestion.artist || 'Unknown Artist'}
                     </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      {getConditionBadgeCompact(suggestion.condition)}
-                      <a
-                        href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-600 dark:text-primary-400 text-xs font-mono"
-                      >
-                        {suggestion.listingId}
-                      </a>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      {suggestion.label || 'Unknown Label'}
+                    </p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <div className="text-xs space-x-0.5">
+                        {suggestion.condition.split(', ').map((part, index) => (
+                          <span key={index}>
+                            {part.includes(':') ? (
+                              <>
+                                <span className="text-gray-500 dark:text-gray-400">{part.split(':')[0]}:</span>
+                                <span className="text-gray-900 dark:text-gray-100">{part.split(':')[1]}</span>
+                              </>
+                            ) : (
+                              <span className="text-gray-900 dark:text-gray-100">{part}</span>
+                            )}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -79,18 +79,18 @@ export function Tooltip({
   }
 
   const getArrowPosition = () => {
-    const baseClasses = 'absolute w-2 h-2 bg-gray-900 dark:bg-gray-700 border-gray-900 dark:border-gray-700'
+    const baseClasses = 'absolute w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45'
     switch (position) {
       case 'top':
-        return `${baseClasses} top-full left-1/2 transform -translate-x-1/2 border-l border-b border-r-0 border-t-0`
+        return `${baseClasses} top-full left-1/2 -translate-x-1/2 -translate-y-1/2`
       case 'bottom':
-        return `${baseClasses} bottom-full left-1/2 transform -translate-x-1/2 border-r border-t border-l-0 border-b-0`
+        return `${baseClasses} bottom-full left-1/2 -translate-x-1/2 translate-y-1/2`
       case 'left':
-        return `${baseClasses} left-full top-1/2 transform -translate-y-1/2 border-t border-r border-b-0 border-l-0`
+        return `${baseClasses} left-full top-1/2 -translate-y-1/2 -translate-x-1/2`
       case 'right':
-        return `${baseClasses} right-full top-1/2 transform -translate-y-1/2 border-b border-l border-t-0 border-r-0`
+        return `${baseClasses} right-full top-1/2 -translate-y-1/2 translate-x-1/2`
       default:
-        return `${baseClasses} top-full left-1/2 transform -translate-x-1/2 border-l border-b border-r-0 border-t-0`
+        return `${baseClasses} top-full left-1/2 -translate-x-1/2 -translate-y-1/2`
     }
   }
 

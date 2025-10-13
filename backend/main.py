@@ -1554,7 +1554,9 @@ async def bulk_apply_price_suggestions(request: dict, session_id: str = None):
                     # Remove this suggestion from the session since it's been applied
                     suggestions = [s for s in suggestions if s.get("listingId") != listing_id]
                 else:
-                    results.append({"listingId": listing_id, "success": False, "error": "Failed to update listing"})
+                    error_msg = f"Discogs API returned {status_code}: {result}"
+                    logger.error(f"Bulk apply failed for listing {listing_id}: {error_msg}")
+                    results.append({"listingId": listing_id, "success": False, "error": error_msg})
                     errors += 1
                     
             except Exception as e:
