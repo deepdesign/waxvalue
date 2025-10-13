@@ -79,7 +79,7 @@ export function Tooltip({
   }
 
   const getArrowPosition = () => {
-    const baseClasses = 'absolute w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45'
+    const baseClasses = 'absolute w-2 h-2 bg-gray-900 dark:bg-gray-700 border border-gray-700 dark:border-gray-600 rotate-45'
     switch (position) {
       case 'top':
         return `${baseClasses} top-full left-1/2 -translate-x-1/2 -translate-y-1/2`

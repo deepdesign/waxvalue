@@ -224,6 +224,14 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Clear any ongoing requests when component unmounts
+      console.log('Component unmounting - cleaning up streaming requests')
+    }
+  }, [])
+
 
 
   // Expose the simulate function to parent component
@@ -234,6 +242,8 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
   }), [isLoading])
 
   const fetchSuggestions = async () => {
+    let abortController: AbortController | null = null
+    
     try {
       setIsLoading(true)
       setFactsKey(Date.now()) // Generate new random facts for this session
@@ -275,20 +285,18 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         localStorage.setItem('waxvalue_analysis_progress', JSON.stringify(initialProgress))
       }
       
+      // Create abort controller for this request
+      abortController = new AbortController()
+      
       let response: Response
       try {
         response = await fetch(`/api/backend/inventory/suggestions/stream?session_id=${sessionId}`, {
-          signal: AbortSignal.timeout(600000) // 10 minute timeout
+          signal: abortController.signal
         })
       } catch (fetchError: any) {
-        if (fetchError.name === 'TimeoutError') {
-          toast.error('Request timed out. Your inventory might be very large. Try again or contact support.')
-          setIsLoading(false)
-          return
-        }
         if (fetchError.name === 'AbortError') {
-          toast.error('Request was cancelled. Please try again.')
-          setIsLoading(false)
+          // Request was aborted - this is normal when navigating away
+          console.log('Stream request aborted (user navigated away)')
           return
         }
         throw new Error(`Network error: ${fetchError.message || 'Failed to connect to server'}`)
@@ -321,115 +329,124 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         throw new Error('No response body reader available')
       }
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || '' // Keep incomplete line in buffer
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6))
-              
-              switch (data.type) {
-                case 'total':
-                  setProcessingProgress(prev => ({
-                    ...prev,
-                    total: data.total
-                  }))
-                  setInventoryCount(data.total)
-                  setActualTotalItems(data.total)
-                  // Save to localStorage for banner
-                  localStorage.setItem('waxvalue_analysis_progress', JSON.stringify({
-                    isRunning: true,
-                    current: 0,
-                    total: data.total,
-                    startTime: processingProgress.startTime
-                  }))
-                  break
-                  
-                case 'progress':
-                  setProcessingProgress(prev => ({
-                    ...prev,
-                    current: data.current,
-                    total: data.total
-                  }))
-                  // Save to localStorage for banner
-                  localStorage.setItem('waxvalue_analysis_progress', JSON.stringify({
-                    isRunning: true,
-                    current: data.current,
-                    total: data.total,
-                    startTime: processingProgress.startTime
-                  }))
-                  break
-                  
-                case 'suggestion':
-                  newSuggestions.push(data.suggestion)
-                  break
-                  
-                case 'complete':
-                  // Add originalIndex to maintain stable sort order during user interactions
-                  const suggestionsWithIndex = (data.suggestions || []).map((s: any, index: number) => ({
-                    ...s,
-                    originalIndex: index
-                  }))
-                  setSuggestions(suggestionsWithIndex)
-                  setRepriceResults(data.repriceResults || [])
-                  setProcessingProgress({
-                    current: data.totalItems,
-                    total: data.totalItems,
-                    startTime: processingProgress.startTime,
-                    estimatedTimeRemaining: 0,
-                    isImporting: false
-                  })
-                  setHasProcessedInitial(true)
-                  setHasInitialized(true)
-                  setIsLoading(false) // Stop loading when analysis completes
-                  // Mark that we have data (prevents auto-fetch on refresh and flicker)
-                  localStorage.setItem('waxvalue_has_data', 'true')
-                  // Clear progress from localStorage as analysis is complete
-                  localStorage.removeItem('waxvalue_analysis_progress')
-                  break
-                  
-                case 'error':
-                  // Handle "already in progress" gracefully - keep loading state active
-                  if (data.error?.includes('already in progress')) {
-                    console.info('Analysis already running, will continue polling')
-                    // Ensure isImporting stays true to keep loading screen visible
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() || '' // Keep incomplete line in buffer
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6))
+                
+                switch (data.type) {
+                  case 'total':
                     setProcessingProgress(prev => ({
                       ...prev,
-                      isImporting: true
+                      total: data.total
                     }))
-                    // Load any cached suggestions to show partial progress
-                    try {
-                      const cachedResponse = await fetch(`/api/backend/inventory/suggestions?session_id=${sessionId}`)
-                      if (cachedResponse.ok) {
-                        const cachedData = await cachedResponse.json()
-                        if (cachedData.suggestions && cachedData.suggestions.length > 0) {
-                          setSuggestions(cachedData.suggestions)
-                          setRepriceResults(cachedData.repriceResults || [])
-                          console.info(`Loaded ${cachedData.suggestions.length} cached suggestions while analysis continues`)
+                    setInventoryCount(data.total)
+                    setActualTotalItems(data.total)
+                    // Save to localStorage for banner
+                    localStorage.setItem('waxvalue_analysis_progress', JSON.stringify({
+                      isRunning: true,
+                      current: 0,
+                      total: data.total,
+                      startTime: processingProgress.startTime
+                    }))
+                    break
+                    
+                  case 'progress':
+                    setProcessingProgress(prev => ({
+                      ...prev,
+                      current: data.current,
+                      total: data.total
+                    }))
+                    // Save to localStorage for banner
+                    localStorage.setItem('waxvalue_analysis_progress', JSON.stringify({
+                      isRunning: true,
+                      current: data.current,
+                      total: data.total,
+                      startTime: processingProgress.startTime
+                    }))
+                    break
+                    
+                  case 'suggestion':
+                    newSuggestions.push(data.suggestion)
+                    break
+                    
+                  case 'complete':
+                    // Add originalIndex to maintain stable sort order during user interactions
+                    const suggestionsWithIndex = (data.suggestions || []).map((s: any, index: number) => ({
+                      ...s,
+                      originalIndex: index
+                    }))
+                    setSuggestions(suggestionsWithIndex)
+                    setRepriceResults(data.repriceResults || [])
+                    setProcessingProgress({
+                      current: data.totalItems,
+                      total: data.totalItems,
+                      startTime: processingProgress.startTime,
+                      estimatedTimeRemaining: 0,
+                      isImporting: false
+                    })
+                    setHasProcessedInitial(true)
+                    setHasInitialized(true)
+                    setIsLoading(false) // Stop loading when analysis completes
+                    // Mark that we have data (prevents auto-fetch on refresh and flicker)
+                    localStorage.setItem('waxvalue_has_data', 'true')
+                    // Clear progress from localStorage as analysis is complete
+                    localStorage.removeItem('waxvalue_analysis_progress')
+                    break
+                    
+                  case 'error':
+                    // Handle "already in progress" gracefully - keep loading state active
+                    if (data.error?.includes('already in progress')) {
+                      console.info('Analysis already running, will continue polling')
+                      // Ensure isImporting stays true to keep loading screen visible
+                      setProcessingProgress(prev => ({
+                        ...prev,
+                        isImporting: true
+                      }))
+                      // Load any cached suggestions to show partial progress
+                      try {
+                        const cachedResponse = await fetch(`/api/backend/inventory/suggestions?session_id=${sessionId}`)
+                        if (cachedResponse.ok) {
+                          const cachedData = await cachedResponse.json()
+                          if (cachedData.suggestions && cachedData.suggestions.length > 0) {
+                            setSuggestions(cachedData.suggestions)
+                            setRepriceResults(cachedData.repriceResults || [])
+                            console.info(`Loaded ${cachedData.suggestions.length} cached suggestions while analysis continues`)
+                          }
                         }
+                      } catch (cacheError) {
+                        console.warn('Could not load cached suggestions:', cacheError)
                       }
-                    } catch (cacheError) {
-                      console.warn('Could not load cached suggestions:', cacheError)
+                      // Keep isLoading true and return to prevent finally block from running
+                      return
                     }
-                    // Keep isLoading true and return to prevent finally block from running
-                    return
-                  }
-                  throw new Error(data.error)
-                  
-                case 'status':
-                  // Optional: could show status messages
-                  break
+                    throw new Error(data.error)
+                    
+                  case 'status':
+                    // Optional: could show status messages
+                    break
+                }
+              } catch (parseError) {
+                console.error('Error parsing streaming data:', parseError)
               }
-            } catch (parseError) {
-              console.error('Error parsing streaming data:', parseError)
             }
           }
+        }
+      } finally {
+        // Clean up the reader
+        try {
+          reader.releaseLock()
+        } catch (e) {
+          // Reader might already be released
         }
       }
       
@@ -1535,10 +1552,12 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                           >
                             <button
                               onClick={() => handleApplyIndividual(suggestion.listingId)}
-                              disabled={applyingItems.has(suggestion.listingId) || appliedItems.has(suggestion.listingId)}
+                              disabled={applyingItems.has(suggestion.listingId) || appliedItems.has(suggestion.listingId) || selectedItems.size > 0}
                               className={`inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed transition-all duration-200 w-[72px] ${
                                 appliedItems.has(suggestion.listingId)
                                   ? 'bg-green-600 hover:bg-green-600 disabled:opacity-100 focus:ring-green-500'
+                                  : selectedItems.size > 0
+                                  ? 'bg-gray-400 hover:bg-gray-400 focus:ring-gray-400 disabled:opacity-50'
                                   : 'bg-primary-600 hover:bg-primary-700 focus:ring-primary-500 disabled:opacity-50 disabled:bg-primary-600'
                               }`}
                             >
@@ -1677,11 +1696,13 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
 
               <Button
                 onClick={() => handleApplyIndividual(suggestion.listingId)}
-                disabled={applyingItems.has(suggestion.listingId) || appliedItems.has(suggestion.listingId)}
+                disabled={applyingItems.has(suggestion.listingId) || appliedItems.has(suggestion.listingId) || selectedItems.size > 0}
                 variant="primary"
                 className={`w-full text-sm ${
                   appliedItems.has(suggestion.listingId)
                     ? 'bg-green-600 hover:bg-green-600'
+                    : selectedItems.size > 0
+                    ? 'bg-gray-400 hover:bg-gray-400'
                     : ''
                 }`}
               >
