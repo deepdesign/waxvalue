@@ -1754,6 +1754,92 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
           )}
         </div>
         
+        {/* Mobile Filters */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+          <div className="space-y-3">
+            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">
+              Filter by price
+            </div>
+            
+            {/* Price Direction Button Group */}
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={() => {
+                  const newFilters = { ...filters, priceDirection: '' }
+                  setFilters(newFilters)
+                  onFiltersChange?.(newFilters)
+                }}
+                className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                  !filters?.priceDirection
+                    ? 'bg-primary-600 dark:bg-primary-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => {
+                  const newFilters = { ...filters, priceDirection: 'underpriced' }
+                  setFilters(newFilters)
+                  onFiltersChange?.(newFilters)
+                }}
+                className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                  filters?.priceDirection === 'underpriced'
+                    ? 'bg-primary-600 dark:bg-primary-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                Underpriced
+              </button>
+              <button
+                onClick={() => {
+                  const newFilters = { ...filters, priceDirection: 'overpriced' }
+                  setFilters(newFilters)
+                  onFiltersChange?.(newFilters)
+                }}
+                className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                  filters?.priceDirection === 'overpriced'
+                    ? 'bg-primary-600 dark:bg-primary-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                Overpriced
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+              <div className="text-xs text-gray-600 dark:text-gray-400">
+                Showing {filteredAndSortedSuggestions.length} of {actualTotalItems || suggestions.length} items
+              </div>
+              <Tooltip 
+                content="Re-analyse your entire Discogs inventory"
+                position="top"
+              >
+                <button
+                  onClick={handleSimulateSelection}
+                  disabled={isLoading}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary-600 dark:bg-primary-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-700 dark:hover:bg-primary-600 disabled:opacity-50"
+                >
+                  <svg
+                    className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  {isLoading ? 'Refreshing...' : 'Refresh'}
+                </button>
+              </Tooltip>
+            </div>
+          </div>
+        </div>
+        
         {totalItems === 0 && !isLoading ? (
           <div className="card text-center py-12">
             <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
