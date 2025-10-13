@@ -509,14 +509,40 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         let aValue, bValue
         
         if (sortConfig.key === 'priceDelta') {
-          // Sort by price delta (suggested - current)
+          // Sort by price delta (suggested - current) - Most underpriced first
           // Positive delta = underpriced (needs increase) → shows at top
-          // Negative delta = overpriced (needs decrease) → shows at bottom
-          // desc: largest positive → zero → largest negative
           aValue = a.suggestedPrice - a.currentPrice
           bValue = b.suggestedPrice - b.currentPrice
+        } else if (sortConfig.key === 'priceDeltaReverse') {
+          // Sort by price delta reversed - Most overpriced first
+          // Negative delta = overpriced (needs decrease) → shows at top
+          aValue = a.currentPrice - a.suggestedPrice
+          bValue = b.currentPrice - b.suggestedPrice
+        } else if (sortConfig.key === 'currentPriceHigh') {
+          // Sort by current price high to low
+          aValue = a.currentPrice
+          bValue = b.currentPrice
+        } else if (sortConfig.key === 'currentPriceLow') {
+          // Sort by current price low to high
+          aValue = a.currentPrice
+          bValue = b.currentPrice
+        } else if (sortConfig.key === 'status') {
+          // Sort by status: underpriced first, then overpriced, then fairly_priced
+          const statusOrder = { 'underpriced': 0, 'overpriced': 1, 'fairly_priced': 2 }
+          aValue = statusOrder[a.status] ?? 3
+          bValue = statusOrder[b.status] ?? 3
+        } else if (sortConfig.key === 'artist') {
+          aValue = (a.artist || '').toLowerCase()
+          bValue = (b.artist || '').toLowerCase()
+        } else if (sortConfig.key === 'condition') {
+          // Sort condition by quality: Mint → Near Mint → Very Good+ → Very Good → Good
+          const conditionOrder = { 'M': 0, 'NM': 1, 'VG+': 2, 'VG': 3, 'G+': 4, 'G': 5 }
+          const aCondition = (a.condition || '').split(',')[0].trim() // Get first condition
+          const bCondition = (b.condition || '').split(',')[0].trim()
+          aValue = conditionOrder[aCondition] ?? 6
+          bValue = conditionOrder[bCondition] ?? 6
         } else {
-          // Sort by current price
+          // Sort by current price or other numeric fields
           aValue = a[sortConfig.key!]
           bValue = b[sortConfig.key!]
         }
@@ -656,7 +682,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
     }
   }
 
-  const handleSort = (key: 'currentPrice' | 'priceDelta') => {
+  const handleSort = (key: 'currentPrice' | 'priceDelta' | 'priceDeltaReverse' | 'currentPriceHigh' | 'currentPriceLow' | 'artist' | 'condition' | 'status') => {
     setSortConfig(prevConfig => {
       if (prevConfig.key === key) {
         // Same column, toggle direction
@@ -1410,22 +1436,42 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   />
                 </th>
                 <th className="w-64 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  RELEASE
+                  <button
+                    onClick={() => handleSort('artist')}
+                    className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors w-full text-left"
+                  >
+                    RELEASE
+                    <svg className={`w-3 h-3 transition-transform ${
+                      sortConfig.key === 'artist' && sortConfig.direction === 'asc' ? 'rotate-180' : ''
+                    }`} fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
                 </th>
                 <th className="w-20 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  CONDITION
+                  <button
+                    onClick={() => handleSort('condition')}
+                    className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors w-full text-left"
+                  >
+                    CONDITION
+                    <svg className={`w-3 h-3 transition-transform ${
+                      sortConfig.key === 'condition' && sortConfig.direction === 'asc' ? 'rotate-180' : ''
+                    }`} fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
                 </th>
                 <th className="w-20 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   ITEM ID
                 </th>
                 <th className="w-20 px-6 py-3 text-right text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   <button
-                    onClick={() => handleSort('currentPrice')}
+                    onClick={() => handleSort('currentPriceHigh')}
                     className="flex items-center justify-end gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors w-full"
                   >
-                    CURRENT PRICE
+                    <span>CURRENT PRICE</span>
                     <svg className={`w-3 h-3 transition-transform ${
-                      sortConfig.key === 'currentPrice' && sortConfig.direction === 'asc' ? 'rotate-180' : ''
+                      (sortConfig.key === 'currentPriceHigh' || sortConfig.key === 'currentPriceLow') && sortConfig.direction === 'asc' ? 'rotate-180' : ''
                     }`} fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
@@ -1436,7 +1482,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                     onClick={() => handleSort('priceDelta')}
                     className="flex items-center justify-end gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors w-full"
                   >
-                    SUGGESTED PRICE
+                    <span>SUGGESTED PRICE</span>
                     <svg className={`w-3 h-3 transition-transform ${
                       sortConfig.key === 'priceDelta' && sortConfig.direction === 'asc' ? 'rotate-180' : ''
                     }`} fill="currentColor" viewBox="0 0 20 20">
