@@ -35,6 +35,7 @@ export default function DashboardPage() {
       condition: '',
       priceRange: { min: null, max: null },
       showFlaggedOnly: false,
+      showFairlyPriced: false,
     }
     setFilters(defaultFilters)
     saveFilterSettings(defaultFilters)
