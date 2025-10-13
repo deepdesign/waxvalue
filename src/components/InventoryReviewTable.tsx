@@ -1646,23 +1646,26 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                       {suggestion.label || 'Unknown Label'}
                     </p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <div className="text-xs space-x-0.5">
-                        {suggestion.condition.split(', ').map((part, index) => (
-                          <span key={index}>
-                            {part.includes(':') ? (
-                              <>
-                                <span className="text-gray-500 dark:text-gray-400">{part.split(':')[0]}:</span>
-                                <span className="text-gray-900 dark:text-gray-100">{part.split(':')[1]}</span>
-                              </>
-                            ) : (
-                              <span className="text-gray-900 dark:text-gray-100">{part}</span>
-                            )}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
                   </div>
+                </div>
+              </div>
+              
+              {/* Condition Row - Aligned with thumbnail */}
+              <div className="flex items-center gap-1 mb-3">
+                <div className="w-14"></div> {/* Spacer to align with thumbnail */}
+                <div className="text-xs space-x-0.5">
+                  {suggestion.condition.split(', ').map((part, index) => (
+                    <span key={index}>
+                      {part.includes(':') ? (
+                        <>
+                          <span className="text-gray-500 dark:text-gray-400">{part.split(':')[0]}:</span>
+                          <span className="text-gray-900 dark:text-gray-100">{part.split(':')[1]}</span>
+                        </>
+                      ) : (
+                        <span className="text-gray-900 dark:text-gray-100">{part}</span>
+                      )}
+                    </span>
+                  ))}
                 </div>
               </div>
               
