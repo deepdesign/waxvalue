@@ -1566,10 +1566,10 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                       href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-mono text-sm inline-flex items-center gap-1"
+                      className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-mono text-sm inline-flex items-center gap-1.5 cursor-pointer"
                     >
                       {suggestion.listingId}
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                       </svg>
                     </a>
@@ -1686,7 +1686,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-xs font-mono"
+                  className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-xs font-mono cursor-pointer"
                   title={`View on Discogs: ${suggestion.listingId}`}
                 >
                   {suggestion.listingId}
@@ -1695,10 +1695,10 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+                  className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 cursor-pointer"
                   title={`View on Discogs: ${suggestion.listingId}`}
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>

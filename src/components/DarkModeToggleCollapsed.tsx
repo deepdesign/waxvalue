@@ -84,7 +84,7 @@ export function DarkModeToggleCollapsed() {
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="w-8 h-8 flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+        className="w-8 h-8 flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer"
         aria-label="Theme selector"
         title={getCurrentTitle()}
       >
@@ -103,7 +103,7 @@ export function DarkModeToggleCollapsed() {
               setTheme('light')
               setIsOpen(false)
             }}
-            className={`w-full flex items-center px-3 py-2 text-sm transition-colors ${
+            className={`w-full flex items-center px-3 py-2 text-sm transition-colors cursor-pointer ${
               theme === 'light'
                 ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -118,7 +118,7 @@ export function DarkModeToggleCollapsed() {
               setTheme('dark')
               setIsOpen(false)
             }}
-            className={`w-full flex items-center px-3 py-2 text-sm transition-colors ${
+            className={`w-full flex items-center px-3 py-2 text-sm transition-colors cursor-pointer ${
               theme === 'dark'
                 ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -133,7 +133,7 @@ export function DarkModeToggleCollapsed() {
               setTheme('system')
               setIsOpen(false)
             }}
-            className={`w-full flex items-center px-3 py-2 text-sm transition-colors ${
+            className={`w-full flex items-center px-3 py-2 text-sm transition-colors cursor-pointer ${
               theme === 'system'
                 ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
