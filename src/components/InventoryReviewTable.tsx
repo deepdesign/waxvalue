@@ -1653,7 +1653,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
               {/* Condition Row - Aligned with thumbnail */}
               <div className="flex items-center gap-1 mb-3">
                 <div className="w-14"></div> {/* Spacer to align with thumbnail */}
-                <div className="text-xs space-x-0.5">
+                <div className="text-xs space-x-2">
                   {suggestion.condition.split(', ').map((part, index) => (
                     <span key={index}>
                       {part.includes(':') ? (
