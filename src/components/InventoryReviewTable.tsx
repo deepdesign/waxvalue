@@ -1717,35 +1717,35 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
           
           {/* Pricing Summary Statistics */}
           {pricingStats.total > 0 && (
-            <div className="mt-6 grid grid-cols-3 gap-3">
+            <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
               {/* Overpriced */}
-              <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 border border-red-100 dark:border-red-800/30">
-                <div className="text-xs font-medium text-red-700 dark:text-red-400 mb-1">Overpriced</div>
+              <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-2 sm:p-3 border border-red-100 dark:border-red-800/30">
+                <div className="text-[10px] sm:text-xs font-medium text-red-700 dark:text-red-400 mb-0.5 sm:mb-1">Overpriced</div>
                 <div className="flex flex-col gap-0.5">
-                  <div className="text-xl font-bold text-red-600 dark:text-red-400">{pricingStats.overpriced}</div>
-                  <div className="text-xs text-red-600/70 dark:text-red-400/70">
+                  <div className="text-lg sm:text-xl font-bold text-red-600 dark:text-red-400">{pricingStats.overpriced}</div>
+                  <div className="text-[10px] sm:text-xs text-red-600/70 dark:text-red-400/70">
                     {pricingStats.total > 0 ? Math.round((pricingStats.overpriced / pricingStats.total) * 100) : 0}%
                   </div>
                 </div>
               </div>
               
               {/* Underpriced */}
-              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-100 dark:border-green-800/30">
-                <div className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Underpriced</div>
+              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-2 sm:p-3 border border-green-100 dark:border-green-800/30">
+                <div className="text-[10px] sm:text-xs font-medium text-green-700 dark:text-green-400 mb-0.5 sm:mb-1">Underpriced</div>
                 <div className="flex flex-col gap-0.5">
-                  <div className="text-xl font-bold text-green-600 dark:text-green-400">{pricingStats.underpriced}</div>
-                  <div className="text-xs text-green-600/70 dark:text-green-400/70">
+                  <div className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400">{pricingStats.underpriced}</div>
+                  <div className="text-[10px] sm:text-xs text-green-600/70 dark:text-green-400/70">
                     {pricingStats.total > 0 ? Math.round((pricingStats.underpriced / pricingStats.total) * 100) : 0}%
                   </div>
                 </div>
               </div>
               
               {/* Fairly Priced */}
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-100 dark:border-blue-800/30">
-                <div className="text-xs font-medium text-blue-700 dark:text-blue-400 mb-1">Fair</div>
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 sm:p-3 border border-blue-100 dark:border-blue-800/30">
+                <div className="text-[10px] sm:text-xs font-medium text-blue-700 dark:text-blue-400 mb-0.5 sm:mb-1">Fair</div>
                 <div className="flex flex-col gap-0.5">
-                  <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{pricingStats.fairlyPriced}</div>
-                  <div className="text-xs text-blue-600/70 dark:text-blue-400/70">
+                  <div className="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400">{pricingStats.fairlyPriced}</div>
+                  <div className="text-[10px] sm:text-xs text-blue-600/70 dark:text-blue-400/70">
                     {pricingStats.total > 0 ? Math.round((pricingStats.fairlyPriced / pricingStats.total) * 100) : 0}%
                   </div>
                 </div>
@@ -1806,25 +1806,25 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
             {paginatedSuggestions.map((suggestion) => (
             <div 
               key={suggestion.listingId} 
-              className={`card ${
+              className={`card min-w-0 overflow-hidden ${
                 appliedItems.has(suggestion.listingId)
                   ? 'bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800'
                   : ''
               }`}
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-start space-x-3">
+              <div className="flex items-start justify-between mb-4 min-w-0">
+                <div className="flex items-start space-x-2 sm:space-x-3 flex-1 min-w-0">
                   <input
                     type="checkbox"
                     checked={selectedItems.has(suggestion.listingId)}
                     onChange={() => handleSelectItem(suggestion.listingId)}
-                    className="table-checkbox mt-1"
+                    className="table-checkbox mt-1 flex-shrink-0"
                   />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start space-x-3">
-                      <div className="flex-shrink-0 h-16 w-16">
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className="flex items-start space-x-2 sm:space-x-3">
+                      <div className="flex-shrink-0 h-14 w-14 sm:h-16 sm:w-16">
                         <img
-                          className="h-16 w-16 rounded object-cover border border-gray-200 dark:border-gray-700"
+                          className="h-14 w-14 sm:h-16 sm:w-16 rounded object-cover border border-gray-200 dark:border-gray-700"
                           src={suggestion.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'}
                           alt={suggestion.release?.title || 'Album cover'}
                           onError={(e) => {
@@ -1833,25 +1833,25 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                           }}
                         />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-1">
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-1 break-words">
                           {suggestion.release?.title || 'Unknown Title'}
                         </h3>
-                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 line-clamp-1">
+                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 line-clamp-1 break-words">
                           {suggestion.artist?.name || 'Unknown Artist'}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 break-words">
                           {suggestion.release?.labels?.[0]?.name || suggestion.release?.label || 'Unknown Label'}
                         </p>
-                        <div className="mt-1">
+                        <div className="mt-1 overflow-hidden">
                           <a
                             href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-mono text-sm inline-flex items-center gap-1"
+                            className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-mono text-xs sm:text-sm inline-flex items-center gap-1 truncate"
                           >
                             ID: {suggestion.listingId}
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                             </svg>
                           </a>
