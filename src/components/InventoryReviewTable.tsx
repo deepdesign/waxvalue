@@ -1358,7 +1358,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         )}
 
         {/* Desktop Table */}
-        <div className="w-full overflow-x-auto hidden lg:block">
+        <div className="w-full overflow-x-auto hidden xl:block">
           <table className="min-w-full">
           <thead className="bg-gray-50 dark:bg-gray-800">
               <tr className="border-gray-200 border-y dark:border-gray-700">
@@ -1585,7 +1585,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         </div>
 
         {/* Mobile Card List */}
-        <div className="lg:hidden px-4 py-4 space-y-3">
+        <div className="xl:hidden px-4 py-4 space-y-3">
           {paginatedSuggestions.map((suggestion) => (
             <div 
               key={suggestion.listingId} 

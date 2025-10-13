@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { DarkModeToggle } from './DarkModeToggle'
 import { Logo } from './Logo'
+import { Tooltip } from './ui/Tooltip'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -82,7 +83,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile sidebar */}
-      <div className={`fixed inset-0 z-50 lg:hidden 
+      <div className={`fixed inset-0 z-50 xl:hidden 
         ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
         
@@ -177,8 +178,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
       </div>
 
-      {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
+      {/* Desktop sidebar - full width */}
+      <div className="hidden xl:fixed xl:inset-y-0 xl:flex xl:w-64 xl:flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
         <div className="flex flex-col flex-grow">
           <div className="flex items-center justify-center px-4 mt-[35px] mb-[20px] select-none">
             <Logo size="lg" className="scale-[1.17] pointer-events-none" />
@@ -262,8 +263,72 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
       </div>
 
+      {/* Collapsed sidebar - icon only */}
+      <div className="hidden lg:flex xl:hidden fixed inset-y-0 w-16 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col flex-grow">
+          <div className="flex items-center justify-center px-2 mt-[35px] mb-[20px] select-none">
+            <Logo size="sm" className="pointer-events-none" />
+          </div>
+          <nav className="flex-1 px-2 py-4 space-y-1" role="navigation" aria-label="Main navigation">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href
+              return (
+                <Tooltip key={item.name} content={item.name} position="right">
+                  <Link
+                    href={item.href}
+                    className={`group flex items-center justify-center px-2 py-2 text-sm font-medium rounded-md transition-colors select-none ${
+                      isActive
+                        ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-900 dark:text-primary-100'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+                    }`}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    <item.icon
+                      className={`h-5 w-5 flex-shrink-0 ${
+                        isActive ? 'text-primary-500 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400'
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </Link>
+                </Tooltip>
+              )
+            })}
+          </nav>
+          
+          {/* Dark Mode Toggle */}
+          <div className="px-2 py-3">
+            <Tooltip content="Toggle dark mode" position="right">
+              <div className="w-full">
+                <DarkModeToggle />
+              </div>
+            </Tooltip>
+          </div>
+          
+          <div className="border-t border-gray-200 dark:border-gray-700 p-2">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <img
+                  className="h-8 w-8 rounded-full"
+                  src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || user?.username || 'User')}&background=6366f1&color=ffffff`}
+                  alt={user?.name || user?.username || 'User'}
+                />
+              </div>
+            </div>
+          </div>
+          
+          {/* Copyright */}
+          <div className="border-t border-gray-200 dark:border-gray-700 px-2 py-3">
+            <Tooltip content={`© ${new Date().getFullYear()} Deep Design Australia Pty Ltd`} position="right">
+              <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                © {new Date().getFullYear()}
+              </p>
+            </Tooltip>
+          </div>
+        </div>
+      </div>
+
       {/* Main content */}
-      <div className="lg:pl-64 flex flex-col flex-1">
+      <div className="lg:pl-16 xl:pl-64 flex flex-col flex-1">
         {/* Background Analysis Banner - Only show when NOT on dashboard */}
         {analysisProgress && pathname !== '/dashboard' && (
           <div className="sticky top-0 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 shadow-sm animate-slide-down">
@@ -307,7 +372,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         )}
 
-        <div className="sticky top-0 z-10 lg:hidden pl-1 pt-1 sm:pl-3 sm:pt-3 bg-gray-50 dark:bg-gray-900">
+        <div className="sticky top-0 z-10 xl:hidden pl-1 pt-1 sm:pl-3 sm:pt-3 bg-gray-50 dark:bg-gray-900">
           <button
             type="button"
             className="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
