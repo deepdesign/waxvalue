@@ -536,7 +536,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
           bValue = (b.artist?.name || b.artist || '').toString().toLowerCase()
         } else if (sortConfig.key === 'condition') {
           // Sort condition by quality: Mint → Near Mint → Very Good+ → Very Good → Good
-          const conditionOrder = { 'M': 0, 'NM': 1, 'VG+': 2, 'VG': 3, 'G+': 4, 'G': 5 }
+          const conditionOrder: { [key: string]: number } = { 'M': 0, 'NM': 1, 'VG+': 2, 'VG': 3, 'G+': 4, 'G': 5 }
           const aCondition = (a.condition || '').split(',')[0].trim() // Get first condition
           const bCondition = (b.condition || '').split(',')[0].trim()
           aValue = conditionOrder[aCondition] ?? 6
