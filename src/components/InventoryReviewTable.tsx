@@ -1262,12 +1262,14 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         {/* Filters Row */}
         <div className="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700">
           <div className="flex flex-col gap-3">
-            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-              Showing {filteredAndSortedSuggestions.length} of {actualTotalItems || suggestions.length} items for sale
-            </div>
-            
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
+              {/* Items Count - Left side on desktop, top on mobile */}
+              <div className="text-sm text-gray-500 dark:text-gray-400 order-1 sm:order-none">
+                Showing {filteredAndSortedSuggestions.length} of {actualTotalItems || suggestions.length} items for sale
+              </div>
+              
+              {/* Filters and Actions - Right side on desktop, bottom on mobile */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 order-2 sm:order-none">
               {/* Price Direction Button Group */}
                 <div className="grid grid-cols-3 sm:inline-flex rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-theme-xs overflow-hidden">
                 <button
@@ -1607,13 +1609,13 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                           {formatCurrency(suggestion.suggestedPrice - suggestion.currentPrice, suggestion.currency)}
                         </div>
                       </div>
-                      <div className="flex flex-col space-y-0.5">
+                      <div className="flex flex-col space-y-1 ml-2">
                         <button
                           onClick={() => handlePriceAdjust(suggestion.listingId, 1)}
                           className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                           title="Increase by $1"
                         >
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
                           </svg>
                         </button>
@@ -1622,7 +1624,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                           className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                           title="Decrease by $1"
                         >
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                           </svg>
                         </button>

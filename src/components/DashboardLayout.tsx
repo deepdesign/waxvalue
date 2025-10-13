@@ -112,7 +112,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`group flex items-center px-2 py-2 text-base font-medium rounded-md transition-colors select-none ${
+                    className={`group flex items-center px-2 py-2 text-base font-medium rounded-md transition-colors select-none cursor-pointer ${
                       isActive
                         ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-900 dark:text-primary-100'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
@@ -192,7 +192,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors select-none ${
+                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors select-none cursor-pointer ${
                     isActive
                       ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-900 dark:text-primary-100'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
@@ -277,7 +277,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Tooltip key={item.name} content={item.name} position="right">
                   <Link
                     href={item.href}
-                    className={`group flex items-center justify-center px-2 py-2 text-sm font-medium rounded-md transition-colors select-none ${
+                    className={`group flex items-center justify-center px-2 py-2 text-sm font-medium rounded-md transition-colors select-none cursor-pointer ${
                       isActive
                         ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-900 dark:text-primary-100'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
