@@ -471,7 +471,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
       // Show fairly priced filter (hide items within threshold)
       if (filters.showFairlyPriced === false) {
         const priceDifference = Math.abs(suggestion.suggestedPrice - suggestion.currentPrice)
-        if (priceDifference < (settings.minPriceChangeThreshold || 1)) return false
+        if (priceDifference < (userSettings.minPriceChangeThreshold || 1)) return false
       }
 
       // Price Direction filter (underpriced, overpriced)
