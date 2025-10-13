@@ -528,7 +528,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
           bValue = b.currentPrice
         } else if (sortConfig.key === 'status') {
           // Sort by status: underpriced first, then overpriced, then fairly_priced
-          const statusOrder = { 'underpriced': 0, 'overpriced': 1, 'fairly_priced': 2 }
+          const statusOrder: { [key: string]: number } = { 'underpriced': 0, 'overpriced': 1, 'fairly_priced': 2 }
           aValue = statusOrder[a.status] ?? 3
           bValue = statusOrder[b.status] ?? 3
         } else if (sortConfig.key === 'artist') {
