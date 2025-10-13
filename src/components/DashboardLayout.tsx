@@ -14,6 +14,7 @@ import {
   CpuChipIcon,
 } from '@heroicons/react/24/outline'
 import { DarkModeToggle } from './DarkModeToggle'
+import { DarkModeToggleCollapsed } from './DarkModeToggleCollapsed'
 import { Logo } from './Logo'
 import { Tooltip } from './ui/Tooltip'
 
@@ -297,11 +298,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           
           {/* Dark Mode Toggle */}
           <div className="px-2 py-3">
-            <Tooltip content="Toggle dark mode" position="right">
-              <div className="w-full">
-                <DarkModeToggle />
-              </div>
-            </Tooltip>
+            <div className="w-full flex justify-center">
+              <DarkModeToggleCollapsed />
+            </div>
           </div>
           
           {/* User profile section hidden in collapsed sidebar */}
