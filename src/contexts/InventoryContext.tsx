@@ -23,7 +23,7 @@ export interface PriceSuggestion {
 }
 
 interface SortConfig {
-  key: 'currentPrice' | 'priceDelta' | null
+  key: 'currentPrice' | 'priceDelta' | 'priceDeltaReverse' | 'currentPriceHigh' | 'currentPriceLow' | 'artist' | 'condition' | 'status' | null
   direction: 'asc' | 'desc'
 }
 
