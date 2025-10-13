@@ -18,6 +18,7 @@ export interface FilterState {
     max: number | null
   }
   showFlaggedOnly: boolean
+  showFairlyPriced: boolean
 }
 
 interface FiltersBarProps {
@@ -86,7 +87,8 @@ export function FiltersBar({
     filters.condition !== '' ||
     filters.priceRange.min !== null ||
     filters.priceRange.max !== null ||
-    filters.showFlaggedOnly
+    filters.showFlaggedOnly ||
+    !filters.showFairlyPriced
 
   // This component now renders just the filters button and expandable panel
   return (
@@ -262,6 +264,33 @@ export function FiltersBar({
                 </label>
               </Tooltip>
             </div>
+
+            {/* Show Fairly Priced Toggle */}
+            <div className="flex items-end">
+              <Tooltip 
+                content={
+                  <div>
+                    <p className="font-medium mb-1">Show Fairly Priced Items</p>
+                    <p className="text-xs opacity-90">
+                      Display items that are priced within the minimum change threshold. Most users prefer to hide these to focus on items needing price changes.
+                    </p>
+                  </div>
+                }
+                position="top"
+              >
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={filters.showFairlyPriced}
+                    onChange={(e) => handleFilterChange('showFairlyPriced', e.target.checked)}
+                    className="table-checkbox"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    Show fairly priced
+                  </span>
+                </label>
+              </Tooltip>
+            </div>
           </div>
 
           {/* Active Filters Display */}
@@ -323,6 +352,18 @@ export function FiltersBar({
                     <button
                       onClick={() => handleFilterChange('showFlaggedOnly', false)}
                       className="ml-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                    >
+                      <XMarkIcon className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+                
+                {!filters.showFairlyPriced && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-200">
+                    Hiding fairly priced
+                    <button
+                      onClick={() => handleFilterChange('showFairlyPriced', true)}
+                      className="ml-1 text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300"
                     >
                       <XMarkIcon className="h-3 w-3" />
                     </button>

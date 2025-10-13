@@ -178,6 +178,7 @@ export interface FilterState {
   }
   priceDirection?: 'increase' | 'decrease' | ''
   showFlaggedOnly?: boolean
+  showFairlyPriced?: boolean
 }
 
 // API Response Types

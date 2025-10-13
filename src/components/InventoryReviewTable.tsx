@@ -468,6 +468,11 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
     let filtered = suggestions.filter((suggestion) => {
       if (!filters) return true
 
+      // Show fairly priced filter (hide items within threshold)
+      if (filters.showFairlyPriced === false) {
+        const priceDifference = Math.abs(suggestion.suggestedPrice - suggestion.currentPrice)
+        if (priceDifference < (settings.minPriceChangeThreshold || 1)) return false
+      }
 
       // Price Direction filter (underpriced, overpriced)
       if (filters.priceDirection && filters.priceDirection !== '') {
@@ -1235,53 +1240,80 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
               Showing {filteredAndSortedSuggestions.length} of {actualTotalItems || suggestions.length} items for sale
             </div>
             
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-              {/* Price Direction Button Group */}
-              <div className="grid grid-cols-3 sm:inline-flex rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-theme-xs overflow-hidden">
-                <button
-                  onClick={() => {
-                    const newFilters = { ...filters, priceDirection: '' }
-                    setFilters(newFilters)
-                    onFiltersChange?.(newFilters)
-                  }}
-                  className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors ${
-                    !filters?.priceDirection
-                      ? 'bg-primary-600 dark:bg-primary-500 text-white'
-                      : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
-                  } sm:rounded-l-lg`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => {
-                    const newFilters = { ...filters, priceDirection: 'underpriced' }
-                    setFilters(newFilters)
-                    onFiltersChange?.(newFilters)
-                  }}
-                  className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors sm:border-l border-gray-200 dark:border-gray-700 ${
-                    filters?.priceDirection === 'underpriced'
-                      ? 'bg-primary-600 dark:bg-primary-500 text-white'
-                      : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
-                  }`}
-                >
-                  Underpriced
-                </button>
-                <button
-                  onClick={() => {
-                    const newFilters = { ...filters, priceDirection: 'overpriced' }
-                    setFilters(newFilters)
-                    onFiltersChange?.(newFilters)
-                  }}
-                  className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors sm:border-l border-gray-200 dark:border-gray-700 sm:rounded-r-lg ${
-                    filters?.priceDirection === 'overpriced'
-                      ? 'bg-primary-600 dark:bg-primary-500 text-white'
-                      : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
-                  }`}
-                >
-                  Overpriced
-                </button>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                {/* Price Direction Button Group */}
+                <div className="grid grid-cols-3 sm:inline-flex rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-theme-xs overflow-hidden">
+                  <button
+                    onClick={() => {
+                      const newFilters = { ...filters, priceDirection: '' }
+                      setFilters(newFilters)
+                      onFiltersChange?.(newFilters)
+                    }}
+                    className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors ${
+                      !filters?.priceDirection
+                        ? 'bg-primary-600 dark:bg-primary-500 text-white'
+                        : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
+                    } sm:rounded-l-lg`}
+                  >
+                    All
+                  </button>
+                  <button
+                    onClick={() => {
+                      const newFilters = { ...filters, priceDirection: 'underpriced' }
+                      setFilters(newFilters)
+                      onFiltersChange?.(newFilters)
+                    }}
+                    className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors sm:border-l border-gray-200 dark:border-gray-700 ${
+                      filters?.priceDirection === 'underpriced'
+                        ? 'bg-primary-600 dark:bg-primary-500 text-white'
+                        : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
+                    }`}
+                  >
+                    Underpriced
+                  </button>
+                  <button
+                    onClick={() => {
+                      const newFilters = { ...filters, priceDirection: 'overpriced' }
+                      setFilters(newFilters)
+                      onFiltersChange?.(newFilters)
+                    }}
+                    className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors sm:border-l border-gray-200 dark:border-gray-700 sm:rounded-r-lg ${
+                      filters?.priceDirection === 'overpriced'
+                        ? 'bg-primary-600 dark:bg-primary-500 text-white'
+                        : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
+                    }`}
+                  >
+                    Overpriced
+                  </button>
+                </div>
+
+                {/* Show Fairly Priced Checkbox */}
+                <div className="flex items-center">
+                  <Tooltip 
+                    content="Show items that are priced within the minimum change threshold. Most users prefer to hide these to focus on items needing price changes."
+                    position="top"
+                  >
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={filters?.showFairlyPriced || false}
+                        onChange={(e) => {
+                          const newFilters = { ...filters, showFairlyPriced: e.target.checked }
+                          setFilters(newFilters)
+                          onFiltersChange?.(newFilters)
+                        }}
+                        className="table-checkbox"
+                      />
+                      <span className="ml-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                        Show fairly priced
+                      </span>
+                    </label>
+                  </Tooltip>
+                </div>
               </div>
 
+              {/* Refresh Analysis Button - Moved to right side */}
               <Tooltip 
                 content="Re-analyse your entire Discogs inventory to get fresh pricing suggestions for all items"
                 position="top"
@@ -1304,7 +1336,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                       d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                     />
                   </svg>
-                  {isLoading ? 'Refreshing...' : 'Refresh Analysis'}
+                  {isLoading ? 'Refreshing...' : 'Refresh analysis'}
                 </button>
               </Tooltip>
             </div>
