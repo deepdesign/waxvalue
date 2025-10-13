@@ -1164,9 +1164,9 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         </div>
       )}
 
-      {/* Desktop Table - TailAdmin Pattern - Only show when we have data or are loading */}
+      {/* Pricing Suggestions Table - Responsive */}
       {(filteredAndSortedSuggestions.length > 0 || isLoading) && (
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 hidden lg:block">
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
         {/* Header */}
         <div className="p-6 border-b border-gray-100 dark:border-gray-700">
           <div className="flex items-center justify-between">
@@ -1232,26 +1232,26 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         </div>
         
         {/* Filters Row */}
-        <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700">
+          <div className="flex flex-col gap-3">
+            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               Showing {filteredAndSortedSuggestions.length} of {actualTotalItems || suggestions.length} items for sale
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
               {/* Price Direction Button Group */}
-              <div className="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-theme-xs">
+              <div className="grid grid-cols-3 sm:inline-flex rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-theme-xs overflow-hidden">
                 <button
                   onClick={() => {
                     const newFilters = { ...filters, priceDirection: '' }
                     setFilters(newFilters)
                     onFiltersChange?.(newFilters)
                   }}
-                  className={`px-4 py-2.5 text-theme-sm font-medium transition-colors ${
+                  className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors ${
                     !filters?.priceDirection
                       ? 'bg-primary-600 dark:bg-primary-500 text-white'
                       : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
-                  } rounded-l-lg`}
+                  } sm:rounded-l-lg`}
                 >
                   All
                 </button>
@@ -1261,11 +1261,11 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                     setFilters(newFilters)
                     onFiltersChange?.(newFilters)
                   }}
-                  className={`px-4 py-2.5 text-theme-sm font-medium transition-colors ${
+                  className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors sm:border-l border-gray-200 dark:border-gray-700 ${
                     filters?.priceDirection === 'underpriced'
                       ? 'bg-primary-600 dark:bg-primary-500 text-white'
                       : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
-                  } border-l border-gray-200 dark:border-gray-700`}
+                  }`}
                 >
                   Underpriced
                 </button>
@@ -1275,11 +1275,11 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                     setFilters(newFilters)
                     onFiltersChange?.(newFilters)
                   }}
-                  className={`px-4 py-2.5 text-theme-sm font-medium transition-colors ${
+                  className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors sm:border-l border-gray-200 dark:border-gray-700 sm:rounded-r-lg ${
                     filters?.priceDirection === 'overpriced'
                       ? 'bg-primary-600 dark:bg-primary-500 text-white'
                       : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
-                  } rounded-r-lg border-l border-gray-200 dark:border-gray-700`}
+                  }`}
                 >
                   Overpriced
                 </button>
@@ -1292,7 +1292,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                 <button
                   onClick={handleSimulateSelection}
                   disabled={isLoading}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-theme-sm font-medium text-gray-700 dark:text-gray-400 shadow-theme-xs hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-400 shadow-theme-xs hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 disabled:opacity-50"
                 >
                   <svg
                     className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
@@ -1360,8 +1360,8 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
           </div>
         )}
 
-        {/* Table */}
-        <div className="w-full overflow-x-auto">
+        {/* Desktop Table */}
+        <div className="w-full overflow-x-auto hidden lg:block">
           <table className="min-w-full">
           <thead className="bg-gray-50 dark:bg-gray-800">
               <tr className="border-gray-200 border-y dark:border-gray-700">
@@ -1584,13 +1584,128 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Card List */}
+        <div className="lg:hidden px-4 py-4 space-y-3">
+          {paginatedSuggestions.map((suggestion) => (
+            <div 
+              key={suggestion.listingId} 
+              className={`rounded-lg border p-3 ${
+                appliedItems.has(suggestion.listingId)
+                  ? 'bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800'
+                  : 'bg-gray-50/50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700'
+              }`}
+            >
+              <div className="flex items-start gap-3 mb-3">
+                <input
+                  type="checkbox"
+                  checked={selectedItems.has(suggestion.listingId)}
+                  onChange={() => handleSelectItem(suggestion.listingId)}
+                  className="table-checkbox mt-1 flex-shrink-0"
+                />
+                <div className="flex gap-2 flex-1 min-w-0">
+                  <img
+                    className="h-14 w-14 rounded object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
+                    src={suggestion.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'}
+                    alt={suggestion.release?.title || 'Album cover'}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
+                    }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                      {suggestion.title || 'Unknown Title'}
+                    </h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                      {typeof suggestion.artist === 'object' ? (suggestion.artist as any)?.name : suggestion.artist || 'Unknown Artist'}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {getConditionBadgeCompact(suggestion.condition)}
+                      <a
+                        href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-600 dark:text-primary-400 text-xs font-mono"
+                      >
+                        {suggestion.listingId}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-3 text-xs mb-3">
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400 mb-1">Current</div>
+                  <div className="font-medium text-gray-900 dark:text-gray-100">
+                    {appliedItems.has(suggestion.listingId) && suggestion.originalPrice ? (
+                      <div className="flex flex-col">
+                        <span className="line-through text-gray-400 dark:text-gray-500">
+                          {formatCurrency(suggestion.originalPrice, suggestion.currency)}
+                        </span>
+                        <span className="text-green-600 dark:text-green-400">
+                          {formatCurrency(suggestion.suggestedPrice, suggestion.currency)}
+                        </span>
+                      </div>
+                    ) : (
+                      formatCurrency(suggestion.currentPrice, suggestion.currency)
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400 mb-1">Suggested</div>
+                  <div className="font-medium text-gray-900 dark:text-gray-100">
+                    {formatCurrency(suggestion.suggestedPrice, suggestion.currency)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-gray-500 dark:text-gray-400 mb-1">Change</div>
+                  <div className={`font-medium ${
+                    suggestion.suggestedPrice > suggestion.currentPrice 
+                      ? 'text-green-600 dark:text-green-400' 
+                      : suggestion.suggestedPrice < suggestion.currentPrice 
+                      ? 'text-red-600 dark:text-red-400' 
+                      : 'text-blue-600 dark:text-blue-400'
+                  }`}>
+                    {suggestion.suggestedPrice > suggestion.currentPrice ? '+' : ''}
+                    {formatCurrency(suggestion.suggestedPrice - suggestion.currentPrice, suggestion.currency)}
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                onClick={() => handleApplyIndividual(suggestion.listingId)}
+                disabled={applyingItems.has(suggestion.listingId) || appliedItems.has(suggestion.listingId)}
+                variant="primary"
+                className={`w-full text-sm ${
+                  appliedItems.has(suggestion.listingId)
+                    ? 'bg-green-600 hover:bg-green-600'
+                    : ''
+                }`}
+              >
+                {applyingItems.has(suggestion.listingId) ? (
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : appliedItems.has(suggestion.listingId) ? (
+                  <span className="flex items-center justify-center gap-1.5">
+                    <CheckIcon className="h-4 w-4" />
+                    Applied
+                  </span>
+                ) : 'Apply'}
+              </Button>
+            </div>
+          ))}
+        </div>
         
-        {/* Pagination Controls */}
+        {/* Pagination Controls - Responsive */}
         {totalItems > 0 && (
-          <div className="flex items-center justify-between px-6 py-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <label htmlFor="itemsPerPage" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 gap-3">
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 w-full sm:w-auto">
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+                <label htmlFor="itemsPerPage" className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                   Show:
                 </label>
                 <select
@@ -1605,14 +1720,14 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   <option value={200}>200</option>
                   <option value={250}>250</option>
                 </select>
-                <span className="text-sm text-gray-500 dark:text-gray-400">items</span>
+                <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">items</span>
               </div>
-              <div className="text-sm text-gray-700 dark:text-gray-300">
+              <div className="hidden sm:block text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                 Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of {totalItems} results
               </div>
             </div>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-center">
               <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
@@ -1621,7 +1736,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                 Previous
               </button>
               
-              <div className="flex items-center space-x-1">
+              <div className="hidden sm:flex items-center gap-1">
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   let pageNum;
                   if (totalPages <= 5) {
@@ -1648,6 +1763,10 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                     </button>
                   );
                 })}
+              </div>
+              
+              <div className="sm:hidden text-xs text-gray-600 dark:text-gray-400">
+                {currentPage} / {totalPages}
               </div>
               
               <button
@@ -1688,415 +1807,9 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         )}
       </div>
       )}
-
-      {/* Mobile Card Layout - Only show when we have data or are loading */}
-      {(filteredAndSortedSuggestions.length > 0 || isLoading) && (
-      <div className="lg:hidden space-y-4">
-        {/* Mobile Header */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Pricing suggestions</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Review and manage suggested price changes for your inventory</p>
-            </div>
-            {lastRunDate && (
-              <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                <ClockIcon className="h-3 w-3 mr-1" />
-                Last run: {new Date(lastRunDate).toLocaleString('en-AU', { 
-                  timeZone: 'Australia/Sydney',
-                  day: '2-digit',
-                  month: '2-digit', 
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: true
-                })} AEST
-              </div>
-            )}
-          </div>
-          
-          {/* Pricing Summary Statistics */}
-          {pricingStats.total > 0 && (
-            <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
-              {/* Overpriced */}
-              <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-2 sm:p-3 border border-red-100 dark:border-red-800/30">
-                <div className="text-[10px] sm:text-xs font-medium text-red-700 dark:text-red-400 mb-0.5 sm:mb-1">Overpriced</div>
-                <div className="flex flex-col gap-0.5">
-                  <div className="text-lg sm:text-xl font-bold text-red-600 dark:text-red-400">{pricingStats.overpriced}</div>
-                  <div className="text-[10px] sm:text-xs text-red-600/70 dark:text-red-400/70">
-                    {pricingStats.total > 0 ? Math.round((pricingStats.overpriced / pricingStats.total) * 100) : 0}%
-                  </div>
-                </div>
-              </div>
-              
-              {/* Underpriced */}
-              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-2 sm:p-3 border border-green-100 dark:border-green-800/30">
-                <div className="text-[10px] sm:text-xs font-medium text-green-700 dark:text-green-400 mb-0.5 sm:mb-1">Underpriced</div>
-                <div className="flex flex-col gap-0.5">
-                  <div className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400">{pricingStats.underpriced}</div>
-                  <div className="text-[10px] sm:text-xs text-green-600/70 dark:text-green-400/70">
-                    {pricingStats.total > 0 ? Math.round((pricingStats.underpriced / pricingStats.total) * 100) : 0}%
-                  </div>
-                </div>
-              </div>
-              
-              {/* Fairly Priced */}
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 sm:p-3 border border-blue-100 dark:border-blue-800/30">
-                <div className="text-[10px] sm:text-xs font-medium text-blue-700 dark:text-blue-400 mb-0.5 sm:mb-1">Fair</div>
-                <div className="flex flex-col gap-0.5">
-                  <div className="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400">{pricingStats.fairlyPriced}</div>
-                  <div className="text-[10px] sm:text-xs text-blue-600/70 dark:text-blue-400/70">
-                    {pricingStats.total > 0 ? Math.round((pricingStats.fairlyPriced / pricingStats.total) * 100) : 0}%
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        {/* Mobile Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-          <div className="space-y-3">
-            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">
-              Filter by price
-            </div>
-            
-            {/* Price Direction Button Group */}
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => {
-                  const newFilters = { ...filters, priceDirection: '' }
-                  setFilters(newFilters)
-                  onFiltersChange?.(newFilters)
-                }}
-                className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
-                  !filters?.priceDirection
-                    ? 'bg-primary-600 dark:bg-primary-500 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => {
-                  const newFilters = { ...filters, priceDirection: 'underpriced' }
-                  setFilters(newFilters)
-                  onFiltersChange?.(newFilters)
-                }}
-                className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
-                  filters?.priceDirection === 'underpriced'
-                    ? 'bg-primary-600 dark:bg-primary-500 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                Underpriced
-              </button>
-              <button
-                onClick={() => {
-                  const newFilters = { ...filters, priceDirection: 'overpriced' }
-                  setFilters(newFilters)
-                  onFiltersChange?.(newFilters)
-                }}
-                className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
-                  filters?.priceDirection === 'overpriced'
-                    ? 'bg-primary-600 dark:bg-primary-500 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                Overpriced
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                Showing {filteredAndSortedSuggestions.length} of {actualTotalItems || suggestions.length} items
-              </div>
-              <Tooltip 
-                content="Re-analyse your entire Discogs inventory"
-                position="top"
-              >
-                <button
-                  onClick={handleSimulateSelection}
-                  disabled={isLoading}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary-600 dark:bg-primary-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-700 dark:hover:bg-primary-600 disabled:opacity-50"
-                >
-                  <svg
-                    className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                  {isLoading ? 'Refreshing...' : 'Refresh'}
-                </button>
-              </Tooltip>
-            </div>
-          </div>
-        </div>
-        
-        {totalItems === 0 && !isLoading ? (
-          <div className="card text-center py-12">
-            <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
-            <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
-              {suggestions.length === 0 ? "No pricing suggestions available" : "No suggestions found"}
-            </h3>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              {suggestions.length === 0 
-                ? "Run a pricing analysis to see recommendations for your Discogs inventory."
-                : "Try adjusting your filters to see more results."
-              }
-            </p>
-            
-            {/* Troubleshooting Tips */}
-            {suggestions.length === 0 && lastRunDate && (
-              <div className="mt-6 max-w-md mx-auto">
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 text-left">
-                  <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
-                    💡 No suggestions found?
-                  </p>
-                  <ul className="text-xs text-yellow-700 dark:text-yellow-300 space-y-1 list-disc list-inside">
-                    <li>Check your Discogs seller settings are configured</li>
-                    <li>Ensure your selling currency is set on Discogs</li>
-                    <li>Some rare items may not have market data</li>
-                    <li>Items with no recent sales won&apos;t get suggestions</li>
-                  </ul>
-                  <a 
-                    href="/help" 
-                    className="text-xs text-yellow-600 dark:text-yellow-400 hover:underline mt-2 inline-block"
-                  >
-                    Learn more in Help →
-                  </a>
-                </div>
-              </div>
-            )}
-            
-            {suggestions.length === 0 && (
-              <div className="mt-6">
-                <Button 
-                  variant="primary" 
-                  onClick={handleSimulateSelection}
-                >
-                  Run Pricing Analysis
-                </Button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <div className="space-y-4">
-              {paginatedSuggestions.map((suggestion) => (
-              <div 
-                key={suggestion.listingId} 
-                className={`bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4 min-w-0 overflow-hidden ${
-                  appliedItems.has(suggestion.listingId)
-                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                    : ''
-                }`}
-              >
-              <div className="flex items-start justify-between mb-4 min-w-0">
-                <div className="flex items-start space-x-2 sm:space-x-3 flex-1 min-w-0">
-                  <input
-                    type="checkbox"
-                    checked={selectedItems.has(suggestion.listingId)}
-                    onChange={() => handleSelectItem(suggestion.listingId)}
-                    className="table-checkbox mt-1 flex-shrink-0"
-                  />
-                  <div className="flex-1 min-w-0 overflow-hidden">
-                    <div className="flex items-start space-x-2 sm:space-x-3">
-                      <div className="flex-shrink-0 h-14 w-14 sm:h-16 sm:w-16">
-                        <img
-                          className="h-14 w-14 sm:h-16 sm:w-16 rounded object-cover border border-gray-200 dark:border-gray-700"
-                          src={suggestion.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'}
-                          alt={suggestion.release?.title || 'Album cover'}
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
-                          }}
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0 overflow-hidden">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-1 break-words">
-                          {suggestion.release?.title || 'Unknown Title'}
-                        </h3>
-                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 line-clamp-1 break-words">
-                          {suggestion.artist?.name || 'Unknown Artist'}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 break-words">
-                          {suggestion.release?.labels?.[0]?.name || suggestion.release?.label || 'Unknown Label'}
-                        </p>
-                        <div className="mt-1 overflow-hidden">
-                          <a
-                            href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-mono text-xs sm:text-sm inline-flex items-center gap-1 truncate"
-                          >
-                            ID: {suggestion.listingId}
-                            <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Condition</label>
-                  <div className="mt-1">
-                    <Tooltip content={`Media: ${suggestion.condition}`} position="top">
-                      {getConditionBadgeCompact(suggestion.condition)}
-                    </Tooltip>
-                    {(suggestion as any).sleeveCondition && (
-                      <Tooltip content={`Sleeve: ${(suggestion as any).sleeveCondition}`} position="top">
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          Sleeve: {getConditionCode((suggestion as any).sleeveCondition)}
-                        </div>
-                      </Tooltip>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Current Price</span>
-                  {appliedItems.has(suggestion.listingId) && suggestion.originalPrice ? (
-                    <div className="flex flex-col items-end">
-                      <span className="text-xs text-gray-400 dark:text-gray-500 line-through">
-                        {formatCurrency(suggestion.originalPrice, suggestion.currency)}
-                      </span>
-                      <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                        {formatCurrency(suggestion.suggestedPrice, suggestion.currency)}
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{formatCurrency(suggestion.currentPrice, suggestion.currency)}</span>
-                  )}
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Suggested Price</span>
-                  <span className="text-sm font-medium text-primary-600 dark:text-primary-400">{formatCurrency(suggestion.suggestedPrice, suggestion.currency)}</span>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Change</span>
-                  <span className={`text-sm font-medium ${
-                    suggestion.suggestedPrice > suggestion.currentPrice 
-                      ? 'text-green-600 dark:text-green-400' 
-                      : suggestion.suggestedPrice < suggestion.currentPrice 
-                      ? 'text-red-600 dark:text-red-400' 
-                      : 'text-blue-600 dark:text-blue-400'
-                  }`}>
-                    {suggestion.suggestedPrice > suggestion.currentPrice ? '+' : ''}{formatCurrency(suggestion.suggestedPrice - suggestion.currentPrice, suggestion.currency)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-                  <Tooltip 
-                    content="Apply this price suggestion to update the item on Discogs"
-                    position="top"
-                  >
-                    <Button
-                      onClick={() => handleApplyIndividual(suggestion.listingId)}
-                      disabled={applyingItems.has(suggestion.listingId) || appliedItems.has(suggestion.listingId)}
-                      variant="primary"
-                      className={`text-sm py-2 px-4 flex-1 disabled:cursor-not-allowed inline-flex items-center justify-center transition-all duration-200 min-w-[100px] ${
-                        appliedItems.has(suggestion.listingId)
-                          ? 'bg-green-600 hover:bg-green-600 disabled:opacity-100'
-                          : 'disabled:opacity-50 disabled:bg-primary-600'
-                      }`}
-                    >
-                      {applyingItems.has(suggestion.listingId) ? (
-                        <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                      ) : appliedItems.has(suggestion.listingId) ? (
-                        <span className="flex items-center gap-1.5">
-                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                          Applied
-                        </span>
-                      ) : 'Apply'}
-                    </Button>
-                  </Tooltip>
-                </div>
-              </div>
-            </div>
-            ))}
-            </div>
-          </div>
-        )}
-        
-        {/* Mobile Pagination */}
-        {totalItems > itemsPerPage && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <div className="flex flex-col space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="text-xs text-gray-600 dark:text-gray-400">
-                  Page {currentPage} of {totalPages} ({totalItems} total)
-                </div>
-                <div className="flex items-center space-x-2">
-                  <label htmlFor="mobile-itemsPerPage" className="text-xs text-gray-600 dark:text-gray-400">
-                    Show:
-                  </label>
-                  <select
-                    id="mobile-itemsPerPage"
-                    value={itemsPerPage}
-                    onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                    className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-1 text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  >
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                    <option value={150}>150</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none disabled:opacity-50"
-                >
-                  Previous
-                </button>
-                
-                <div className="text-xs text-gray-600 dark:text-gray-400">
-                  {startIndex + 1}-{Math.min(endIndex, totalItems)}
-                </div>
-                
-                <button
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-      )}
     </div>
   )
 })
 
 InventoryReviewTable.displayName = 'InventoryReviewTable'
-
-
+
