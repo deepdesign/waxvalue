@@ -33,6 +33,7 @@ interface FilterConfig {
   condition: string
   priceRange: { min: number | null; max: number | null }
   showFlaggedOnly: boolean
+  showFairlyPriced: boolean
 }
 
 interface InventoryContextType {
@@ -67,6 +68,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     condition: '',
     priceRange: { min: null, max: null },
     showFlaggedOnly: false,
+    showFairlyPriced: false,
   })
 
   return (
