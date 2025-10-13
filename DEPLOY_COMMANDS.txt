@@ -1,0 +1,53 @@
+========================================
+WAXVALUE DEPLOYMENT COMMANDS
+========================================
+
+STEP 1: Connect to VPS
+------------------------
+ssh -i C:\Users\JCutts\.ssh\id_ed25519 -p 65002 u728332901@195.35.15.194
+
+Passphrase: Babylon1!
+
+
+STEP 2: Paste this entire block into the VPS terminal
+-------------------------------------------------------
+cd ~ && cat > deploy.sh << 'EOFSCRIPT'
+#!/bin/bash
+set -e
+echo "🚀 Starting Waxvalue Deployment..."
+cd ~
+if [ -d "waxvalue" ]; then
+    echo "📦 Updating repository..."
+    cd waxvalue && git fetch origin && git reset --hard origin/master && git pull origin master
+else
+    echo "📦 Cloning repository..."
+    git clone https://github.com/deepdesign/waxvalue.git && cd waxvalue
+fi
+echo "✅ Repository ready"
+cd ~/waxvalue/backend
+cat > .env << 'EOF'
+DISCOGS_CONSUMER_KEY=WDwjaxApILXXiTrTBbpB
+DISCOGS_CONSUMER_SECRET=sRLerNInpEQEGTjUuhltwpVOhIJjnbVO
+FRONTEND_URL=https://waxvalue.com
+CORS_ORIGINS=https://waxvalue.com,https://www.waxvalue.com
+SESSION_SECRET=WxV2025!SecureRandomKey_ProductionOnly_DoNotShareThis32CharSecret
+LOG_LEVEL=INFO
+EOF
+[ ! -d "venv" ] && python3 -m venv venv
+source venv/bin/activate && pip install --upgrade pip -q && pip install -r requirements.txt -q
+cd ~/waxvalue
+cat > .env.production << 'EOF'
+NEXT_PUBLIC_BACKEND_URL=https://waxvalue.com/api/backend
+EOF
+npm install && npm run build
+pm2 delete waxvalue-backend waxvalue-frontend 2>/dev/null || true
+cd ~/waxvalue/backend && pm2 start venv/bin/python --name waxvalue-backend -- main.py
+cd ~/waxvalue && pm2 start npm --name waxvalue-frontend -- start
+pm2 save
+pm2 status
+echo "✅ Deployment Complete! 🌐 https://waxvalue.com"
+EOFSCRIPT
+
+chmod +x deploy.sh && ./deploy.sh
+
+

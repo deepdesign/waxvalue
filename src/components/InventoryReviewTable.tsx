@@ -243,26 +243,37 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         return
       }
       
-      // Always run fresh analysis on initial page load to show progress and get latest data
-      console.log('Starting fresh analysis with progress tracking...')
+      // Check if there's existing progress (rejoining analysis) or starting fresh
+      const existingProgress = localStorage.getItem('waxvalue_analysis_progress')
+      const isRejoining = existingProgress ? JSON.parse(existingProgress).isRunning : false
       
-      // Set importing state and start progress tracking
-      setProcessingProgress({
-        current: 0,
-        total: 0,
-        startTime: Date.now(),
-        estimatedTimeRemaining: 0,
-        isImporting: true
-      })
-      
-      // Save to localStorage for background monitoring
-      const initialProgress = {
-        isRunning: true,
-        current: 0,
-        total: 0,
-        startTime: Date.now()
+      if (isRejoining) {
+        console.log('Rejoining analysis in progress...')
+        // Keep existing progress, just ensure importing state is set
+        setProcessingProgress(prev => ({
+          ...prev,
+          isImporting: true
+        }))
+      } else {
+        console.log('Starting fresh analysis with progress tracking...')
+        // Set importing state and start progress tracking
+        setProcessingProgress({
+          current: 0,
+          total: 0,
+          startTime: Date.now(),
+          estimatedTimeRemaining: 0,
+          isImporting: true
+        })
+        
+        // Save to localStorage for background monitoring
+        const initialProgress = {
+          isRunning: true,
+          current: 0,
+          total: 0,
+          startTime: Date.now()
+        }
+        localStorage.setItem('waxvalue_analysis_progress', JSON.stringify(initialProgress))
       }
-      localStorage.setItem('waxvalue_analysis_progress', JSON.stringify(initialProgress))
       
       let response: Response
       try {
