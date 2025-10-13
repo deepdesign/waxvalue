@@ -610,8 +610,9 @@ async def get_suggestions_stream(session_id: str = None):
             
             async def stream_current_progress():
                 # Get current suggestions from session to show progress
-                session_suggestions = session_manager.get_session_data(session_id, "suggestions") or []
-                session_total = session_manager.get_session_data(session_id, "inventory_count") or 0
+                session_data = session_manager.get_session(session_id) or {}
+                session_suggestions = session_data.get("suggestions", [])
+                session_total = session_data.get("inventory_count", 0)
                 
                 # Send total if we have it
                 if session_total > 0:
@@ -630,7 +631,8 @@ async def get_suggestions_stream(session_id: str = None):
                 while session_id in analysis_lock:
                     await asyncio.sleep(2)
                     # Check if analysis completed
-                    updated_suggestions = session_manager.get_session_data(session_id, "suggestions") or []
+                    session_data = session_manager.get_session(session_id) or {}
+                    updated_suggestions = session_data.get("suggestions", [])
                     if len(updated_suggestions) > current_count:
                         # New suggestions added - stream them
                         for suggestion in updated_suggestions[current_count:]:
@@ -639,7 +641,8 @@ async def get_suggestions_stream(session_id: str = None):
                         yield f"data: {json.dumps({'type': 'progress', 'current': current_count, 'total': session_total})}\n\n"
                 
                 # Analysis complete - send final event
-                final_suggestions = session_manager.get_session_data(session_id, "suggestions") or []
+                final_session = session_manager.get_session(session_id) or {}
+                final_suggestions = final_session.get("suggestions", [])
                 yield f"data: {json.dumps({'type': 'complete', 'suggestions': final_suggestions, 'totalItems': len(final_suggestions)})}\n\n"
             
             return StreamingResponse(stream_current_progress(), media_type="text/event-stream")
