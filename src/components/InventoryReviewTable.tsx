@@ -2039,6 +2039,56 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
             ))}
           </div>
         )}
+        
+        {/* Mobile Pagination */}
+        {totalItems > itemsPerPage && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+            <div className="flex flex-col space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  Page {currentPage} of {totalPages} ({totalItems} total)
+                </div>
+                <div className="flex items-center space-x-2">
+                  <label htmlFor="mobile-itemsPerPage" className="text-xs text-gray-600 dark:text-gray-400">
+                    Show:
+                  </label>
+                  <select
+                    id="mobile-itemsPerPage"
+                    value={itemsPerPage}
+                    onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                    className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-1 text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={150}>150</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="inline-flex items-center px-3 py-1.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  {startIndex + 1}-{Math.min(endIndex, totalItems)}
+                </div>
+                
+                <button
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="inline-flex items-center px-3 py-1.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       )}
     </div>
