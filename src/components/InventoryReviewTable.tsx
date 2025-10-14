@@ -1193,7 +1193,6 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
   return (
     <div className="space-y-6">
       {/* Pricing Suggestions Table - Responsive */}
-      {(filteredAndSortedSuggestions.length > 0 || isLoading) && (
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
         {/* Header */}
         <div className="p-6 border-b border-gray-100 dark:border-gray-700">
@@ -1935,8 +1934,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
             )}
           </div>
         )}
-              </div>
-            )}
+      </div>
     </div>
   )
 })
