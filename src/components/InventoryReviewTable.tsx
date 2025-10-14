@@ -11,7 +11,7 @@ import {
   PencilIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
-  CurrencyDollarIcon,
+  DocumentMagnifyingGlassIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline'
 import { PriceSuggestion, FilterState } from '@/types'
@@ -1912,7 +1912,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         
         {totalItems === 0 && (
           <div className="text-center py-12">
-            <CurrencyDollarIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+            <DocumentMagnifyingGlassIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
             <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
               {suggestions.length === 0 ? "No pricing suggestions available" : "No suggestions found"}
             </h3>
