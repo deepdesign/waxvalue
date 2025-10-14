@@ -1425,7 +1425,8 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
         )}
 
         {/* Desktop Table */}
-        <div className="w-full overflow-x-auto hidden xl:block">
+        {totalItems > 0 && (
+          <div className="w-full overflow-x-auto hidden xl:block">
           <table className="min-w-full">
           <thead className="bg-gray-50 dark:bg-gray-800">
               <tr className="border-gray-200 border-y dark:border-gray-700">
@@ -1670,9 +1671,11 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
             </tbody>
           </table>
         </div>
+        )}
         
         {/* Mobile Card List */}
-        <div className="xl:hidden px-4 py-4 space-y-3">
+        {totalItems > 0 && (
+          <div className="xl:hidden px-4 py-4 space-y-3">
           {paginatedSuggestions.map((suggestion) => (
             <div 
               key={suggestion.listingId} 
@@ -1825,6 +1828,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
             </div>
           ))}
         </div>
+        )}
         
         {/* Pagination Controls - Responsive */}
         {totalItems > 0 && (
