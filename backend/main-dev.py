@@ -1696,6 +1696,7 @@ async def create_wanted_list_entry_mock(entry_data: dict):
         "location_filter": entry_data.get("location_filter"),
         "min_seller_rating": entry_data.get("min_seller_rating"),
         "underpriced_percentage": entry_data.get("underpriced_percentage"),
+        "user_email": entry_data.get("user_email", "user@example.com"),  # Add user email
         "status": "monitoring",
         "is_active": True,
         "last_checked": None,

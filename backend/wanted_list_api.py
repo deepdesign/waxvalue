@@ -39,6 +39,7 @@ class WantedListEntryRequest(BaseModel):
     location_filter: Optional[str] = Field(None, max_length=100, description="Geographic filter")
     min_seller_rating: Optional[float] = Field(None, ge=0, le=100, description="Minimum seller rating")
     underpriced_percentage: Optional[int] = Field(None, ge=1, le=100, description="Underpriced alert percentage")
+    user_email: str = Field(..., description="User email for notifications")
     
     @validator('max_price_currency')
     def validate_currency(cls, v):
@@ -99,6 +100,7 @@ class WantedListEntryResponse(BaseModel):
     location_filter: Optional[str]
     min_seller_rating: Optional[float]
     underpriced_percentage: Optional[int]
+    user_email: str
     status: str
     is_active: bool
     last_checked: Optional[datetime]

@@ -92,7 +92,13 @@ export default function WantedListPage() {
     if (!user?.id) return
     
     try {
-      await apiClient.post('/wanted-list/', releaseData)
+      // Include user email in the release data for notifications
+      const releaseDataWithEmail = {
+        ...releaseData,
+        user_email: user.email
+      }
+      
+      await apiClient.post('/wanted-list/', releaseDataWithEmail)
       toast.success('Release added to wanted list!')
       await fetchWantedList()
       setShowAddModal(false)
