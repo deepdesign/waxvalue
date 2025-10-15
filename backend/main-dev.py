@@ -1560,6 +1560,66 @@ async def get_logs(session_id: str = None):
     session = session_manager.get_session(session_id)
     return session["logs"]
 
+# Temporary mock endpoints for wanted list functionality
+@app.get("/wanted-list/")
+async def get_wanted_list_mock(session_id: str = None):
+    """Mock endpoint for getting wanted list entries"""
+    user = require_auth(session_id)
+    # Return empty list for now
+    return []
+
+@app.get("/wanted-list/stats")
+async def get_wanted_list_stats_mock(session_id: str = None):
+    """Mock endpoint for getting wanted list statistics"""
+    user = require_auth(session_id)
+    return {
+        "total_entries": 0,
+        "monitoring_active": 0,
+        "paused_entries": 0,
+        "matched_alerts": 0,
+        "no_listings_found": 0
+    }
+
+@app.get("/wanted-list/release-details/{release_id}")
+async def get_release_details_mock(release_id: str, session_id: str = None):
+    """Mock endpoint for getting release details from Discogs"""
+    user = require_auth(session_id)
+    require_discogs_auth(user)
+    
+    # Mock release details - in real implementation, this would fetch from Discogs API
+    return {
+        "id": release_id,
+        "title": f"Mock Release {release_id}",
+        "artist": "Mock Artist",
+        "year": 2023,
+        "genres": ["Electronic"],
+        "styles": ["Ambient"],
+        "country": "US",
+        "thumbnail_url": "https://via.placeholder.com/150",
+        "resource_url": f"https://www.discogs.com/release/{release_id}",
+        "lowest_price": 25.99,
+        "lowest_price_currency": "USD"
+    }
+
+@app.post("/wanted-list/")
+async def create_wanted_list_entry_mock(entry_data: dict, session_id: str = None):
+    """Mock endpoint for creating wanted list entries"""
+    user = require_auth(session_id)
+    # Mock successful creation
+    return {"message": "Wanted list entry created successfully", "id": "mock_id_123"}
+
+@app.put("/wanted-list/{entry_id}")
+async def update_wanted_list_entry_mock(entry_id: str, entry_data: dict, session_id: str = None):
+    """Mock endpoint for updating wanted list entries"""
+    user = require_auth(session_id)
+    return {"message": "Wanted list entry updated successfully"}
+
+@app.delete("/wanted-list/{entry_id}")
+async def delete_wanted_list_entry_mock(entry_id: str, session_id: str = None):
+    """Mock endpoint for deleting wanted list entries"""
+    user = require_auth(session_id)
+    return {"message": "Wanted list entry deleted successfully"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

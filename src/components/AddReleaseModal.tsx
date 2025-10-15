@@ -137,8 +137,8 @@ export function AddReleaseModal({ onClose, onAdd, user }: AddReleaseModalProps) 
     
     // Extract release ID from various Discogs URL formats
     const patterns = [
-      /discogs\.com\/release\/(\d+)/,
-      /discogs\.com\/.*\/release\/(\d+)/,
+      /discogs\.com\/release\/(\d+)(?:-[^\/]*)?/,  // Handle URLs with slugs
+      /discogs\.com\/.*\/release\/(\d+)(?:-[^\/]*)?/,  // Handle URLs with slugs
       /^(\d+)$/ // Direct ID
     ]
     
