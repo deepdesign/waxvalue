@@ -6,9 +6,7 @@ import {
   TrashIcon, 
   PlayIcon, 
   PauseIcon,
-  ExternalLinkIcon,
-  EyeIcon,
-  EyeSlashIcon
+  ArrowTopRightOnSquareIcon
 } from '@heroicons/react/24/outline'
 import { Button } from '@/components/ui/Button'
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -303,7 +301,7 @@ export function WantedListTable({ entries, isLoading, onRefresh, onUpdate }: Wan
                         rel="noopener noreferrer"
                         className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                       >
-                        <ExternalLinkIcon className="h-4 w-4" />
+                        <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                       </a>
                     </Tooltip>
 
@@ -402,7 +400,7 @@ export function WantedListTable({ entries, isLoading, onRefresh, onUpdate }: Wan
                     rel="noopener noreferrer"
                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                   >
-                    <ExternalLinkIcon className="h-4 w-4" />
+                    <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                   </a>
                   
                   <button
