@@ -145,12 +145,18 @@ def get_discogs_client(user) -> ExtendedDiscogsClient:
     if not consumer_key or not consumer_secret:
         raise HTTPException(status_code=500, detail="Discogs API credentials not configured")
     
-    return ExtendedDiscogsClient(
+    client = ExtendedDiscogsClient(
+        user_agent="WaxValue/1.0",
         consumer_key=consumer_key,
-        consumer_secret=consumer_secret,
-        access_token=user.accessToken,
-        access_token_secret=user.accessTokenSecret
+        consumer_secret=consumer_secret
     )
+    
+    # Set OAuth credentials if available
+    if user.accessToken and user.accessTokenSecret:
+        client.set_consumer_key(consumer_key, consumer_secret)
+        client.set_token(user.accessToken, user.accessTokenSecret)
+    
+    return client
 
 def get_database_connection():
     """Get database connection - placeholder for actual implementation."""

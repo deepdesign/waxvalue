@@ -209,28 +209,51 @@ export default function WantedListPage() {
                   </div>
                 </div>
                 
-                {/* Stats Summary */}
-                <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total_releases}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Total Releases</div>
+                {/* Wanted List Summary Statistics */}
+                {stats.total_releases > 0 && (
+                  <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {/* Total Releases */}
+                    <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-4 border border-gray-100 dark:border-gray-800/30">
+                      <div className="text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Total Releases</div>
+                      <div className="flex items-baseline gap-1.5">
+                        <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.total_releases}</div>
+                      </div>
+                    </div>
+                    
+                    {/* Active Alerts */}
+                    <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-100 dark:border-green-800/30">
+                      <div className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Active Alerts</div>
+                      <div className="flex items-baseline gap-1.5">
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.active_alerts}</div>
+                        <div className="text-sm text-green-600/70 dark:text-green-400/70">
+                          ({stats.total_releases > 0 ? Math.round((stats.active_alerts / stats.total_releases) * 100) : 0}%)
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Price Matched */}
+                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-100 dark:border-blue-800/30">
+                      <div className="text-xs font-medium text-blue-700 dark:text-blue-400 mb-1">Price Matched</div>
+                      <div className="flex items-baseline gap-1.5">
+                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.price_matched}</div>
+                        <div className="text-sm text-blue-600/70 dark:text-blue-400/70">
+                          ({stats.total_releases > 0 ? Math.round((stats.price_matched / stats.total_releases) * 100) : 0}%)
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Underpriced */}
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-100 dark:border-yellow-800/30">
+                      <div className="text-xs font-medium text-yellow-700 dark:text-yellow-400 mb-1">Underpriced</div>
+                      <div className="flex items-baseline gap-1.5">
+                        <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.underpriced}</div>
+                        <div className="text-sm text-yellow-600/70 dark:text-yellow-400/70">
+                          ({stats.total_releases > 0 ? Math.round((stats.underpriced / stats.total_releases) * 100) : 0}%)
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.active_alerts}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Active Alerts</div>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.price_matched}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Price Matched</div>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.underpriced}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Underpriced</div>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Table Content */}

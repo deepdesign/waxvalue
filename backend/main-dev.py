@@ -327,8 +327,9 @@ async def verify_auth(verification: dict, session_id: str = None):
         )
         
         # Create authenticated client to get user info
-        client = Client(consumer_key, consumer_secret, 
-                              access_token, access_token_secret)
+        client = Client("WaxValue/1.0")
+        client.set_consumer_key(consumer_key, consumer_secret)
+        client.set_token(access_token, access_token_secret)
         
         try:
             user_info = client.get_user_info()
@@ -431,12 +432,9 @@ async def get_inventory_count(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client(
-            consumer_key=consumer_key,
-            consumer_secret=consumer_secret,
-            access_token=user.accessToken,
-            access_token_secret=user.accessTokenSecret
-        )
+        client = Client("WaxValue/1.0")
+        client.set_consumer_key(consumer_key, consumer_secret)
+        client.set_token(user.accessToken, user.accessTokenSecret)
         
         # Get user inventory count - use pagination data for fast count
         try:
@@ -494,12 +492,9 @@ async def get_dashboard_summary(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client(
-            consumer_key=consumer_key,
-            consumer_secret=consumer_secret,
-            access_token=user.accessToken,
-            access_token_secret=user.accessTokenSecret
-        )
+        client = Client("WaxValue/1.0")
+        client.set_consumer_key(consumer_key, consumer_secret)
+        client.set_token(user.accessToken, user.accessTokenSecret)
         
         # Get user inventory count (For Sale items only) - fetch all pages for accurate count
         try:
@@ -872,12 +867,9 @@ async def get_suggestions(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client(
-            consumer_key=consumer_key,
-            consumer_secret=consumer_secret,
-            access_token=user.accessToken,
-            access_token_secret=user.accessTokenSecret
-        )
+        client = Client("WaxValue/1.0")
+        client.set_consumer_key(consumer_key, consumer_secret)
+        client.set_token(user.accessToken, user.accessTokenSecret)
         
         # Use the stored username from the session (avoid extra API call)
         username = user.username
@@ -1309,12 +1301,9 @@ async def apply_price_suggestion(listing_id: int, listing_data: dict, session_id
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client(
-            consumer_key=consumer_key,
-            consumer_secret=consumer_secret,
-            access_token=user.accessToken,
-            access_token_secret=user.accessTokenSecret
-        )
+        client = Client("WaxValue/1.0")
+        client.set_consumer_key(consumer_key, consumer_secret)
+        client.set_token(user.accessToken, user.accessTokenSecret)
         
         # Update the listing price
         logger.info(f"Attempting to update listing {listing_id} with price {new_price}")
@@ -1392,12 +1381,9 @@ async def bulk_apply_price_suggestions(request: dict, session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client(
-            consumer_key=consumer_key,
-            consumer_secret=consumer_secret,
-            access_token=user.accessToken,
-            access_token_secret=user.accessTokenSecret
-        )
+        client = Client("WaxValue/1.0")
+        client.set_consumer_key(consumer_key, consumer_secret)
+        client.set_token(user.accessToken, user.accessTokenSecret)
         
         results = []
         successful_updates = 0
@@ -1519,12 +1505,9 @@ async def get_user_profile(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client(
-            consumer_key=consumer_key,
-            consumer_secret=consumer_secret,
-            access_token=user.accessToken,
-            access_token_secret=user.accessTokenSecret
-        )
+        client = Client("WaxValue/1.0")
+        client.set_consumer_key(consumer_key, consumer_secret)
+        client.set_token(user.accessToken, user.accessTokenSecret)
         
         # Get user profile from Discogs
         logger.info(f"Fetching profile for user: {user.username}")

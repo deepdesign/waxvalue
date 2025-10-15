@@ -17,12 +17,12 @@ import logging
 import time
 from typing import Dict, List, Optional, Any
 from datetime import datetime
-from discogs_client import DiscogsClient
+from discogs_client import Client
 from discogs_client.exceptions import DiscogsAPIError, DiscogsAuthError
 
 logger = logging.getLogger(__name__)
 
-class ExtendedDiscogsClient(DiscogsClient):
+class ExtendedDiscogsClient(Client):
     """
     Extended Discogs client with additional methods for wanted list functionality.
     
