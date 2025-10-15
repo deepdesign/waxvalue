@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { XMarkIcon, MagnifyingGlassIcon, CheckIcon } from '@heroicons/react/24/outline'
 import { Button } from '@/components/ui/Button'
+import { ApiClient } from '@/lib/apiClient'
+import toast from 'react-hot-toast'
 
 interface ReleaseDetails {
   id: number
@@ -30,10 +32,10 @@ interface AlertCriteria {
 interface AddReleaseModalProps {
   onClose: () => void
   onAdd: (releaseData: any) => void
-  sessionId: string | null
+  user?: any
 }
 
-export function AddReleaseModal({ onClose, onAdd, sessionId }: AddReleaseModalProps) {
+export function AddReleaseModal({ onClose, onAdd, user }: AddReleaseModalProps) {
   const [step, setStep] = useState(1) // 1: Input, 2: Configure, 3: Confirm
   const [releaseUrl, setReleaseUrl] = useState('')
   const [releaseDetails, setReleaseDetails] = useState<ReleaseDetails | null>(null)
@@ -47,6 +49,8 @@ export function AddReleaseModal({ onClose, onAdd, sessionId }: AddReleaseModalPr
     min_seller_rating: '',
     underpriced_percentage: ''
   })
+
+  const apiClient = new ApiClient(user?.accessToken, user?.accessTokenSecret)
 
   const handleStep1 = async () => {
     if (!releaseUrl.trim()) {
@@ -65,33 +69,21 @@ export function AddReleaseModal({ onClose, onAdd, sessionId }: AddReleaseModalPr
         return
       }
 
-      if (!sessionId) {
-        setError('Session not found. Please refresh the page and try again.')
+      if (!user?.accessToken) {
+        setError('Authentication required. Please refresh the page and try again.')
         return
       }
 
-      // Fetch release details
-      const response = await fetch(`/api/backend/wanted-list/releases/${releaseId}?session_id=${sessionId}`, {
-        credentials: 'include'
-      })
-      
-      if (!response.ok) {
-        if (response.status === 404) {
-          setError('Release not found. Please check the URL or ID.')
-        } else if (response.status === 401) {
-          setError('Please log in to Discogs first.')
-        } else {
-          setError('Failed to fetch release details. Please try again.')
-        }
-        return
-      }
-
-      const details = await response.json()
+      // Fetch release details using API client
+      const response = await apiClient.get(`/wanted-list/release-details/${releaseId}`)
+      const details = response.data
       setReleaseDetails(details)
       setStep(2)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch release details:', error)
-      setError('Network error. Please check your connection and try again.')
+      const errorMessage = error.response?.data?.detail || 'Failed to fetch release details. Please try again.'
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }

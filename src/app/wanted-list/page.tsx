@@ -1,11 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { PlusIcon, HeartIcon, ChartBarIcon } from '@heroicons/react/24/outline'
 import { Button } from '@/components/ui/Button'
 import { WantedListTable } from '@/components/WantedListTable'
 import { AddReleaseModal } from '@/components/AddReleaseModal'
 import { useApp } from '@/components/Providers'
+import { DashboardLayout } from '@/components/DashboardLayout'
+import { AuthGuard } from '@/components/AuthGuard'
+import { ApiClient } from '@/lib/apiClient'
+import toast from 'react-hot-toast'
 
 interface WantedListEntry {
   id: string
@@ -36,7 +40,7 @@ interface WantedListStats {
 }
 
 export default function WantedListPage() {
-  const { sessionId } = useApp()
+  const { user } = useApp()
   const [entries, setEntries] = useState<WantedListEntry[]>([])
   const [stats, setStats] = useState<WantedListStats>({
     total_releases: 0,
@@ -47,82 +51,54 @@ export default function WantedListPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  const apiClient = new ApiClient(user?.accessToken, user?.accessTokenSecret)
 
   useEffect(() => {
-    if (sessionId) {
+    if (user?.id) {
       fetchWantedList()
     }
-  }, [sessionId])
+  }, [user?.id])
 
-  const fetchWantedList = async () => {
-    if (!sessionId) return
+  const fetchWantedList = useCallback(async () => {
+    if (!user?.id) return
     
     try {
       setIsLoading(true)
       setError(null)
       
-      const response = await fetch('/api/backend/wanted-list/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      })
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
-      const data = await response.json()
-      setEntries(data)
+      const response = await apiClient.get('/wanted-list/')
+      setEntries(response.data || [])
       
       // Calculate stats
+      const entriesData = response.data || []
       const newStats = {
-        total_releases: data.length,
-        active_alerts: data.filter((e: WantedListEntry) => e.is_active).length,
-        price_matched: data.filter((e: WantedListEntry) => e.status === 'price_matched').length,
-        underpriced: data.filter((e: WantedListEntry) => e.status === 'underpriced').length
+        total_releases: entriesData.length,
+        active_alerts: entriesData.filter((e: WantedListEntry) => e.is_active).length,
+        price_matched: entriesData.filter((e: WantedListEntry) => e.status === 'price_matched').length,
+        underpriced: entriesData.filter((e: WantedListEntry) => e.status === 'underpriced').length
       }
       setStats(newStats)
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch wanted list:', error)
-      setError('Failed to load wanted list. Please try again.')
+      toast.error(error.response?.data?.detail || 'Failed to load wanted list. Please try again.')
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user?.id, apiClient])
 
   const handleAddRelease = async (releaseData: any) => {
-    if (!sessionId) return
+    if (!user?.id) return
     
     try {
-      const response = await fetch('/api/backend/wanted-list/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(releaseData)
-      })
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.detail || 'Failed to add release')
-      }
-      
-      const result = await response.json()
-      
-      // Refresh the list
+      await apiClient.post('/wanted-list/', releaseData)
+      toast.success('Release added to wanted list!')
       await fetchWantedList()
       setShowAddModal(false)
-      
-      // Show success message (you could add a toast notification here)
-      console.log('Release added successfully:', result.message)
-      
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to add release:', error)
-      setError(error instanceof Error ? error.message : 'Failed to add release. Please try again.')
+      toast.error(error.response?.data?.detail || 'Failed to add release. Please try again.')
     }
   }
 
@@ -165,7 +141,9 @@ export default function WantedListPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <AuthGuard>
+      <DashboardLayout>
+        <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -246,14 +224,16 @@ export default function WantedListPage() {
         onUpdate={fetchWantedList}
       />
 
-      {/* Add Release Modal */}
-      {showAddModal && (
-        <AddReleaseModal
-          onClose={() => setShowAddModal(false)}
-          onAdd={handleAddRelease}
-          sessionId={sessionId}
-        />
-      )}
-    </div>
+        {/* Add Release Modal */}
+        {showAddModal && (
+          <AddReleaseModal
+            onClose={() => setShowAddModal(false)}
+            onAdd={handleAddRelease}
+            user={user}
+          />
+        )}
+        </div>
+      </DashboardLayout>
+    </AuthGuard>
   )
 }
