@@ -6,7 +6,8 @@ import {
   TrashIcon, 
   PlayIcon, 
   PauseIcon,
-  ArrowTopRightOnSquareIcon
+  ArrowTopRightOnSquareIcon,
+  CursorIcon
 } from '@heroicons/react/24/outline'
 import { Button } from '@/components/ui/Button'
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -37,9 +38,10 @@ interface WantedListTableProps {
   isLoading: boolean
   onRefresh: () => void
   onUpdate: () => void
+  onAdd?: () => void
 }
 
-export function WantedListTable({ entries, isLoading, onRefresh, onUpdate }: WantedListTableProps) {
+export function WantedListTable({ entries, isLoading, onRefresh, onUpdate, onAdd }: WantedListTableProps) {
   const [editingEntry, setEditingEntry] = useState<string | null>(null)
   const [deletingEntry, setDeletingEntry] = useState<string | null>(null)
 
@@ -180,18 +182,14 @@ export function WantedListTable({ entries, isLoading, onRefresh, onUpdate }: Wan
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
         <div className="text-center py-12">
-          <div className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          </div>
+          <CursorIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
             No releases in your wanted list
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
             Add releases you want to monitor and get alerts when they match your criteria.
           </p>
-          <Button onClick={onRefresh}>
+          <Button onClick={onAdd || onRefresh}>
             Add Your First Release
           </Button>
         </div>
@@ -200,13 +198,7 @@ export function WantedListTable({ entries, isLoading, onRefresh, onUpdate }: Wan
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Your Wanted List ({entries.length})
-        </h2>
-      </div>
+    <div className="overflow-hidden">
 
       {/* Desktop Table */}
       <div className="hidden lg:block overflow-x-auto">
@@ -240,10 +232,14 @@ export function WantedListTable({ entries, isLoading, onRefresh, onUpdate }: Wan
                       <img
                         src={entry.cover_image_url}
                         alt={entry.release_title}
-                        className="w-12 h-12 object-cover rounded-md"
+                        className="h-14 w-14 rounded object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
+                        }}
                       />
                     ) : (
-                      <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-md flex items-center justify-center">
+                      <div className="h-14 w-14 bg-gray-200 dark:bg-gray-600 rounded-md flex items-center justify-center flex-shrink-0">
                         <span className="text-xs text-gray-500 dark:text-gray-400">No Image</span>
                       </div>
                     )}
@@ -265,16 +261,26 @@ export function WantedListTable({ entries, isLoading, onRefresh, onUpdate }: Wan
 
                 {/* Alert Criteria */}
                 <td className="px-6 py-4">
-                  <div className="text-sm text-gray-900 dark:text-white space-y-1">
-                    <div>Max Price: {formatPrice(entry.max_price, entry.max_price_currency)}</div>
+                  <div className="text-sm space-y-1">
+                    {entry.max_price && (
+                      <div className="text-gray-700 dark:text-gray-300">
+                        <span className="font-medium text-gray-900 dark:text-gray-100">Max Price:</span> {formatPrice(entry.max_price, entry.max_price_currency)}
+                      </div>
+                    )}
                     {entry.min_condition && (
-                      <div>Min Condition: {entry.min_condition}</div>
+                      <div className="text-gray-700 dark:text-gray-300">
+                        <span className="font-medium text-gray-900 dark:text-gray-100">Min Condition:</span> {entry.min_condition}
+                      </div>
                     )}
                     {entry.underpriced_percentage && (
-                      <div>Underpriced: {entry.underpriced_percentage}%</div>
+                      <div className="text-gray-700 dark:text-gray-300">
+                        <span className="font-medium text-gray-900 dark:text-gray-100">Underpriced:</span> {entry.underpriced_percentage}%
+                      </div>
                     )}
                     {entry.location_filter && (
-                      <div>Location: {entry.location_filter}</div>
+                      <div className="text-gray-700 dark:text-gray-300">
+                        <span className="font-medium text-gray-900 dark:text-gray-100">Location:</span> {entry.location_filter}
+                      </div>
                     )}
                   </div>
                 </td>
@@ -293,7 +299,7 @@ export function WantedListTable({ entries, isLoading, onRefresh, onUpdate }: Wan
 
                 {/* Actions */}
                 <td className="px-6 py-4 text-right">
-                  <div className="flex items-center justify-end gap-2">
+                  <div className="flex items-center justify-end gap-3">
                     <Tooltip content="View on Discogs">
                       <a
                         href={`https://www.discogs.com/release/${entry.discogs_release_id}`}

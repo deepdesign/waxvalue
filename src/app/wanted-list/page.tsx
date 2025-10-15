@@ -196,36 +196,52 @@ export default function WantedListPage() {
         </div>
       )}
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Releases</div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total_releases}</div>
-        </div>
-        
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Alerts</div>
-          <div className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.active_alerts}</div>
-        </div>
-        
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Price Matched</div>
-          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.price_matched}</div>
-        </div>
-        
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Underpriced</div>
-          <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.underpriced}</div>
-        </div>
-      </div>
+            {/* Wanted List Table with Integrated Stats */}
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+              {/* Header with Stats */}
+              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-semibold text-gray-800 dark:text-white/90">
+                      Wanted List
+                    </h2>
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Monitor releases and get alerts when they match your criteria</p>
+                  </div>
+                </div>
+                
+                {/* Stats Summary */}
+                <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total_releases}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Total Releases</div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.active_alerts}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Active Alerts</div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.price_matched}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Price Matched</div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.underpriced}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Underpriced</div>
+                  </div>
+                </div>
+              </div>
 
-      {/* Wanted List Table */}
-      <WantedListTable 
-        entries={entries}
-        isLoading={isLoading}
-        onRefresh={handleRefresh}
-        onUpdate={fetchWantedList}
-      />
+              {/* Table Content */}
+              <WantedListTable 
+                entries={entries}
+                isLoading={isLoading}
+                onRefresh={handleRefresh}
+                onUpdate={fetchWantedList}
+                onAdd={() => setShowAddModal(true)}
+              />
+            </div>
 
         {/* Add Release Modal */}
         {showAddModal && (
