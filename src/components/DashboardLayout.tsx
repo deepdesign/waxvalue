@@ -12,7 +12,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   CpuChipIcon,
-  HeartIcon,
+  ViewfinderCircleIcon,
 } from '@heroicons/react/24/outline'
 import { DarkModeToggle } from './DarkModeToggle'
 import { DarkModeToggleCollapsed } from './DarkModeToggleCollapsed'
@@ -25,7 +25,7 @@ interface DashboardLayoutProps {
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Wanted List', href: '/wanted-list', icon: HeartIcon },
+  { name: 'Wanted List', href: '/wanted-list', icon: ViewfinderCircleIcon },
   { name: 'Automation', href: '/automation', icon: CpuChipIcon },
   { name: 'Settings', href: '/settings', icon: CogIcon },
   { name: 'Help & support', href: '/help', icon: QuestionMarkCircleIcon },

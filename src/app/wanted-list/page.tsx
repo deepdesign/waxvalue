@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { PlusIcon, HeartIcon, ChartBarIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, ViewfinderCircleIcon, ChartBarIcon } from '@heroicons/react/24/outline'
 import { Button } from '@/components/ui/Button'
 import { WantedListTable } from '@/components/WantedListTable'
 import { AddReleaseModal } from '@/components/AddReleaseModal'
@@ -143,39 +143,36 @@ export default function WantedListPage() {
   return (
     <AuthGuard>
       <DashboardLayout>
-        <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90 flex items-center gap-2">
-            <HeartIcon className="h-6 w-6 text-red-500" />
-            Wanted List
-          </h1>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Monitor releases and get alerts when they match your criteria
-          </p>
+        <div className="space-y-8">
+        {/* Page Header */}
+        <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
+          <h1 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">Wanted List</h1>
+          <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">Monitor releases and get alerts when they match your criteria</p>
         </div>
-        
-        <div className="flex items-center gap-3">
-          <Button
-            variant="secondary"
-            onClick={handleRefresh}
-            disabled={isLoading}
-            className="flex items-center gap-2"
-          >
-            <ChartBarIcon className="h-4 w-4" />
-            Refresh
-          </Button>
-          
-          <Button
-            onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-2"
-          >
-            <PlusIcon className="h-4 w-4" />
-            Add Release
-          </Button>
+
+        {/* Actions Bar */}
+        <div className="flex items-center justify-between">
+          <div></div>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="secondary"
+              onClick={handleRefresh}
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              <ChartBarIcon className="h-4 w-4" />
+              Refresh
+            </Button>
+            
+            <Button
+              onClick={() => setShowAddModal(true)}
+              className="inline-flex items-center gap-2"
+            >
+              <PlusIcon className="h-4 w-4" />
+              Add Release
+            </Button>
+          </div>
         </div>
-      </div>
 
       {/* Error Message */}
       {error && (
