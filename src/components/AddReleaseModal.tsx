@@ -50,7 +50,7 @@ export function AddReleaseModal({ onClose, onAdd, user }: AddReleaseModalProps) 
     underpriced_percentage: ''
   })
 
-  const apiClient = new ApiClient(user?.accessToken, user?.accessTokenSecret)
+  const apiClient = new ApiClient({ baseUrl: 'http://localhost:8000' })
 
   const handleStep1 = async () => {
     if (!releaseUrl.trim()) {

@@ -52,7 +52,7 @@ export default function WantedListPage() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  const apiClient = new ApiClient(user?.accessToken, user?.accessTokenSecret)
+  const apiClient = new ApiClient({ baseUrl: 'http://localhost:8000' })
 
   useEffect(() => {
     if (user?.id) {
