@@ -1560,22 +1560,31 @@ async def get_logs(session_id: str = None):
     session = session_manager.get_session(session_id)
     return session["logs"]
 
+# In-memory storage for wanted list entries (temporary for testing)
+wanted_list_storage = []
+entry_counter = 1
+
 # Temporary mock endpoints for wanted list functionality (no auth required for testing)
 @app.get("/wanted-list/")
 async def get_wanted_list_mock():
     """Mock endpoint for getting wanted list entries"""
-    # Return empty list for now
-    return []
+    return wanted_list_storage
 
 @app.get("/wanted-list/stats")
 async def get_wanted_list_stats_mock():
     """Mock endpoint for getting wanted list statistics"""
+    total_entries = len(wanted_list_storage)
+    monitoring_active = len([e for e in wanted_list_storage if e.get("status") == "monitoring"])
+    paused_entries = len([e for e in wanted_list_storage if e.get("status") == "paused"])
+    matched_alerts = len([e for e in wanted_list_storage if e.get("status") == "price_matched"])
+    no_listings_found = len([e for e in wanted_list_storage if e.get("status") == "no_listings"])
+    
     return {
-        "total_entries": 0,
-        "monitoring_active": 0,
-        "paused_entries": 0,
-        "matched_alerts": 0,
-        "no_listings_found": 0
+        "total_entries": total_entries,
+        "monitoring_active": monitoring_active,
+        "paused_entries": paused_entries,
+        "matched_alerts": matched_alerts,
+        "no_listings_found": no_listings_found
     }
 
 @app.get("/wanted-list/release-details/{release_id}")
@@ -1603,18 +1612,59 @@ async def get_release_details_mock(release_id: str):
 @app.post("/wanted-list/")
 async def create_wanted_list_entry_mock(entry_data: dict):
     """Mock endpoint for creating wanted list entries"""
-    # Mock successful creation
-    return {"message": "Wanted list entry created successfully", "id": "mock_id_123"}
+    global entry_counter
+    
+    # Create a new entry with the provided data
+    new_entry = {
+        "id": str(entry_counter),
+        "discogs_release_id": entry_data.get("discogs_release_id", 0),
+        "release_title": entry_data.get("release_title", "Unknown Release"),
+        "artist_name": entry_data.get("artist_name", "Unknown Artist"),
+        "release_year": entry_data.get("release_year"),
+        "release_format": entry_data.get("release_format"),
+        "cover_image_url": entry_data.get("cover_image_url"),
+        "max_price": entry_data.get("max_price"),
+        "max_price_currency": entry_data.get("max_price_currency", "USD"),
+        "min_condition": entry_data.get("min_condition"),
+        "location_filter": entry_data.get("location_filter"),
+        "min_seller_rating": entry_data.get("min_seller_rating"),
+        "underpriced_percentage": entry_data.get("underpriced_percentage"),
+        "status": "monitoring",
+        "is_active": True,
+        "last_checked": None,
+        "created_at": "2024-01-15T12:00:00Z",
+        "updated_at": "2024-01-15T12:00:00Z"
+    }
+    
+    # Add to storage
+    wanted_list_storage.append(new_entry)
+    entry_counter += 1
+    
+    return {"message": "Wanted list entry created successfully", "id": new_entry["id"]}
 
 @app.put("/wanted-list/{entry_id}")
 async def update_wanted_list_entry_mock(entry_id: str, entry_data: dict):
     """Mock endpoint for updating wanted list entries"""
-    return {"message": "Wanted list entry updated successfully"}
+    # Find the entry in storage
+    for i, entry in enumerate(wanted_list_storage):
+        if entry["id"] == entry_id:
+            # Update the entry with new data
+            wanted_list_storage[i].update(entry_data)
+            wanted_list_storage[i]["updated_at"] = "2024-01-15T12:00:00Z"
+            return {"message": "Wanted list entry updated successfully"}
+    
+    return {"message": "Entry not found"}
 
 @app.delete("/wanted-list/{entry_id}")
 async def delete_wanted_list_entry_mock(entry_id: str):
     """Mock endpoint for deleting wanted list entries"""
-    return {"message": "Wanted list entry deleted successfully"}
+    # Find and remove the entry from storage
+    for i, entry in enumerate(wanted_list_storage):
+        if entry["id"] == entry_id:
+            del wanted_list_storage[i]
+            return {"message": "Wanted list entry deleted successfully"}
+    
+    return {"message": "Entry not found"}
 
 if __name__ == "__main__":
     import uvicorn
