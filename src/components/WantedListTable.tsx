@@ -7,7 +7,7 @@ import {
   PlayIcon, 
   PauseIcon,
   ArrowTopRightOnSquareIcon,
-  CursorIcon
+  CursorArrowRaysIcon
 } from '@heroicons/react/24/outline'
 import { Button } from '@/components/ui/Button'
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -182,7 +182,7 @@ export function WantedListTable({ entries, isLoading, onRefresh, onUpdate, onAdd
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
         <div className="text-center py-12">
-          <CursorIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+          <CursorArrowRaysIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
             No releases in your wanted list
           </h3>
