@@ -65,7 +65,11 @@ export function AddReleaseModal({ onClose, onAdd, user }: AddReleaseModalProps) 
       // Extract release ID from URL or validate direct ID
       const releaseId = extractReleaseId(releaseUrl)
       if (!releaseId) {
-        setError('Invalid Discogs release URL or ID. Please check the format.')
+        if (releaseUrl.includes('/sell/item/')) {
+          setError('This is a listing URL, not a release URL. Please use the release page URL instead. Look for the "Release" link on the listing page.')
+        } else {
+          setError('Invalid Discogs release URL or ID. Please check the format.')
+        }
         return
       }
 
@@ -126,6 +130,11 @@ export function AddReleaseModal({ onClose, onAdd, user }: AddReleaseModalProps) 
   }
 
   const extractReleaseId = (url: string): number | null => {
+    // Check for listing URLs first and provide helpful error
+    if (url.includes('/sell/item/')) {
+      return null // Will trigger error message below
+    }
+    
     // Extract release ID from various Discogs URL formats
     const patterns = [
       /discogs\.com\/release\/(\d+)/,
@@ -226,11 +235,11 @@ export function AddReleaseModal({ onClose, onAdd, user }: AddReleaseModalProps) 
                   type="text"
                   value={releaseUrl}
                   onChange={(e) => setReleaseUrl(e.target.value)}
-                  placeholder="https://www.discogs.com/release/1234567 or just 1234567"
+                  placeholder="https://www.discogs.com/release/1234567 or just 1234567 (NOT /sell/item/ URLs)"
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Enter the full Discogs URL or just the release ID number
+                  Enter the release page URL (not the listing/sell page). Look for the "Release" link on listing pages.
                 </p>
               </div>
               
