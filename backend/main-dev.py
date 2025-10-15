@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from discogs_client import DiscogsOAuth, DiscogsClient
+from discogs_client import Client
 
 # Load environment variables
 load_dotenv()
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # Global lock to prevent concurrent analysis
 analysis_lock = {}  # session_id -> is_running
 
-def get_user_inventory_all_pages(client: DiscogsClient, username: str, first_page_data: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+def get_user_inventory_all_pages(client: Client, username: str, first_page_data: Dict[str, Any] = None) -> List[Dict[str, Any]]:
     """Fetch all pages of user inventory"""
     all_listings = []
     
@@ -327,7 +327,7 @@ async def verify_auth(verification: dict, session_id: str = None):
         )
         
         # Create authenticated client to get user info
-        client = DiscogsClient(consumer_key, consumer_secret, 
+        client = Client(consumer_key, consumer_secret, 
                               access_token, access_token_secret)
         
         try:
@@ -431,7 +431,7 @@ async def get_inventory_count(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = DiscogsClient(
+        client = Client(
             consumer_key=consumer_key,
             consumer_secret=consumer_secret,
             access_token=user.accessToken,
@@ -494,7 +494,7 @@ async def get_dashboard_summary(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = DiscogsClient(
+        client = Client(
             consumer_key=consumer_key,
             consumer_secret=consumer_secret,
             access_token=user.accessToken,
@@ -583,7 +583,7 @@ async def get_suggestions_stream(session_id: str = None):
             consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
             consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
             
-            client = DiscogsClient(
+            client = Client(
                 consumer_key=consumer_key,
                 consumer_secret=consumer_secret,
                 access_token=user.accessToken,
@@ -669,7 +669,7 @@ async def get_suggestions_stream(session_id: str = None):
                 if (i + 1) % 5 == 0 or i == 0:
                     logger.info(f"Processing item {i+1}/{len(items_to_process)}: listing {listing_id}, release {release_id}")
                 
-                # Rate limiting is now handled by the token bucket in DiscogsClient
+                # Rate limiting is now handled by the token bucket in Client
                 # No artificial delay needed - the rate limiter handles it
                 
                 try:
@@ -872,7 +872,7 @@ async def get_suggestions(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = DiscogsClient(
+        client = Client(
             consumer_key=consumer_key,
             consumer_secret=consumer_secret,
             access_token=user.accessToken,
@@ -923,7 +923,7 @@ async def get_suggestions(session_id: str = None):
             if (i + 1) % 5 == 0 or i == 0:
                 logger.info(f"Processing item {i+1}/{len(items_to_process)}: listing {listing_id}, release {release_id}")
             
-            # Rate limiting is now handled by the token bucket in DiscogsClient
+            # Rate limiting is now handled by the token bucket in Client
             # No artificial delay needed
             
             try:
@@ -1309,7 +1309,7 @@ async def apply_price_suggestion(listing_id: int, listing_data: dict, session_id
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = DiscogsClient(
+        client = Client(
             consumer_key=consumer_key,
             consumer_secret=consumer_secret,
             access_token=user.accessToken,
@@ -1392,7 +1392,7 @@ async def bulk_apply_price_suggestions(request: dict, session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = DiscogsClient(
+        client = Client(
             consumer_key=consumer_key,
             consumer_secret=consumer_secret,
             access_token=user.accessToken,
@@ -1519,7 +1519,7 @@ async def get_user_profile(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = DiscogsClient(
+        client = Client(
             consumer_key=consumer_key,
             consumer_secret=consumer_secret,
             access_token=user.accessToken,
@@ -1589,25 +1589,92 @@ async def get_wanted_list_stats_mock():
 
 @app.get("/wanted-list/release-details/{release_id}")
 async def get_release_details_mock(release_id: str):
-    """Mock endpoint for getting release details from Discogs"""
-    # Mock release details - in real implementation, this would fetch from Discogs API
-    return {
-        "id": release_id,
-        "title": f"Mock Release {release_id}",
-        "artist": "Mock Artist",
-        "year": 2023,
-        "genres": ["Electronic"],
-        "styles": ["Ambient"],
-        "country": "US",
-        "thumbnail_url": "https://via.placeholder.com/150",
-        "resource_url": f"https://www.discogs.com/release/{release_id}",
-        "lowest_price": 25.99,
-        "lowest_price_currency": "USD",
-        "images": ["https://via.placeholder.com/300", "https://via.placeholder.com/300"],
-        "artists": ["Mock Artist"],
-        "labels": ["Mock Label"],
-        "formats": ["Vinyl", "LP"]
-    }
+    """Get actual release details from Discogs API"""
+    logger.info(f"Fetching release details for ID: {release_id}")
+    try:
+        # Initialize Discogs client with consumer credentials
+        consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
+        consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
+        
+        if not consumer_key or not consumer_secret:
+            return {
+                "id": release_id,
+                "title": f"Release {release_id}",
+                "artist": "Unknown Artist",
+                "year": None,
+                "genres": [],
+                "styles": [],
+                "country": "Unknown",
+                "thumbnail_url": None,
+                "resource_url": f"https://www.discogs.com/release/{release_id}",
+                "lowest_price": None,
+                "lowest_price_currency": "USD",
+                "images": [],
+                "artists": ["Unknown Artist"],
+                "labels": [],
+                "formats": []
+            }
+        
+        # Make direct HTTP request to Discogs API
+        import requests
+        
+        url = f"https://api.discogs.com/releases/{release_id}"
+        headers = {
+            "User-Agent": "WaxValue/1.0",
+            "Authorization": f"Discogs key={consumer_key}, secret={consumer_secret}"
+        }
+        
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        
+        data = response.json()
+        
+        # Extract data from the API response
+        artists = [artist['name'] for artist in data.get('artists', [])]
+        labels = [label['name'] for label in data.get('labels', [])]
+        formats = [format['name'] for format in data.get('formats', [])]
+        images = [img['uri150'] for img in data.get('images', [])]
+        
+        return {
+            "id": str(data.get('id', release_id)),
+            "title": data.get('title', f"Release {release_id}"),
+            "artist": artists[0] if artists else "Unknown Artist",
+            "year": data.get('year'),
+            "genres": data.get('genres', []),
+            "styles": data.get('styles', []),
+            "country": data.get('country', "Unknown"),
+            "thumbnail_url": images[0] if images else None,
+            "resource_url": data.get('uri', f"https://www.discogs.com/release/{release_id}"),
+            "lowest_price": data.get('lowest_price'),
+            "lowest_price_currency": "USD",  # Discogs API doesn't provide currency in this endpoint
+            "images": images,
+            "artists": artists,
+            "labels": labels,
+            "formats": formats
+        }
+        
+    except Exception as e:
+        logger.error(f"Error fetching Discogs release {release_id}: {e}")
+        import traceback
+        logger.error(f"Full traceback: {traceback.format_exc()}")
+        # Return fallback data if API fails
+        return {
+            "id": release_id,
+            "title": f"Release {release_id}",
+            "artist": "Unknown Artist",
+            "year": None,
+            "genres": [],
+            "styles": [],
+            "country": "Unknown",
+            "thumbnail_url": None,
+            "resource_url": f"https://www.discogs.com/release/{release_id}",
+            "lowest_price": None,
+            "lowest_price_currency": "USD",
+            "images": [],
+            "artists": ["Unknown Artist"],
+            "labels": [],
+            "formats": []
+        }
 
 @app.post("/wanted-list/")
 async def create_wanted_list_entry_mock(entry_data: dict):
