@@ -1593,7 +1593,11 @@ async def get_release_details_mock(release_id: str):
         "thumbnail_url": "https://via.placeholder.com/150",
         "resource_url": f"https://www.discogs.com/release/{release_id}",
         "lowest_price": 25.99,
-        "lowest_price_currency": "USD"
+        "lowest_price_currency": "USD",
+        "images": ["https://via.placeholder.com/300", "https://via.placeholder.com/300"],
+        "artists": ["Mock Artist"],
+        "labels": ["Mock Label"],
+        "formats": ["Vinyl", "LP"]
     }
 
 @app.post("/wanted-list/")
