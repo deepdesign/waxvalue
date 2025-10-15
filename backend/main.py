@@ -79,6 +79,14 @@ def get_user_inventory_all_pages(client: DiscogsClient, username: str, first_pag
 # Initialize FastAPI app
 app = FastAPI(title="WaxValue Backend", version="1.0.0")
 
+# Import and include wanted list API routes
+try:
+    from wanted_list_api import router as wanted_list_router
+    app.include_router(wanted_list_router)
+    logger.info("Wanted list API routes included successfully")
+except ImportError as e:
+    logger.warning(f"Could not import wanted list API routes: {e}")
+
 # CORS middleware - use environment variable for frontend URL
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 allowed_origins = [FRONTEND_URL]
