@@ -1,8 +1,7 @@
 'use client'
 
-import { forwardRef, useState, useRef, useEffect, useCallback } from 'react'
+import { forwardRef, useState, useRef, useEffect } from 'react'
 import { clsx } from 'clsx'
-import { createPortal } from 'react-dom'
 
 interface TooltipProps {
   content: React.ReactNode
@@ -26,43 +25,8 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
     ...props 
   }, ref) => {
     const [isVisible, setIsVisible] = useState(false)
-    const [position, setPosition] = useState({ top: 0, left: 0 })
     const triggerRef = useRef<HTMLDivElement>(null)
-    const tooltipRef = useRef<HTMLDivElement>(null)
     const timeoutRef = useRef<NodeJS.Timeout>()
-
-    const updatePosition = useCallback(() => {
-      if (!triggerRef.current || !tooltipRef.current) return
-
-      const triggerRect = triggerRef.current.getBoundingClientRect()
-      const tooltipRect = tooltipRef.current.getBoundingClientRect()
-      const scrollX = window.pageXOffset || document.documentElement.scrollLeft
-      const scrollY = window.pageYOffset || document.documentElement.scrollTop
-
-      let top = 0
-      let left = 0
-
-      switch (placement) {
-        case 'top':
-          top = triggerRect.top + scrollY - tooltipRect.height - 8
-          left = triggerRect.left + scrollX + (triggerRect.width - tooltipRect.width) / 2
-          break
-        case 'bottom':
-          top = triggerRect.bottom + scrollY + 8
-          left = triggerRect.left + scrollX + (triggerRect.width - tooltipRect.width) / 2
-          break
-        case 'left':
-          top = triggerRect.top + scrollY + (triggerRect.height - tooltipRect.height) / 2
-          left = triggerRect.left + scrollX - tooltipRect.width - 8
-          break
-        case 'right':
-          top = triggerRect.top + scrollY + (triggerRect.height - tooltipRect.height) / 2
-          left = triggerRect.right + scrollX + 8
-          break
-      }
-
-      setPosition({ top, left })
-    }, [placement])
 
     const showTooltip = () => {
       if (disabled) return
@@ -73,7 +37,6 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       
       timeoutRef.current = setTimeout(() => {
         setIsVisible(true)
-        updatePosition()
       }, delay)
     }
 
@@ -83,22 +46,6 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       }
       setIsVisible(false)
     }
-
-    useEffect(() => {
-      if (isVisible) {
-        updatePosition()
-        const handleResize = () => updatePosition()
-        const handleScroll = () => updatePosition()
-        
-        window.addEventListener('resize', handleResize)
-        window.addEventListener('scroll', handleScroll)
-        
-        return () => {
-          window.removeEventListener('resize', handleResize)
-          window.removeEventListener('scroll', handleScroll)
-        }
-      }
-    }, [isVisible, placement, updatePosition])
 
     useEffect(() => {
       return () => {
@@ -160,28 +107,23 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
     }
 
     return (
-      <>
-        <div
-          ref={triggerRef}
-          className={clsx('inline-block', className)}
-          {...eventHandlers[trigger]}
-          {...props}
-        >
-          {children}
-        </div>
-
-        {isVisible && createPortal(
+      <div
+        ref={triggerRef}
+        className={clsx('relative inline-block', className)}
+        {...eventHandlers[trigger]}
+        {...props}
+      >
+        {children}
+        
+        {isVisible && (
           <div
-            ref={tooltipRef}
             className={clsx(
-              'fixed z-50 px-3 py-2 text-sm text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg',
+              'absolute z-50 px-3 py-2 text-sm text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg',
               'animate-fade-in',
               getPlacementClasses()
             )}
-            style={{
-              top: position.top,
-              left: position.left,
-            }}
+            role="tooltip"
+            aria-live="polite"
           >
             {content}
             {/* Arrow */}
@@ -191,10 +133,9 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
                 getArrowClasses()
               )}
             />
-          </div>,
-          document.body
+          </div>
         )}
-      </>
+      </div>
     )
   }
 )

@@ -4,7 +4,7 @@ import { forwardRef } from 'react'
 import { clsx } from 'clsx'
 import { ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
 
-interface FormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface FormFieldProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label: string
   error?: string
   helperText?: string
