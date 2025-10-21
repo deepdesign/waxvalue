@@ -3,6 +3,7 @@
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
@@ -82,11 +83,13 @@ export function Logo({
   return (
     <Link href="/dashboard" className="cursor-pointer">
       <div className={`relative ${sizeClasses[variant][size]} ${className}`}>
-        <img
+        <Image
           key={logoPath}
           src={logoPath}
           alt="waxvalue"
           className="w-auto h-full object-contain"
+          width={200}
+          height={60}
         />
       </div>
     </Link>

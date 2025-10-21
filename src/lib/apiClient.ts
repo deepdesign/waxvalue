@@ -191,31 +191,4 @@ export class ApiClient {
     });
   }
 
-  // Generic HTTP methods for wanted list and other features
-  async get<T = any>(endpoint: string): Promise<{ data: T }> {
-    const result = await this.request<T>(endpoint, { method: 'GET' });
-    return { data: result };
-  }
-
-  async post<T = any>(endpoint: string, data?: any): Promise<{ data: T }> {
-    const result = await this.request<T>(endpoint, {
-      method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
-    });
-    return { data: result };
-  }
-
-  async put<T = any>(endpoint: string, data?: any): Promise<{ data: T }> {
-    const result = await this.request<T>(endpoint, {
-      method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
-    });
-    return { data: result };
-  }
-
-  async delete<T = any>(endpoint: string): Promise<{ data: T }> {
-    const result = await this.request<T>(endpoint, { method: 'DELETE' });
-    return { data: result };
-  }
-
 }

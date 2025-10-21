@@ -163,11 +163,8 @@ See [docs/ENV_TEMPLATE.md](docs/ENV_TEMPLATE.md) for complete configuration.
 ### Development
 - [API Documentation](docs/API.md)
 - [Testing Guide](docs/development/TESTING_GUIDE.md)
-- [UX Change Log](docs/ux-change-log.md)
 
 ### Reference
-- [Milestone Documentation](docs/MILESTONE_PRE_DEPLOYMENT.md)
-- [Loading Facts](docs/LOADING_FACTS_DESIGNS.md)
 - [Security Checklist](docs/security/SECURITY_CHECKLIST.md)
 
 ---

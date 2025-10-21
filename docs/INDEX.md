@@ -23,23 +23,8 @@ Complete documentation for Waxvalue development, deployment, and maintenance.
 - [Testing Guide](development/TESTING_GUIDE.md) - Test procedures
 - [Compliance Workflow](compliance-workflow.md) - API compliance checks
 
-### Project Info
-- [Milestone v1.0.0](MILESTONE_PRE_DEPLOYMENT.md) - Feature list and changelog
-- [Project Completion Summary](PROJECT_COMPLETION_SUMMARY.md) - Development summary
-- [UX Change Log](ux-change-log.md) - UI/UX improvements
-- [UX Audit](ux-audit.md) - User experience analysis
-
-### Features
-- [Loading Facts](LOADING_FACTS_DESIGNS.md) - Vinyl facts and UI designs
-
 ### Security
 - [Security Checklist](security/SECURITY_CHECKLIST.md) - Security best practices
-
-### Archive
-- [Compliance System](archive/COMPLIANCE_SYSTEM_SUMMARY.md) - Historical documentation
-- [Folder Structure](archive/FOLDER_STRUCTURE_SUMMARY.md) - Old structure reference
-- [Organization Summary](archive/ORGANIZATION_SUMMARY.md) - Cleanup history
-- [Cleanup Summary](archive/CLEANUP_SUMMARY.md) - Documentation cleanup
 
 ---
 
@@ -51,14 +36,7 @@ docs/
 ├── README.md                   # Documentation overview
 ├── API.md                      # API reference
 ├── ENV_TEMPLATE.md             # Environment variables
-├── LOADING_FACTS_DESIGNS.md    # Vinyl facts feature
-├── MILESTONE_PRE_DEPLOYMENT.md # v1.0.0 milestone
-├── PROJECT_COMPLETION_SUMMARY.md
-├── ux-audit.md                 # UX analysis
-├── ux-audit-summary.md
-├── ux-change-log.md            # UI/UX changes
 ├── compliance-workflow.md
-├── iteration-checklist.md
 ├── pre-development-checklist.md
 │
 ├── deployment/                 # Deployment guides
@@ -79,14 +57,8 @@ docs/
 │   ├── TESTING_GUIDE.md
 │   └── QNAP_DEVELOPMENT_SETUP.md
 │
-├── security/                   # Security documentation
-│   └── SECURITY_CHECKLIST.md
-│
-└── archive/                    # Historical documentation
-    ├── COMPLIANCE_SYSTEM_SUMMARY.md
-    ├── FOLDER_STRUCTURE_SUMMARY.md
-    ├── ORGANIZATION_SUMMARY.md
-    └── CLEANUP_SUMMARY.md
+└── security/                   # Security documentation
+    └── SECURITY_CHECKLIST.md
 ```
 
 ---
@@ -99,15 +71,13 @@ docs/
 3. Follow [Development Guidelines](development/DEVELOPMENT_GUIDELINES.md)
 
 ### Deploying to Production
-1. Read [Milestone](MILESTONE_PRE_DEPLOYMENT.md) to understand v1.0.0 features
-2. Follow [Hostinger VPS Deployment](deployment/HOSTINGER_VPS_DEPLOYMENT.md)
-3. Use [Deployment Checklist](deployment/DEPLOYMENT_CHECKLIST.md)
-4. Verify with [Pre-Deployment Tests](deployment/PRE_DEPLOYMENT_TEST_REPORT.md)
+1. Follow [Hostinger VPS Deployment](deployment/HOSTINGER_VPS_DEPLOYMENT.md)
+2. Use [Deployment Checklist](deployment/DEPLOYMENT_CHECKLIST.md)
+3. Verify with [Pre-Deployment Tests](deployment/PRE_DEPLOYMENT_TEST_REPORT.md)
 
 ### Understanding the Codebase
 1. Review [API Documentation](API.md)
-2. Check [UX Change Log](ux-change-log.md) for UI decisions
-3. Read [Development Guidelines](development/DEVELOPMENT_GUIDELINES.md)
+2. Read [Development Guidelines](development/DEVELOPMENT_GUIDELINES.md)
 
 ### Testing
 1. Follow [Testing Guide](development/TESTING_GUIDE.md)
@@ -125,7 +95,6 @@ docs/
 
 ### Reference During Development
 - [API.md](API.md) - API endpoints
-- [MILESTONE_PRE_DEPLOYMENT.md](MILESTONE_PRE_DEPLOYMENT.md) - v1.0.0 features
 - [Development Guidelines](development/DEVELOPMENT_GUIDELINES.md)
 
 ---
@@ -141,7 +110,7 @@ docs/
 - British English throughout
 - Production-ready deployment scripts
 
-See [MILESTONE_PRE_DEPLOYMENT.md](MILESTONE_PRE_DEPLOYMENT.md) for full changelog.
+See the main [README.md](../README.md) for full feature list.
 
 ---
 

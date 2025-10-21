@@ -103,7 +103,7 @@ export function FiltersBar({
             </p>
           </div>
         }
-        position="bottom"
+        placement="bottom"
       >
         <button
           onClick={() => setIsExpanded(!isExpanded)}
@@ -249,7 +249,7 @@ export function FiltersBar({
                     </p>
                   </div>
                 }
-                position="top"
+                placement="top"
               >
                 <label className="flex items-center">
                   <input
@@ -276,7 +276,7 @@ export function FiltersBar({
                     </p>
                   </div>
                 }
-                position="top"
+                placement="top"
               >
                 <label className="flex items-center">
                   <input

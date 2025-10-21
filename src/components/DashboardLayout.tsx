@@ -11,10 +11,9 @@ import {
   ArrowRightOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
-  CpuChipIcon,
-  CursorArrowRaysIcon,
 } from '@heroicons/react/24/outline'
 import { DarkModeToggle } from './DarkModeToggle'
+import Image from 'next/image'
 import { DarkModeToggleCollapsed } from './DarkModeToggleCollapsed'
 import { Logo } from './Logo'
 import { Tooltip } from './ui/Tooltip'
@@ -25,8 +24,6 @@ interface DashboardLayoutProps {
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Wanted List', href: '/wanted-list', icon: CursorArrowRaysIcon },
-  { name: 'Automation', href: '/automation', icon: CpuChipIcon },
   { name: 'Settings', href: '/settings', icon: CogIcon },
   { name: 'Help & support', href: '/help', icon: QuestionMarkCircleIcon },
 ]
@@ -94,7 +91,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="absolute top-0 right-0 -mr-12 pt-2">
             <button
               type="button"
-              className="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+              className="ml-1 flex h-12 w-12 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white touch-manipulation"
               onClick={() => setSidebarOpen(false)}
             >
               <span className="sr-only">Close sidebar</span>
@@ -107,21 +104,22 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
           
           <div className="mt-5 h-0 flex-1 overflow-y-auto">
-            <nav className="space-y-1 px-2">
-              {navigation.map((item) => {
-                const isActive = pathname === item.href
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`group flex items-center px-2 py-2 text-base font-medium rounded-md transition-colors select-none cursor-pointer ${
-                      isActive
-                        ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-900 dark:text-primary-100'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
-                    }`}
-                    aria-current={isActive ? 'page' : undefined}
-                    onClick={() => setSidebarOpen(false)}
-                  >
+          <nav className="space-y-1 px-2" role="navigation" aria-label="Main navigation">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`group flex items-center px-3 py-3 text-base font-medium rounded-md transition-colors select-none cursor-pointer touch-manipulation min-h-[44px] ${
+                    isActive
+                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-900 dark:text-primary-100'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 active:bg-gray-100 dark:active:bg-gray-700'
+                  }`}
+                  aria-current={isActive ? 'page' : undefined}
+                  aria-label={`Navigate to ${item.name}${isActive ? ' (current page)' : ''}`}
+                  onClick={() => setSidebarOpen(false)}
+                >
                     <item.icon
                       className={`mr-4 h-6 w-6 flex-shrink-0 ${
                         isActive ? 'text-primary-500 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400'
@@ -146,10 +144,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 {user?.avatar ? (
-                  <img
+                  <Image
                     className="h-8 w-8 rounded-full object-cover"
                     src={user.avatar}
                     alt={user.name || user.username}
+                    width={32}
+                    height={32}
                     onError={(e) => {
                       console.error('Avatar failed to load:', user.avatar)
                       e.currentTarget.style.display = 'none'
@@ -224,10 +224,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 {user?.avatar ? (
-                  <img
+                  <Image
                     className="h-8 w-8 rounded-full object-cover"
                     src={user.avatar}
                     alt={user.name || user.username}
+                    width={32}
+                    height={32}
                     onError={(e) => {
                       console.error('Avatar failed to load:', user.avatar)
                       e.currentTarget.style.display = 'none'
@@ -276,7 +278,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             {navigation.map((item) => {
               const isActive = pathname === item.href
               return (
-                <Tooltip key={item.name} content={item.name} position="right">
+                <Tooltip key={item.name} content={item.name} placement="right">
                   <Link
                     href={item.href}
                     className={`group flex items-center justify-center px-2 py-2 text-sm font-medium rounded-md transition-colors select-none cursor-pointer ${
@@ -309,10 +311,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="border-t border-gray-200 dark:border-gray-700 p-2 hidden">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <img
+                <Image
                   className="h-8 w-8 rounded-full"
                   src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || user?.username || 'User')}&background=6366f1&color=ffffff`}
                   alt={user?.name || user?.username || 'User'}
+                  width={32}
+                  height={32}
                 />
               </div>
             </div>
@@ -320,7 +324,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           
           {/* Copyright */}
           <div className="border-t border-gray-200 dark:border-gray-700 px-2 py-3">
-            <Tooltip content={`© ${new Date().getFullYear()} Deep Design Australia Pty Ltd`} position="right">
+            <Tooltip content={`© ${new Date().getFullYear()} Deep Design Australia Pty Ltd`} placement="right">
               <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
                 © {new Date().getFullYear()}
               </p>
@@ -377,7 +381,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="sticky top-0 z-10 xl:hidden pl-1 pt-1 sm:pl-3 sm:pt-3 bg-gray-50 dark:bg-gray-900">
           <button
             type="button"
-            className="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+            className="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 touch-manipulation active:bg-gray-100 dark:active:bg-gray-800"
             onClick={() => setSidebarOpen(true)}
           >
             <span className="sr-only">Open sidebar</span>

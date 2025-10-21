@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ArrowRightIcon } from '@heroicons/react/24/outline'
+import Image from 'next/image'
 
 export function LandingGradientWave() {
   const [isConnecting, setIsConnecting] = useState(false)
@@ -45,10 +46,12 @@ export function LandingGradientWave() {
           </div>
 
           <div className="mb-16 animate-zoom-in">
-            <img 
+            <Image 
               src="/svg/dark/waxvalue-horizontal-dark.svg"
               alt="waxvalue"
               className="h-24 w-auto mx-auto"
+              width={200}
+              height={80}
             />
           </div>
 
@@ -115,10 +118,12 @@ export function LandingGradientWave() {
           {/* Hero Image */}
           <div className="mt-24 relative pb-0 -mb-32">
             <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-t-2xl overflow-hidden shadow-2xl">
-              <img 
+              <Image 
                 src="/images/waxvalue-screenshot-01.png"
                 alt="waxvalue Dashboard"
                 className="w-full h-auto"
+                width={800}
+                height={600}
               />
             </div>
             {/* Floating orbs around image */}

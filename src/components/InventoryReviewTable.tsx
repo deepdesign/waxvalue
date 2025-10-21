@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useMemo, forwardRef, useImperativeHandle } from 'react'
+import { useState, useEffect, useMemo, forwardRef, useImperativeHandle, useCallback } from 'react'
+import Image from 'next/image'
 import {
   CheckIcon,
   XMarkIcon,
@@ -234,12 +235,106 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
 
 
 
+
+  const handleSimulateSelection = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      
+      // Clear cached data flags to force fresh analysis
+      localStorage.removeItem('waxvalue_has_data')
+      
+      // Clear cached data to force fresh analysis
+      setHasInitialized(false)
+      setSuggestions([])
+      localStorage.removeItem('waxvalue_analysis_progress')
+      
+      // Get session ID from localStorage
+      const sessionId = localStorage.getItem('waxvalue_session_id')
+      if (!sessionId) {
+        throw new Error('No session found. Please login first.')
+      }
+      
+      // Set importing state and start progress tracking
+      setProcessingProgress({
+        current: 0,
+        total: 0,
+        startTime: Date.now(),
+        estimatedTimeRemaining: 0,
+        isImporting: true
+      })
+      
+      // Start the analysis
+      const response = await fetch(`/api/backend/inventory/suggestions/stream?session_id=${sessionId}`)
+      
+      if (!response.ok) {
+        throw new Error(`Analysis failed: ${response.statusText}`)
+      }
+      
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('Failed to start analysis stream')
+      }
+      
+      const decoder = new TextDecoder()
+      let buffer = ''
+      
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+        
+        for (const line of lines) {
+          if (line.trim() === '') continue
+          
+          try {
+            const data = JSON.parse(line)
+            
+            if (data.type === 'progress') {
+              setProcessingProgress(prev => ({
+                ...prev,
+                current: data.current,
+                total: data.total,
+                estimatedTimeRemaining: data.estimatedTimeRemaining
+              }))
+            } else if (data.type === 'complete') {
+              setProcessingProgress(prev => ({
+                ...prev,
+                isImporting: false
+              }))
+              setIsLoading(false)
+              localStorage.removeItem('waxvalue_analysis_progress')
+              
+              // Refresh the suggestions
+              await fetchSuggestions()
+              return
+            }
+          } catch (e) {
+            console.warn('Failed to parse progress data:', line)
+          }
+        }
+      }
+      
+    } catch (error: any) {
+      console.error('Analysis failed:', error)
+      toast.error('Failed to run pricing analysis. Make sure you are connected to Discogs.')
+      setProcessingProgress(prev => ({
+        ...prev,
+        isImporting: false
+      }))
+      setIsLoading(false)
+      localStorage.removeItem('waxvalue_analysis_progress')
+    }
+  }, [fetchSuggestions])
+
   // Expose the simulate function to parent component
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useImperativeHandle(ref, () => ({
     simulate: handleSimulateSelection,
     isLoading
-  }), [isLoading])
+  }), [isLoading, handleSimulateSelection])
 
   const fetchSuggestions = async () => {
     let abortController: AbortController | null = null
@@ -562,7 +657,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
     }
 
     return filtered
-  }, [suggestions, filters, sortConfig])
+  }, [suggestions, filters, sortConfig, userSettings.minPriceChangeThreshold])
 
   // Calculate pricing statistics
   const pricingStats = useMemo(() => {
@@ -759,7 +854,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
   }
 
 
-  const handleSimulateSelection = async () => {
+  const handleSimulateSelection = useCallback(async () => {
     try {
       setIsLoading(true)
       
@@ -986,7 +1081,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
       setIsLoading(false)
       localStorage.removeItem('waxvalue_analysis_progress')
     }
-  }
+  }, [fetchSuggestions])
 
   const handleStartEdit = (listingId: number, currentPrice: number) => {
     setEditingPrice(listingId)
@@ -1518,10 +1613,12 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   <td className="w-64 px-6 py-4">
                     <div className="flex items-start space-x-3">
                       <div className="flex-shrink-0 h-16 w-16">
-                        <img
+                        <Image
                           className="h-16 w-16 rounded object-cover border border-gray-200 dark:border-gray-700"
                           src={suggestion.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'}
                           alt={suggestion.release?.title || 'Album cover'}
+                          width={64}
+                          height={64}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
@@ -1716,10 +1813,12 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   className="table-checkbox mt-1 flex-shrink-0"
                 />
                 <div className="flex gap-2 flex-1 min-w-0 pr-8">
-                  <img
+                  <Image
                     className="h-14 w-14 rounded object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
                     src={suggestion.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'}
                     alt={suggestion.release?.title || 'Album cover'}
+                    width={56}
+                    height={56}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';

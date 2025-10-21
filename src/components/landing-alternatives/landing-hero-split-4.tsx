@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ArrowRightIcon } from '@heroicons/react/24/outline'
+import Image from 'next/image'
 
 export function LandingHeroSplit4() {
   const [isConnecting, setIsConnecting] = useState(false)
@@ -31,25 +32,29 @@ export function LandingHeroSplit4() {
             <div className="max-w-xl animate-fade-in-up">
             {/* Logo */}
             <div className="mb-6 lg:mb-12">
-              <img 
+              <Image 
                 src="/svg/light/waxvalue-horizontal-light.svg"
                 alt="waxvalue"
                 className="h-20 lg:h-24 w-auto dark:hidden"
+                width={200}
+                height={80}
               />
-              <img 
+              <Image 
                 src="/svg/dark/waxvalue-horizontal-dark.svg"
                 alt="waxvalue"
                 className="h-20 lg:h-24 w-auto hidden dark:block"
+                width={200}
+                height={80}
               />
             </div>
 
             {/* Main content */}
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 text-sm font-medium mb-6 lg:mb-10 animate-bounce-slow">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 text-sm font-medium mb-6 lg:mb-10 animate-bounce-slow" role="banner" aria-label="Product tagline">
               🎵 Smart Pricing for Record Sellers
             </div>
-            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-white mb-6 lg:mb-10 leading-tight tracking-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-gray-900 dark:text-white mb-6 lg:mb-10 leading-tight tracking-tight text-shadow-sm">
               Keep your Discogs prices{' '}
-              <span className="gradient-text-animated">
+              <span className="gradient-text-animated" aria-label="market-perfect with animated gradient">
                 market-perfect
               </span>
             </h1>
@@ -60,7 +65,9 @@ export function LandingHeroSplit4() {
               <button
                 onClick={handleConnectDiscogs}
                 disabled={isConnecting}
-                className="group relative px-8 py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative px-8 py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-xl font-semibold text-lg shadow-xl shadow-primary-500/30 hover:shadow-2xl hover:shadow-primary-500/40 transition-all duration-300 hover:scale-105 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed will-change-transform transform-gpu touch-manipulation min-h-[56px] active:scale-95"
+                aria-label={isConnecting ? "Connecting to Discogs, please wait" : "Connect your Discogs account to start pricing analysis"}
+                aria-describedby="connect-description"
               >
                 <span className="flex items-center justify-center gap-2">
                   {isConnecting ? (
@@ -80,7 +87,7 @@ export function LandingHeroSplit4() {
                 </span>
               </button>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p id="connect-description" className="text-sm text-gray-500 dark:text-gray-400">
               🔒 Secure OAuth • No password required • Free to start
             </p>
             </div>
@@ -98,19 +105,18 @@ export function LandingHeroSplit4() {
         <div className="relative bg-gradient-to-br from-primary-100 via-purple-100 to-pink-100 dark:from-primary-900 dark:via-purple-900 dark:to-pink-900 flex items-center justify-center overflow-hidden">
           {/* Hero image - full bleed */}
           <div className="absolute inset-0">
-            <img 
+            <Image 
               src="/images/valentino-funghi-MEcxLZ8ENV8-unsplash.jpg"
               alt="Vinyl records collection"
               className="w-full h-full object-cover"
+              width={600}
+              height={400}
             />
           </div>
           
           {/* Gradient overlay for better text contrast if needed */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-purple-500/10"></div>
           
-          {/* Floating elements */}
-          <div className="absolute top-20 right-20 w-32 h-32 bg-white/10 backdrop-blur-sm rounded-full animate-float-delayed"></div>
-          <div className="absolute bottom-32 left-16 w-24 h-24 bg-white/10 backdrop-blur-sm rounded-full animate-float"></div>
         </div>
       </div>
 
