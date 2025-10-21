@@ -412,23 +412,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                       ? `Processing ${analysisProgress.current} of ${analysisProgress.total} items`
                       : 'Preparing inventory analysis...'}
                   </p>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-1.5 max-w-xs">
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1.5 max-w-xs overflow-hidden">
                     <div 
-                      className="bg-primary-600 dark:bg-primary-400 h-1.5 rounded-full transition-all duration-300"
+                      className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500"
                       style={{ width: `${analysisProgress.total > 0 ? (analysisProgress.current / analysisProgress.total) * 100 : 25}%` }}
                     />
                   </div>
                 </div>
               </div>
-              <Link 
-                href="/dashboard"
-                className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium whitespace-nowrap ml-4 flex items-center gap-1"
-              >
-                View Progress
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
             </div>
           </div>
         )}
