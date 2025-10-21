@@ -233,109 +233,6 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
     }
   }, [])
 
-
-
-
-  const handleSimulateSelection = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      
-      // Clear cached data flags to force fresh analysis
-      localStorage.removeItem('waxvalue_has_data')
-      
-      // Clear cached data to force fresh analysis
-      setHasInitialized(false)
-      setSuggestions([])
-      localStorage.removeItem('waxvalue_analysis_progress')
-      
-      // Get session ID from localStorage
-      const sessionId = localStorage.getItem('waxvalue_session_id')
-      if (!sessionId) {
-        throw new Error('No session found. Please login first.')
-      }
-      
-      // Set importing state and start progress tracking
-      setProcessingProgress({
-        current: 0,
-        total: 0,
-        startTime: Date.now(),
-        estimatedTimeRemaining: 0,
-        isImporting: true
-      })
-      
-      // Start the analysis
-      const response = await fetch(`/api/backend/inventory/suggestions/stream?session_id=${sessionId}`)
-      
-      if (!response.ok) {
-        throw new Error(`Analysis failed: ${response.statusText}`)
-      }
-      
-      const reader = response.body?.getReader()
-      if (!reader) {
-        throw new Error('Failed to start analysis stream')
-      }
-      
-      const decoder = new TextDecoder()
-      let buffer = ''
-      
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || ''
-        
-        for (const line of lines) {
-          if (line.trim() === '') continue
-          
-          try {
-            const data = JSON.parse(line)
-            
-            if (data.type === 'progress') {
-              setProcessingProgress(prev => ({
-                ...prev,
-                current: data.current,
-                total: data.total,
-                estimatedTimeRemaining: data.estimatedTimeRemaining
-              }))
-            } else if (data.type === 'complete') {
-              setProcessingProgress(prev => ({
-                ...prev,
-                isImporting: false
-              }))
-              setIsLoading(false)
-              localStorage.removeItem('waxvalue_analysis_progress')
-              
-              // Refresh the suggestions
-              await fetchSuggestions()
-              return
-            }
-          } catch (e) {
-            console.warn('Failed to parse progress data:', line)
-          }
-        }
-      }
-      
-    } catch (error: any) {
-      console.error('Analysis failed:', error)
-      toast.error('Failed to run pricing analysis. Make sure you are connected to Discogs.')
-      setProcessingProgress(prev => ({
-        ...prev,
-        isImporting: false
-      }))
-      setIsLoading(false)
-      localStorage.removeItem('waxvalue_analysis_progress')
-    }
-  }, [fetchSuggestions])
-
-  // Expose the simulate function to parent component
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useImperativeHandle(ref, () => ({
-    simulate: handleSimulateSelection,
-    isLoading
-  }), [isLoading, handleSimulateSelection])
-
   const fetchSuggestions = async () => {
     let abortController: AbortController | null = null
     
@@ -558,6 +455,108 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
     // NOTE: No finally block - isLoading(false) is set explicitly only when analysis completes or fails
     // This prevents the loading screen from closing during polling
   }
+
+  const handleSimulateSelection = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      
+      // Clear cached data flags to force fresh analysis
+      localStorage.removeItem('waxvalue_has_data')
+      
+      // Clear cached data to force fresh analysis
+      setHasInitialized(false)
+      setSuggestions([])
+      localStorage.removeItem('waxvalue_analysis_progress')
+      
+      // Get session ID from localStorage
+      const sessionId = localStorage.getItem('waxvalue_session_id')
+      if (!sessionId) {
+        throw new Error('No session found. Please login first.')
+      }
+      
+      // Set importing state and start progress tracking
+      setProcessingProgress({
+        current: 0,
+        total: 0,
+        startTime: Date.now(),
+        estimatedTimeRemaining: 0,
+        isImporting: true
+      })
+      
+      // Start the analysis
+      const response = await fetch(`/api/backend/inventory/suggestions/stream?session_id=${sessionId}`)
+      
+      if (!response.ok) {
+        throw new Error(`Analysis failed: ${response.statusText}`)
+      }
+      
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('Failed to start analysis stream')
+      }
+      
+      const decoder = new TextDecoder()
+      let buffer = ''
+      
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+        
+        for (const line of lines) {
+          if (line.trim() === '') continue
+          
+          try {
+            const data = JSON.parse(line)
+            
+            if (data.type === 'progress') {
+              setProcessingProgress(prev => ({
+                ...prev,
+                current: data.current,
+                total: data.total,
+                estimatedTimeRemaining: data.estimatedTimeRemaining
+              }))
+            } else if (data.type === 'complete') {
+              setProcessingProgress(prev => ({
+                ...prev,
+                isImporting: false
+              }))
+              setIsLoading(false)
+              localStorage.removeItem('waxvalue_analysis_progress')
+              
+              // Refresh the suggestions
+              await fetchSuggestions()
+              return
+            }
+          } catch (e) {
+            console.warn('Failed to parse progress data:', line)
+          }
+        }
+      }
+      
+    } catch (error: any) {
+      console.error('Analysis failed:', error)
+      toast.error('Failed to run pricing analysis. Make sure you are connected to Discogs.')
+      setProcessingProgress(prev => ({
+        ...prev,
+        isImporting: false
+      }))
+      setIsLoading(false)
+      localStorage.removeItem('waxvalue_analysis_progress')
+    }
+  }, [fetchSuggestions])
+
+  // Expose the simulate function to parent component
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useImperativeHandle(ref, () => ({
+    simulate: handleSimulateSelection,
+    isLoading
+  }), [isLoading, handleSimulateSelection])
+
+  // fetchSuggestions function moved to line 239
 
   const filteredAndSortedSuggestions = useMemo(() => {
     let filtered = suggestions.filter((suggestion) => {
