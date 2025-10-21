@@ -111,30 +111,77 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
           
           <div className="mt-5 h-0 flex-1 overflow-y-auto">
-          <nav className="space-y-1 px-2" role="navigation" aria-label="Main navigation">
-            {navigationItems.map((item) => {
+          <nav className="space-y-1 px-2" role="navigation" aria-label="Main navigation" style={{ animation: 'fadeInUp 0.6s ease-out' }}>
+            {navigationItems.map((item, index) => {
               const isActive = pathname === item.href
               return (
                 <Link
                   key={item.name}
                   href={item.href}
                   prefetch={true}
-                  className={`group flex items-center px-3 py-3 text-base font-medium rounded-md transition-colors select-none cursor-pointer touch-manipulation min-h-[44px] ${
+                  className={`group relative flex items-center px-3 py-3 text-base font-medium rounded-lg select-none cursor-pointer touch-manipulation min-h-[44px] overflow-hidden transition-all duration-300 ease-out transform hover:scale-[1.02] hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-gray-900/20 active:scale-[0.98] active:transition-transform active:duration-150 sidebar-nav-item ${
                     isActive
-                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-900 dark:text-primary-100'
+                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-900 dark:text-primary-100 shadow-sm shadow-primary-200/30 dark:shadow-primary-900/20'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 active:bg-gray-100 dark:active:bg-gray-700'
                   }`}
+                  style={{ 
+                    animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`,
+                    animationFillMode: 'both'
+                  }}
                   aria-current={isActive ? 'page' : undefined}
                   aria-label={`Navigate to ${item.name}${isActive ? ' (current page)' : ''}`}
-                  onClick={() => setSidebarOpen(false)}
+                  onClick={(e) => {
+                    setSidebarOpen(false)
+                    // Create ripple effect
+                    const ripple = document.createElement('span')
+                    const rect = e.currentTarget.getBoundingClientRect()
+                    const size = Math.max(rect.width, rect.height)
+                    const x = e.clientX - rect.left - size / 2
+                    const y = e.clientY - rect.top - size / 2
+                    
+                    ripple.style.cssText = `
+                      position: absolute;
+                      border-radius: 50%;
+                      background: ${isActive ? 'rgba(59, 130, 246, 0.3)' : 'rgba(156, 163, 175, 0.3)'};
+                      transform: scale(0);
+                      animation: ripple 600ms linear;
+                      left: ${x}px;
+                      top: ${y}px;
+                      width: ${size}px;
+                      height: ${size}px;
+                      pointer-events: none;
+                    `
+                    
+                    e.currentTarget.appendChild(ripple)
+                    
+                    setTimeout(() => {
+                      ripple.remove()
+                    }, 600)
+                  }}
                 >
                     <item.icon
-                      className={`mr-4 h-6 w-6 flex-shrink-0 ${
-                        isActive ? 'text-primary-500 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400'
+                      className={`mr-4 h-6 w-6 flex-shrink-0 transition-all duration-300 ${
+                        isActive 
+                          ? 'text-primary-500 dark:text-primary-400 scale-110' 
+                          : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400 group-hover:scale-105'
                       }`}
                       aria-hidden="true"
+                      onAnimationEnd={(e) => {
+                        // Add bounce animation on click
+                        e.currentTarget.classList.add('icon-bounce')
+                        setTimeout(() => {
+                          e.currentTarget.classList.remove('icon-bounce')
+                        }, 600)
+                      }}
                     />
-                    {item.name}
+                    <span className="transition-all duration-300 group-hover:translate-x-0.5">
+                      {item.name}
+                    </span>
+                    
+                    {/* Active indicator */}
+                    {isActive && (
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-primary-500 dark:bg-primary-400 rounded-full animate-pulse shadow-lg shadow-primary-500/50 dark:shadow-primary-400/50" />
+                    )}
                   </Link>
                 )
               })}
