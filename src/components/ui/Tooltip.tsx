@@ -11,6 +11,7 @@ interface TooltipProps {
   disabled?: boolean
   children: React.ReactNode
   className?: string
+  maxWidth?: string
 }
 
 const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
@@ -21,6 +22,7 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
     trigger = 'hover',
     delay = 200,
     disabled = false,
+    maxWidth = 'max-w-xs',
     children,
     ...props 
   }, ref) => {
@@ -109,7 +111,7 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
     return (
       <div
         ref={triggerRef}
-        className={clsx('relative inline-block', className)}
+        className={clsx('tooltip-container', className)}
         {...eventHandlers[trigger]}
         {...props}
       >
@@ -118,14 +120,23 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
         {isVisible && (
           <div
             className={clsx(
-              'absolute z-50 px-3 py-2 text-sm text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg',
-              'animate-fade-in',
-              getPlacementClasses()
+              'tooltip-content px-3 py-2 text-sm text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg',
+              'animate-fade-in'
             )}
             role="tooltip"
             aria-live="polite"
+            data-placement={placement}
+            style={{
+              maxWidth: '300px',
+              wordWrap: 'break-word',
+              overflowWrap: 'break-word',
+              whiteSpace: 'normal',
+              lineHeight: '1.4',
+            }}
           >
-            {content}
+            <div className="break-words">
+              {content}
+            </div>
             {/* Arrow */}
             <div
               className={clsx(

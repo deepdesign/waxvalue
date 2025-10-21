@@ -635,6 +635,51 @@ input[type="checkbox"].table-checkbox:checked::after {
         .animate-fade-in {
           animation: fade-in 0.2s ease-out;
         }
+        
+        /* Tooltip constraints to prevent off-screen issues */
+        .tooltip-container {
+          position: relative;
+          display: inline-block;
+        }
+        
+        .tooltip-content {
+          position: absolute;
+          z-index: 50;
+          max-width: 300px;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          white-space: normal;
+          line-height: 1.4;
+        }
+        
+        /* Ensure tooltips don't go off screen */
+        .tooltip-content[data-placement="top"] {
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-bottom: 8px;
+        }
+        
+        .tooltip-content[data-placement="bottom"] {
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-top: 8px;
+        }
+        
+        .tooltip-content[data-placement="left"] {
+          right: 100%;
+          top: 50%;
+          transform: translateY(-50%);
+          margin-right: 8px;
+        }
+        
+        .tooltip-content[data-placement="right"] {
+          left: 100%;
+          top: 50%;
+          transform: translateY(-50%);
+          margin-left: 8px;
+        }
 
 /* Indeterminate progress animation */
 @keyframes indeterminate {
