@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ArrowRightIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 
 export function LandingHeroSplit4() {
   const [isConnecting, setIsConnecting] = useState(false)
+  const [isImageLoaded, setIsImageLoaded] = useState(false)
+  const [selectedImage, setSelectedImage] = useState('')
 
   // Array of all 4 Unsplash images
   const unsplashImages = [
@@ -15,9 +17,26 @@ export function LandingHeroSplit4() {
     '/images/mr-cup-fabien-barral-o6GEPQXnqMY-unsplash.jpg'
   ]
 
-  // Randomly select one image on each page load
-  const randomImageIndex = Math.floor(Math.random() * unsplashImages.length)
-  const selectedImage = unsplashImages[randomImageIndex]
+  // Preload the selected image to prevent flickering
+  useEffect(() => {
+    const randomImageIndex = Math.floor(Math.random() * unsplashImages.length)
+    const imageToLoad = unsplashImages[randomImageIndex]
+    
+    // Set the selected image immediately
+    setSelectedImage(imageToLoad)
+    
+    // Preload the image
+    const img = new Image()
+    img.onload = () => {
+      setIsImageLoaded(true)
+    }
+    img.onerror = () => {
+      // Fallback to first image if random selection fails
+      setSelectedImage(unsplashImages[0])
+      setIsImageLoaded(true)
+    }
+    img.src = imageToLoad
+  }, [])
 
   const handleConnectDiscogs = async () => {
     setIsConnecting(true)
@@ -117,14 +136,18 @@ export function LandingHeroSplit4() {
         <div className="relative bg-gradient-to-br from-primary-100 via-purple-100 to-pink-100 dark:from-primary-900 dark:via-purple-900 dark:to-pink-900 flex items-center justify-center overflow-hidden">
           {/* Hero image - full bleed */}
           <div className="absolute inset-0">
-            <Image 
-              src={selectedImage}
-              alt="Vinyl records collection"
-              className="w-full h-full object-cover"
-              width={800}
-              height={600}
-              priority
-            />
+            {isImageLoaded && selectedImage ? (
+              <Image 
+                src={selectedImage}
+                alt="Vinyl records collection"
+                className="w-full h-full object-cover transition-opacity duration-500"
+                width={800}
+                height={600}
+                priority
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-primary-200 via-purple-200 to-pink-200 dark:from-primary-800 dark:via-purple-800 dark:to-pink-800 animate-pulse" />
+            )}
           </div>
           
           {/* Gradient overlay for better text contrast if needed */}

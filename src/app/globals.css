@@ -53,11 +53,41 @@
   }
   
   /* Allow text selection on content (but keep default cursor, not I-beam) */
-  p, td, li, pre, code, .allow-select {
+  p, td, li, pre, code, .allow-select, 
+  /* Add more specific selectors for better text selection */
+  .text-content, .copyable-text, .selectable-text,
+  /* Table content should be selectable */
+  .table-cell, .table-content,
+  /* Navigation text should be selectable */
+  .nav-text, .menu-text,
+  /* Card content should be selectable */
+  .card-content, .content-text,
+  /* Dashboard content should be selectable */
+  .dashboard-content, .stats-text, .metric-text {
     user-select: text;
     -webkit-user-select: text;
     -moz-user-select: text;
     -ms-user-select: text;
+    cursor: default; /* Keep default cursor, not I-beam */
+  }
+  
+  /* Special handling for specific content areas */
+  .copyable-content {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    cursor: default;
+    /* Add subtle visual hint that text is selectable */
+    transition: background-color 0.2s ease;
+  }
+  
+  .copyable-content:hover {
+    background-color: rgba(59, 130, 246, 0.05); /* Very subtle blue hint */
+  }
+  
+  .copyable-content:active {
+    background-color: rgba(59, 130, 246, 0.1); /* Slightly more visible on click */
   }
 
   /* Mobile optimizations */
@@ -766,6 +796,38 @@ input[type="checkbox"].table-checkbox:checked::after {
   }
 }
 
-.icon-bounce {
-  animation: iconBounce 0.6s ease-in-out;
-}
+  .icon-bounce {
+    animation: iconBounce 0.6s ease-in-out;
+  }
+
+  /* Copyable text utilities */
+  .copyable {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    cursor: default;
+    transition: background-color 0.2s ease;
+  }
+
+  .copyable:hover {
+    background-color: rgba(59, 130, 246, 0.05);
+  }
+
+  .copyable:active {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+
+  /* Prevent I-beam cursor on specific elements */
+  .no-ibeam {
+    cursor: default !important;
+  }
+
+  /* Make text selectable but keep default cursor */
+  .selectable-default-cursor {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    cursor: default;
+  }
