@@ -693,6 +693,10 @@ async def get_suggestions_stream(session_id: str = None):
                 logger.warning(f"Could not get instant count from profile: {profile_error}")
                 instant_for_sale_count = 0
             
+            # Use the instant count from Discogs profile API (no guessing needed!)
+            total_items = instant_for_sale_count
+            logger.info(f"Using instant count from Discogs profile: {total_items} For Sale items")
+            
             # Now fetch inventory pages for detailed analysis
             logger.info("Fetching inventory pages...")
             yield f"data: {json.dumps({'type': 'status', 'message': 'Fetching inventory details...'})}\n\n"
@@ -707,12 +711,10 @@ async def get_suggestions_stream(session_id: str = None):
             for_sale_listings = [listing for listing in all_listings if listing.get("status") == "For Sale"]
             
             logger.info(f"Fetched {len(all_listings)} total listings from Discogs")
-            logger.info(f"Filtered to {len(for_sale_listings)} For Sale items (actual count)")
+            logger.info(f"Filtered to {len(for_sale_listings)} For Sale items")
             
-            # Use actual count for processing
-            total_items = len(for_sale_listings)
-            if total_items != instant_for_sale_count:
-                logger.info(f"Actual count ({total_items}) differs from profile count ({instant_for_sale_count})")
+            # Use the instant count from profile (no calculation needed)
+            logger.info(f"Using instant count from Discogs profile: {total_items} For Sale items")
             
             # Cache for price suggestions by release_id to avoid duplicate API calls
             # This significantly speeds up analysis when you have multiple copies of the same release
@@ -723,7 +725,6 @@ async def get_suggestions_stream(session_id: str = None):
             
             # Process all for-sale items
             items_to_process = for_sale_listings
-            total_items = len(items_to_process)
             logger.info(f"Processing {total_items} For Sale items...")
             
             yield f"data: {json.dumps({'type': 'status', 'message': f'Processing {total_items} items...'})}\n\n"

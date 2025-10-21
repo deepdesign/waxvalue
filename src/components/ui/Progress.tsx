@@ -11,6 +11,10 @@ interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
   showLabel?: boolean
   animated?: boolean
   striped?: boolean
+  indeterminate?: boolean
+  label?: string
+  showPercentage?: boolean
+  showValue?: boolean
 }
 
 const sizeClasses = {
@@ -37,46 +41,68 @@ const Progress = forwardRef<HTMLDivElement, ProgressProps>(
     showLabel = false,
     animated = false,
     striped = false,
+    indeterminate = false,
+    label,
+    showPercentage = true,
+    showValue = false,
     ...props 
   }, ref) => {
-    const percentage = Math.min(Math.max((value / max) * 100, 0), 100)
+    const percentage = indeterminate ? 0 : Math.min(Math.max((value / max) * 100, 0), 100)
+    const displayLabel = label || 'Progress'
+    const displayValue = showValue ? `${value}/${max}` : undefined
+    const displayPercentage = showPercentage ? `${Math.round(percentage)}%` : undefined
 
     return (
       <div className={clsx('w-full', className)} {...props}>
-        {showLabel && (
+        {(showLabel || label) && (
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Progress
+              {displayLabel}
             </span>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              {Math.round(percentage)}%
-            </span>
+            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+              {displayValue && <span>{displayValue}</span>}
+              {displayPercentage && <span>{displayPercentage}</span>}
+            </div>
           </div>
         )}
         
         <div
           ref={ref}
           className={clsx(
-            'w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden',
+            'w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden relative',
             sizeClasses[size]
           )}
           role="progressbar"
-          aria-valuenow={value}
+          aria-valuenow={indeterminate ? undefined : value}
           aria-valuemin={0}
           aria-valuemax={max}
-          aria-label={`Progress: ${Math.round(percentage)}%`}
+          aria-label={indeterminate ? 'Loading...' : `${displayLabel}: ${Math.round(percentage)}%`}
         >
-          <div
-            className={clsx(
-              'h-full transition-all duration-300 ease-out',
-              variantClasses[variant],
-              {
-                'animate-pulse': animated,
-                'bg-stripes': striped,
-              }
-            )}
-            style={{ width: `${percentage}%` }}
-          />
+          {indeterminate ? (
+            <div
+              className={clsx(
+                'h-full bg-gradient-to-r from-transparent via-current to-transparent',
+                'animate-pulse',
+                variantClasses[variant]
+              )}
+              style={{
+                background: 'linear-gradient(90deg, transparent, currentColor, transparent)',
+                animation: 'indeterminate 2s infinite linear'
+              }}
+            />
+          ) : (
+            <div
+              className={clsx(
+                'h-full transition-all duration-300 ease-out',
+                variantClasses[variant],
+                {
+                  'animate-pulse': animated,
+                  'bg-stripes': striped,
+                }
+              )}
+              style={{ width: `${percentage}%` }}
+            />
+          )}
         </div>
       </div>
     )
@@ -184,5 +210,7 @@ const CircularProgress = forwardRef<HTMLDivElement, CircularProgressProps>(
 CircularProgress.displayName = 'CircularProgress'
 
 export { Progress, CircularProgress }
+
+
 
 

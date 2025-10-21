@@ -440,39 +440,18 @@ async def get_inventory_count(session_id: str = None):
             access_token_secret=user.accessTokenSecret
         )
         
-        # Get user inventory count - use pagination data for fast count
+        # Get instant count from user profile (single API call, no guessing needed!)
         try:
-            # Get first page to get pagination info and sample of listings
-            inventory = client.get_user_inventory(user.username, per_page=100)
-            pagination = inventory.get("pagination", {})
-            total_listings = pagination.get("items", 0)
+            user_profile = client.get_user_profile(user.username)
+            total_for_sale = user_profile.get('num_for_sale', 0)
+            total_listings = user_profile.get('num_listing', 0)  # Total inventory (all statuses)
             
-            # Get a sample of listings to estimate For Sale percentage
-            sample_listings = inventory.get("listings", [])
-            if sample_listings:
-                # Count For Sale items in the sample
-                sample_for_sale = len([listing for listing in sample_listings if listing.get("status") == "For Sale"])
-                sample_size = len(sample_listings)
-                
-                # Estimate total For Sale items based on sample
-                if sample_size > 0:
-                    for_sale_percentage = sample_for_sale / sample_size
-                    estimated_for_sale = int(total_listings * for_sale_percentage)
-                else:
-                    estimated_for_sale = 0
-                
-                logger.info(f"Total listings: {total_listings}, Sample size: {sample_size}, For Sale in sample: {sample_for_sale}, Estimated For Sale: {estimated_for_sale}")
-                
-                return {
-                    "totalForSale": estimated_for_sale,
-                    "totalListings": total_listings
-                }
-            else:
-                # No listings found
-                return {
-                    "totalForSale": 0,
-                    "totalListings": 0
-                }
+            logger.info(f"Instant count from profile: {total_for_sale} For Sale, {total_listings} total listings")
+            
+            return {
+                "totalForSale": total_for_sale,
+                "totalListings": total_listings
+            }
                 
         except Exception as e:
             logger.error(f"Error fetching inventory count: {e}")
@@ -503,26 +482,14 @@ async def get_dashboard_summary(session_id: str = None):
             access_token_secret=user.accessTokenSecret
         )
         
-        # Get user inventory count (For Sale items only) - fetch all pages for accurate count
+        # Get instant count from user profile (single API call, no guessing needed!)
         try:
-            all_listings = get_user_inventory_all_pages(client, user.username)
-            logger.info(f"Fetched {len(all_listings)} total listings for dashboard summary")
-            
-            # Count only "For Sale" items
-            for_sale_count = len([listing for listing in all_listings if listing.get("status") == "For Sale"])
-            total_listings = for_sale_count
-            logger.info(f"Dashboard summary: {total_listings} For Sale items")
+            user_profile = client.get_user_profile(user.username)
+            total_listings = user_profile.get('num_for_sale', 0)
+            logger.info(f"Dashboard summary: {total_listings} For Sale items (from profile)")
         except Exception as e:
-            logger.error(f"Error fetching inventory for dashboard: {e}")
-            # Fallback to basic count if pagination fails
-            try:
-                inventory = client.get_user_inventory(user.username, per_page=1)
-                basic_count = inventory.get("pagination", {}).get("items", 0)
-                total_listings = basic_count
-                logger.info(f"Using fallback count: {total_listings} items")
-            except Exception as fallback_error:
-                logger.error(f"Fallback count also failed: {fallback_error}")
-                total_listings = 0
+            logger.error(f"Error fetching profile for dashboard: {e}")
+            total_listings = 0
         
         # Get latest log entry and suggestions
         try:

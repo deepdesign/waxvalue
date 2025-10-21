@@ -1041,8 +1041,8 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
             <p className="text-xs text-gray-500 dark:text-gray-500">
               {isCountingInventory 
                 ? 'Getting inventory count from Discogs...'
-                : inventoryCount > 0 
-                  ? `Found ${inventoryCount} items for sale in your inventory`
+                : (processingProgress.total > 0 || inventoryCount > 0)
+                  ? `Found ${processingProgress.total || inventoryCount} items for sale in your inventory`
                   : 'Fetching inventory data from Discogs...'
               }
             </p>

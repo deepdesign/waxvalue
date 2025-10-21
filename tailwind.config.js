@@ -92,8 +92,9 @@ module.exports = {
           '50%': { transform: 'translateY(-30px)' },
         },
         gradientShift: {
-          '0%': { 'background-position': '0% center' },
-          '100%': { 'background-position': '200% center' },
+          '0%': { 'background-position': '0% 50%' },
+          '50%': { 'background-position': '100% 50%' },
+          '100%': { 'background-position': '0% 50%' },
         },
         slideDown: {
           'from': { transform: 'translateY(-100%)', opacity: '0' },
@@ -123,8 +124,16 @@ module.exports = {
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
         shimmer: {
-          '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(100%)' },
+          '0%': { 'background-position': '-200% 0' },
+          '100%': { 'background-position': '200% 0' },
+        },
+        'gradient-pulse': {
+          '0%, 100%': { 'background-position': '0% 50%' },
+          '50%': { 'background-position': '100% 50%' },
+        },
+        'rainbow-shift': {
+          '0%': { 'background-position': '0% 50%' },
+          '100%': { 'background-position': '100% 50%' },
         },
         // 3D Transform keyframes
         flipX: {
