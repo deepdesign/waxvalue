@@ -853,234 +853,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
   }
 
 
-  const handleSimulateSelection = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      
-      // Clear cached data flags to force fresh analysis
-      localStorage.removeItem('waxvalue_has_data')
-      
-      // Clear cached data to force fresh analysis
-      setHasInitialized(false)
-      setSuggestions([])
-      localStorage.removeItem('waxvalue_analysis_progress')
-      
-      // Get session ID from localStorage
-      const sessionId = localStorage.getItem('waxvalue_session_id')
-      if (!sessionId) {
-        throw new Error('No session found. Please login first.')
-      }
-      
-      // Set importing state and start progress tracking
-      setProcessingProgress({
-        current: 0,
-        total: 0,
-        startTime: Date.now(),
-        estimatedTimeRemaining: 0,
-        isImporting: true
-      })
-      
-      // Save to localStorage for background monitoring
-      const initialProgress = {
-        isRunning: true,
-        current: 0,
-        total: 0,
-        startTime: Date.now()
-      }
-      localStorage.setItem('waxvalue_analysis_progress', JSON.stringify(initialProgress))
-      
-      // Try streaming endpoint first, fallback to regular endpoint
-      let response = await fetch(`/api/backend/inventory/suggestions/stream?session_id=${sessionId}`)
-      
-      if (!response.ok) {
-        console.warn('Streaming endpoint failed, falling back to regular endpoint')
-        
-        // Fallback to regular endpoint
-        response = await fetch(`/api/backend/inventory/suggestions?session_id=${sessionId}`)
-        
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}))
-          if (response.status === 401) {
-            // Session expired or invalid - redirect to login
-            localStorage.removeItem('waxvalue_session_id')
-            localStorage.removeItem('waxvalue_user')
-            window.location.href = '/auth'
-            return
-          }
-          throw new Error(errorData.detail || `HTTP error! status: ${response.status}`)
-        }
-        
-        // Handle regular (non-streaming) response
-        const data = await response.json()
-        // Add originalIndex to maintain stable sort order
-        const suggestionsWithIndex = (data.suggestions || []).map((s: any, index: number) => ({
-          ...s,
-          originalIndex: index
-        }))
-        setSuggestions(suggestionsWithIndex)
-        setRepriceResults(data.repriceResults || [])
-        
-        // Update progress to show completion
-        const actualTotal = data.totalItems || data.total || (data.suggestions?.length || 0)
-        setProcessingProgress(prev => ({
-          ...prev,
-          current: actualTotal,
-          total: actualTotal,
-          isImporting: false
-        }))
-        setHasProcessedInitial(true)
-        return
-      }
-
-      // Handle streaming response
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''
-      const newSuggestions: PriceSuggestion[] = []
-      
-      if (!reader) {
-        throw new Error('No response body reader available')
-      }
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || '' // Keep incomplete line in buffer
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6))
-              
-              switch (data.type) {
-                case 'total':
-                  setProcessingProgress(prev => ({
-                    ...prev,
-                    total: data.total
-                  }))
-                  setInventoryCount(data.total)
-                  setActualTotalItems(data.total)
-                  // Save to localStorage for banner
-                  localStorage.setItem('waxvalue_analysis_progress', JSON.stringify({
-                    isRunning: true,
-                    current: 0,
-                    total: data.total,
-                    startTime: processingProgress.startTime
-                  }))
-                  break
-                  
-                case 'progress':
-                  setProcessingProgress(prev => ({
-                    ...prev,
-                    current: data.current,
-                    total: data.total
-                  }))
-                  // Save to localStorage for banner
-                  localStorage.setItem('waxvalue_analysis_progress', JSON.stringify({
-                    isRunning: true,
-                    current: data.current,
-                    total: data.total,
-                    startTime: processingProgress.startTime
-                  }))
-                  break
-                  
-                case 'suggestion':
-                  newSuggestions.push(data.suggestion)
-                  // Don't update state yet - wait for 'complete' event to show all items at once
-                  break
-                  
-                case 'complete':
-                  // Add originalIndex to maintain stable sort order during user interactions
-                  const suggestionsWithIndex = (data.suggestions || []).map((s: any, index: number) => ({
-                    ...s,
-                    originalIndex: index
-                  }))
-                  setSuggestions(suggestionsWithIndex)
-                  setRepriceResults(data.repriceResults || [])
-                  setProcessingProgress({
-                    current: data.totalItems,
-                    total: data.totalItems,
-                    startTime: processingProgress.startTime,
-                    estimatedTimeRemaining: 0,
-                    isImporting: false
-                  })
-                  setHasProcessedInitial(true)
-                  setHasInitialized(true)
-                  setIsLoading(false) // Stop loading when analysis completes
-                  // Mark that we have data (prevents auto-fetch on refresh and flicker)
-                  localStorage.setItem('waxvalue_has_data', 'true')
-                  // Clear progress from localStorage as analysis is complete
-                  localStorage.removeItem('waxvalue_analysis_progress')
-                  break
-                  
-                case 'error':
-                  // Handle "already in progress" gracefully - keep loading state active
-                  if (data.error?.includes('already in progress')) {
-                    console.info('Analysis already running, will continue polling')
-                    // Ensure isImporting stays true to keep loading screen visible
-                    setProcessingProgress(prev => ({
-                      ...prev,
-                      isImporting: true
-                    }))
-                    // Keep isLoading true and return to prevent completion
-                    return
-                  }
-                  throw new Error(data.error)
-                  
-                case 'status':
-                  // Optional: could show status messages
-                  break
-              }
-            } catch (parseError) {
-              console.error('Error parsing streaming data:', parseError)
-            }
-          }
-        }
-      }
-      
-      // Check if analysis is actually complete - if stream ended without 'complete' event, keep polling
-      const progressData = localStorage.getItem('waxvalue_analysis_progress')
-      if (progressData) {
-        const progress = JSON.parse(progressData)
-        if (progress.isRunning) {
-          // Analysis is still running - keep loading screen visible and poll for updates
-          console.info('Stream ended but analysis still running, polling for completion...')
-          setTimeout(() => {
-            fetchSuggestions() // Poll again
-          }, 3000) // Poll every 3 seconds
-          return // Keep loading screen visible, don't run finally block
-        }
-      }
-      
-      // Analysis is complete - calculate actionable insights
-      const totalAnalyzed = actualTotalItems || suggestions.length || newSuggestions.length
-      const allSuggestions = suggestions.length > 0 ? suggestions : newSuggestions
-      const needsAction = allSuggestions.filter(s => s.status === 'overpriced' || s.status === 'underpriced').length
-      
-      if (needsAction > 0) {
-        toast.success(`Found ${needsAction} out of ${totalAnalyzed} items that need price adjustments`)
-      } else if (totalAnalyzed > 0) {
-        toast.success(`Analysis complete! All ${totalAnalyzed} items are fairly priced.`)
-      }
-      
-      // Analysis complete - hide loading screen
-      setIsLoading(false)
-      setProcessingProgress(prev => ({ ...prev, isImporting: false }))
-      localStorage.removeItem('waxvalue_analysis_progress')
-    } catch (error: any) {
-      console.error('Analysis failed:', error)
-      toast.error('Failed to run pricing analysis. Make sure you are connected to Discogs.')
-      setProcessingProgress(prev => ({
-        ...prev,
-        isImporting: false
-      }))
-      setIsLoading(false)
-      localStorage.removeItem('waxvalue_analysis_progress')
-    }
-  }, [fetchSuggestions])
+  // Removed duplicate function - see line 459
 
   const handleStartEdit = (listingId: number, currentPrice: number) => {
     setEditingPrice(listingId)
@@ -1413,7 +1186,6 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                 <div className="flex items-center">
               <Tooltip 
                     content="Show items that are priced within the minimum change threshold. Unchecked to focus on items needing significant price changes."
-                    position="top"
                   >
                     <label className="flex items-center">
                       <input
@@ -1444,7 +1216,6 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
               {/* Refresh Analysis Button - Moved to right side */}
               <Tooltip 
                 content="Re-analyse your entire Discogs inventory to get fresh pricing suggestions for all items"
-                position="top"
               >
                 <button
                   onClick={handleSimulateSelection}
@@ -1731,7 +1502,6 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                         <div className="flex space-x-2">
                           <Tooltip 
                             content="Apply this price suggestion to update the item on Discogs"
-                            position="top"
                           >
                             <button
                               onClick={() => handleApplyIndividual(suggestion.listingId)}
