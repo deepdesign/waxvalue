@@ -54,18 +54,25 @@ export function SettingsCard() {
             <label htmlFor="itemsPerPage" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Items per page
             </label>
-            <select
-              id="itemsPerPage"
-              value={settings.itemsPerPage}
-              onChange={(e) => handleChange('itemsPerPage', parseInt(e.target.value))}
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-10 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQgNkw4IDEwTDEyIDYiIHN0cm9rZT0iIzZiNzI4MCIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K')] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQgNkw4IDEwTDEyIDYiIHN0cm9rZT0iIzljYTNhZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K')]"
-            >
-              <option value={50}>50 items</option>
-              <option value={100}>100 items</option>
-              <option value={150}>150 items</option>
-              <option value={200}>200 items</option>
-              <option value={250}>250 items</option>
-            </select>
+            <div className="relative">
+              <select
+                id="itemsPerPage"
+                value={settings.itemsPerPage}
+                onChange={(e) => handleChange('itemsPerPage', parseInt(e.target.value))}
+                className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-12 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none"
+              >
+                <option value={50}>50 items</option>
+                <option value={100}>100 items</option>
+                <option value={150}>150 items</option>
+                <option value={200}>200 items</option>
+                <option value={250}>250 items</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
 
           {/* Default Sort */}
@@ -73,21 +80,28 @@ export function SettingsCard() {
             <label htmlFor="defaultSort" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Default sorting
             </label>
-            <select
-              id="defaultSort"
-              value={settings.defaultSort || 'priceDelta'}
-              onChange={(e) => handleChange('defaultSort', e.target.value)}
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-10 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQgNkw4IDEwTDEyIDYiIHN0cm9rZT0iIzZiNzI4MCIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K')] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQgNkw4IDEwTDEyIDYiIHN0cm9rZT0iIzljYTNhZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K')]"
-            >
-              <option value="priceDelta">Most underpriced first (largest price increase)</option>
-              <option value="priceDeltaReverse">Most overpriced first (largest price decrease)</option>
-              <option value="currentPriceHigh">Highest current price first</option>
-              <option value="currentPriceLow">Lowest current price first</option>
-              <option value="artist">Artist (A to Z)</option>
-              <option value="condition">Best condition first (Mint → VG)</option>
-              <option value="status">Status (underpriced → overpriced)</option>
-              <option value="">No default sorting</option>
-            </select>
+            <div className="relative">
+              <select
+                id="defaultSort"
+                value={settings.defaultSort || 'priceDelta'}
+                onChange={(e) => handleChange('defaultSort', e.target.value)}
+                className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-12 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none"
+              >
+                <option value="priceDelta">Most underpriced first (largest price increase)</option>
+                <option value="priceDeltaReverse">Most overpriced first (largest price decrease)</option>
+                <option value="currentPriceHigh">Highest current price first</option>
+                <option value="currentPriceLow">Lowest current price first</option>
+                <option value="artist">Artist (A to Z)</option>
+                <option value="condition">Best condition first (Mint → VG)</option>
+                <option value="status">Status (underpriced → overpriced)</option>
+                <option value="">No default sorting</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
 
           {/* View Density */}
@@ -95,16 +109,23 @@ export function SettingsCard() {
             <label htmlFor="viewDensity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Table density
             </label>
-            <select
-              id="viewDensity"
-              value={settings.viewDensity || 'comfortable'}
-              onChange={(e) => handleChange('viewDensity', e.target.value)}
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-10 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQgNkw4IDEwTDEyIDYiIHN0cm9rZT0iIzZiNzI4MCIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K')] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQgNkw4IDEwTDEyIDYiIHN0cm9rZT0iIzljYTNhZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K')]"
-            >
-              <option value="compact">Compact</option>
-              <option value="comfortable">Comfortable</option>
-              <option value="spacious">Spacious</option>
-            </select>
+            <div className="relative">
+              <select
+                id="viewDensity"
+                value={settings.viewDensity || 'comfortable'}
+                onChange={(e) => handleChange('viewDensity', e.target.value)}
+                className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-12 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none"
+              >
+                <option value="compact">Compact</option>
+                <option value="comfortable">Comfortable</option>
+                <option value="spacious">Spacious</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Affects row height and spacing
             </p>
@@ -143,18 +164,25 @@ export function SettingsCard() {
             <label htmlFor="minPriceChange" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Minimum price change to show
             </label>
-            <select
-              id="minPriceChange"
-              value={settings.minPriceChangeThreshold || 1}
-              onChange={(e) => handleChange('minPriceChangeThreshold', parseFloat(e.target.value))}
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-10 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none bg-no-repeat bg-right bg-[length:16px_16px] bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQgNkw4IDEwTDEyIDYiIHN0cm9rZT0iIzZiNzI4MCIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K')] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQgNkw4IDEwTDEyIDYiIHN0cm9rZT0iIzljYTNhZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K')]"
-            >
-              <option value={0.5}>$0.50</option>
-              <option value={1}>$1.00</option>
-              <option value={2}>$2.00</option>
-              <option value={5}>$5.00</option>
-              <option value={10}>$10.00</option>
-            </select>
+            <div className="relative">
+              <select
+                id="minPriceChange"
+                value={settings.minPriceChangeThreshold || 1}
+                onChange={(e) => handleChange('minPriceChangeThreshold', parseFloat(e.target.value))}
+                className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-12 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none"
+              >
+                <option value={0.5}>$0.50</option>
+                <option value={1}>$1.00</option>
+                <option value={2}>$2.00</option>
+                <option value={5}>$5.00</option>
+                <option value={10}>$10.00</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Only show suggestions with at least this much price difference
             </p>
