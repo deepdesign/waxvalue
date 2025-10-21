@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from discogs_client import Client
+from discogs_client import DiscogsOAuth, DiscogsClient
 
 # Load environment variables
 load_dotenv()
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # Global lock to prevent concurrent analysis
 analysis_lock = {}  # session_id -> is_running
 
-def get_user_inventory_all_pages(client: Client, username: str, first_page_data: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+def get_user_inventory_all_pages(client: DiscogsClient, username: str, first_page_data: Dict[str, Any] = None) -> List[Dict[str, Any]]:
     """Fetch all pages of user inventory"""
     all_listings = []
     
@@ -327,9 +327,8 @@ async def verify_auth(verification: dict, session_id: str = None):
         )
         
         # Create authenticated client to get user info
-        client = Client("WaxValue/1.0")
-        client.set_consumer_key(consumer_key, consumer_secret)
-        client.set_token(access_token, access_token_secret)
+        client = DiscogsClient(consumer_key, consumer_secret, 
+                              access_token, access_token_secret)
         
         try:
             user_info = client.get_user_info()
@@ -432,9 +431,12 @@ async def get_inventory_count(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client("WaxValue/1.0")
-        client.set_consumer_key(consumer_key, consumer_secret)
-        client.set_token(user.accessToken, user.accessTokenSecret)
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
         
         # Get user inventory count - use pagination data for fast count
         try:
@@ -492,9 +494,12 @@ async def get_dashboard_summary(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client("WaxValue/1.0")
-        client.set_consumer_key(consumer_key, consumer_secret)
-        client.set_token(user.accessToken, user.accessTokenSecret)
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
         
         # Get user inventory count (For Sale items only) - fetch all pages for accurate count
         try:
@@ -578,7 +583,7 @@ async def get_suggestions_stream(session_id: str = None):
             consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
             consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
             
-            client = Client(
+            client = DiscogsClient(
                 consumer_key=consumer_key,
                 consumer_secret=consumer_secret,
                 access_token=user.accessToken,
@@ -664,7 +669,7 @@ async def get_suggestions_stream(session_id: str = None):
                 if (i + 1) % 5 == 0 or i == 0:
                     logger.info(f"Processing item {i+1}/{len(items_to_process)}: listing {listing_id}, release {release_id}")
                 
-                # Rate limiting is now handled by the token bucket in Client
+                # Rate limiting is now handled by the token bucket in DiscogsClient
                 # No artificial delay needed - the rate limiter handles it
                 
                 try:
@@ -867,9 +872,12 @@ async def get_suggestions(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client("WaxValue/1.0")
-        client.set_consumer_key(consumer_key, consumer_secret)
-        client.set_token(user.accessToken, user.accessTokenSecret)
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
         
         # Use the stored username from the session (avoid extra API call)
         username = user.username
@@ -915,7 +923,7 @@ async def get_suggestions(session_id: str = None):
             if (i + 1) % 5 == 0 or i == 0:
                 logger.info(f"Processing item {i+1}/{len(items_to_process)}: listing {listing_id}, release {release_id}")
             
-            # Rate limiting is now handled by the token bucket in Client
+            # Rate limiting is now handled by the token bucket in DiscogsClient
             # No artificial delay needed
             
             try:
@@ -1301,9 +1309,12 @@ async def apply_price_suggestion(listing_id: int, listing_data: dict, session_id
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client("WaxValue/1.0")
-        client.set_consumer_key(consumer_key, consumer_secret)
-        client.set_token(user.accessToken, user.accessTokenSecret)
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
         
         # Update the listing price
         logger.info(f"Attempting to update listing {listing_id} with price {new_price}")
@@ -1381,9 +1392,12 @@ async def bulk_apply_price_suggestions(request: dict, session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client("WaxValue/1.0")
-        client.set_consumer_key(consumer_key, consumer_secret)
-        client.set_token(user.accessToken, user.accessTokenSecret)
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
         
         results = []
         successful_updates = 0
@@ -1505,9 +1519,12 @@ async def get_user_profile(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client("WaxValue/1.0")
-        client.set_consumer_key(consumer_key, consumer_secret)
-        client.set_token(user.accessToken, user.accessTokenSecret)
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
         
         # Get user profile from Discogs
         logger.info(f"Fetching profile for user: {user.username}")
@@ -1542,180 +1559,6 @@ async def get_logs(session_id: str = None):
     user = require_auth(session_id)
     session = session_manager.get_session(session_id)
     return session["logs"]
-
-# In-memory storage for wanted list entries (temporary for testing)
-wanted_list_storage = []
-entry_counter = 1
-
-# Temporary mock endpoints for wanted list functionality (no auth required for testing)
-@app.get("/wanted-list/")
-async def get_wanted_list_mock():
-    """Mock endpoint for getting wanted list entries"""
-    return wanted_list_storage
-
-@app.get("/wanted-list/stats")
-async def get_wanted_list_stats_mock():
-    """Mock endpoint for getting wanted list statistics"""
-    total_entries = len(wanted_list_storage)
-    monitoring_active = len([e for e in wanted_list_storage if e.get("status") == "monitoring"])
-    paused_entries = len([e for e in wanted_list_storage if e.get("status") == "paused"])
-    matched_alerts = len([e for e in wanted_list_storage if e.get("status") == "price_matched"])
-    no_listings_found = len([e for e in wanted_list_storage if e.get("status") == "no_listings"])
-    
-    return {
-        "total_entries": total_entries,
-        "monitoring_active": monitoring_active,
-        "paused_entries": paused_entries,
-        "matched_alerts": matched_alerts,
-        "no_listings_found": no_listings_found
-    }
-
-@app.get("/wanted-list/release-details/{release_id}")
-async def get_release_details_mock(release_id: str):
-    """Get actual release details from Discogs API"""
-    logger.info(f"Fetching release details for ID: {release_id}")
-    try:
-        # Initialize Discogs client with consumer credentials
-        consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
-        consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
-        
-        if not consumer_key or not consumer_secret:
-            return {
-                "id": release_id,
-                "title": f"Release {release_id}",
-                "artist": "Unknown Artist",
-                "year": None,
-                "genres": [],
-                "styles": [],
-                "country": "Unknown",
-                "thumbnail_url": None,
-                "resource_url": f"https://www.discogs.com/release/{release_id}",
-                "lowest_price": None,
-                "lowest_price_currency": "USD",
-                "images": [],
-                "artists": ["Unknown Artist"],
-                "labels": [],
-                "formats": []
-            }
-        
-        # Make direct HTTP request to Discogs API
-        import requests
-        
-        url = f"https://api.discogs.com/releases/{release_id}"
-        headers = {
-            "User-Agent": "WaxValue/1.0",
-            "Authorization": f"Discogs key={consumer_key}, secret={consumer_secret}"
-        }
-        
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        
-        data = response.json()
-        
-        # Extract data from the API response
-        artists = [artist['name'] for artist in data.get('artists', [])]
-        labels = [label['name'] for label in data.get('labels', [])]
-        formats = [format['name'] for format in data.get('formats', [])]
-        images = [img['uri150'] for img in data.get('images', [])]
-        
-        return {
-            "id": str(data.get('id', release_id)),
-            "title": data.get('title', f"Release {release_id}"),
-            "artist": artists[0] if artists else "Unknown Artist",
-            "year": data.get('year'),
-            "genres": data.get('genres', []),
-            "styles": data.get('styles', []),
-            "country": data.get('country', "Unknown"),
-            "thumbnail_url": images[0] if images else None,
-            "resource_url": data.get('uri', f"https://www.discogs.com/release/{release_id}"),
-            "lowest_price": data.get('lowest_price'),
-            "lowest_price_currency": "USD",  # Discogs API doesn't provide currency in this endpoint
-            "images": images,
-            "artists": artists,
-            "labels": labels,
-            "formats": formats
-        }
-        
-    except Exception as e:
-        logger.error(f"Error fetching Discogs release {release_id}: {e}")
-        import traceback
-        logger.error(f"Full traceback: {traceback.format_exc()}")
-        # Return fallback data if API fails
-        return {
-            "id": release_id,
-            "title": f"Release {release_id}",
-            "artist": "Unknown Artist",
-            "year": None,
-            "genres": [],
-            "styles": [],
-            "country": "Unknown",
-            "thumbnail_url": None,
-            "resource_url": f"https://www.discogs.com/release/{release_id}",
-            "lowest_price": None,
-            "lowest_price_currency": "USD",
-            "images": [],
-            "artists": ["Unknown Artist"],
-            "labels": [],
-            "formats": []
-        }
-
-@app.post("/wanted-list/")
-async def create_wanted_list_entry_mock(entry_data: dict):
-    """Mock endpoint for creating wanted list entries"""
-    global entry_counter
-    
-    # Create a new entry with the provided data
-    new_entry = {
-        "id": str(entry_counter),
-        "discogs_release_id": entry_data.get("discogs_release_id", 0),
-        "release_title": entry_data.get("release_title", "Unknown Release"),
-        "artist_name": entry_data.get("artist_name", "Unknown Artist"),
-        "release_year": entry_data.get("release_year"),
-        "release_format": entry_data.get("release_format"),
-        "cover_image_url": entry_data.get("cover_image_url"),
-        "max_price": entry_data.get("max_price"),
-        "max_price_currency": entry_data.get("max_price_currency", "USD"),
-        "min_condition": entry_data.get("min_condition"),
-        "location_filter": entry_data.get("location_filter"),
-        "min_seller_rating": entry_data.get("min_seller_rating"),
-        "underpriced_percentage": entry_data.get("underpriced_percentage"),
-        "user_email": entry_data.get("user_email", "user@example.com"),  # Add user email
-        "status": "monitoring",
-        "is_active": True,
-        "last_checked": None,
-        "created_at": "2024-01-15T12:00:00Z",
-        "updated_at": "2024-01-15T12:00:00Z"
-    }
-    
-    # Add to storage
-    wanted_list_storage.append(new_entry)
-    entry_counter += 1
-    
-    return {"message": "Wanted list entry created successfully", "id": new_entry["id"]}
-
-@app.put("/wanted-list/{entry_id}")
-async def update_wanted_list_entry_mock(entry_id: str, entry_data: dict):
-    """Mock endpoint for updating wanted list entries"""
-    # Find the entry in storage
-    for i, entry in enumerate(wanted_list_storage):
-        if entry["id"] == entry_id:
-            # Update the entry with new data
-            wanted_list_storage[i].update(entry_data)
-            wanted_list_storage[i]["updated_at"] = "2024-01-15T12:00:00Z"
-            return {"message": "Wanted list entry updated successfully"}
-    
-    return {"message": "Entry not found"}
-
-@app.delete("/wanted-list/{entry_id}")
-async def delete_wanted_list_entry_mock(entry_id: str):
-    """Mock endpoint for deleting wanted list entries"""
-    # Find and remove the entry from storage
-    for i, entry in enumerate(wanted_list_storage):
-        if entry["id"] == entry_id:
-            del wanted_list_storage[i]
-            return {"message": "Wanted list entry deleted successfully"}
-    
-    return {"message": "Entry not found"}
 
 if __name__ == "__main__":
     import uvicorn

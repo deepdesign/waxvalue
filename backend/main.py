@@ -79,14 +79,6 @@ def get_user_inventory_all_pages(client: DiscogsClient, username: str, first_pag
 # Initialize FastAPI app
 app = FastAPI(title="WaxValue Backend", version="1.0.0")
 
-# Import and include wanted list API routes
-try:
-    from wanted_list_api import router as wanted_list_router
-    app.include_router(wanted_list_router)
-    logger.info("Wanted list API routes included successfully")
-except ImportError as e:
-    logger.warning(f"Could not import wanted list API routes: {e}")
-
 # CORS middleware - use environment variable for frontend URL
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 allowed_origins = [FRONTEND_URL]
@@ -344,9 +336,8 @@ async def verify_auth(verification: dict, session_id: str = None):
         )
         
         # Create authenticated client to get user info
-        client = Client("WaxValue/1.0")
-        client.set_consumer_key(consumer_key, consumer_secret)
-        client.set_token(access_token, access_token_secret)
+        client = DiscogsClient(consumer_key, consumer_secret, 
+                              access_token, access_token_secret)
         
         try:
             user_info = client.get_user_info()
@@ -449,9 +440,12 @@ async def get_inventory_count(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client("WaxValue/1.0")
-        client.set_consumer_key(consumer_key, consumer_secret)
-        client.set_token(user.accessToken, user.accessTokenSecret)
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
         
         # Get instant count from user profile (single API call, no pagination needed)
         try:
@@ -488,9 +482,12 @@ async def get_dashboard_summary(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client("WaxValue/1.0")
-        client.set_consumer_key(consumer_key, consumer_secret)
-        client.set_token(user.accessToken, user.accessTokenSecret)
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
         
         # Get user inventory count (For Sale items only) - use instant profile call
         try:
@@ -994,9 +991,12 @@ async def get_suggestions(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client("WaxValue/1.0")
-        client.set_consumer_key(consumer_key, consumer_secret)
-        client.set_token(user.accessToken, user.accessTokenSecret)
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
         
         # Use the stored username from the session (avoid extra API call)
         username = user.username
@@ -1428,9 +1428,12 @@ async def apply_price_suggestion(listing_id: int, listing_data: dict, session_id
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client("WaxValue/1.0")
-        client.set_consumer_key(consumer_key, consumer_secret)
-        client.set_token(user.accessToken, user.accessTokenSecret)
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
         
         # Update the listing price
         logger.info(f"Attempting to update listing {listing_id} with price {new_price}")
@@ -1508,9 +1511,12 @@ async def bulk_apply_price_suggestions(request: dict, session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client("WaxValue/1.0")
-        client.set_consumer_key(consumer_key, consumer_secret)
-        client.set_token(user.accessToken, user.accessTokenSecret)
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
         
         results = []
         successful_updates = 0
@@ -1634,9 +1640,12 @@ async def get_user_profile(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client("WaxValue/1.0")
-        client.set_consumer_key(consumer_key, consumer_secret)
-        client.set_token(user.accessToken, user.accessTokenSecret)
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
         
         # Get user profile from Discogs
         logger.info(f"Fetching profile for user: {user.username}")
@@ -1677,9 +1686,12 @@ async def refresh_avatar(session_id: str = None):
         consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
         consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
         
-        client = Client("WaxValue/1.0")
-        client.set_consumer_key(consumer_key, consumer_secret)
-        client.set_token(user.accessToken, user.accessTokenSecret)
+        client = DiscogsClient(
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            access_token=user.accessToken,
+            access_token_secret=user.accessTokenSecret
+        )
         
         # Get user profile from Discogs (includes avatar_url)
         logger.info(f"Refreshing avatar for user: {user.username}")
@@ -1715,66 +1727,6 @@ async def get_logs(session_id: str = None):
     user = require_auth(session_id)
     session = session_manager.get_session(session_id)
     return session["logs"]
-
-# Temporary mock endpoints for wanted list functionality
-@app.get("/wanted-list/")
-async def get_wanted_list_mock(session_id: str = None):
-    """Mock endpoint for getting wanted list entries"""
-    user = require_auth(session_id)
-    # Return empty list for now
-    return []
-
-@app.get("/wanted-list/stats")
-async def get_wanted_list_stats_mock(session_id: str = None):
-    """Mock endpoint for getting wanted list statistics"""
-    user = require_auth(session_id)
-    return {
-        "total_entries": 0,
-        "monitoring_active": 0,
-        "paused_entries": 0,
-        "matched_alerts": 0,
-        "no_listings_found": 0
-    }
-
-@app.get("/wanted-list/release-details/{release_id}")
-async def get_release_details_mock(release_id: str, session_id: str = None):
-    """Mock endpoint for getting release details from Discogs"""
-    user = require_auth(session_id)
-    require_discogs_auth(user)
-    
-    # Mock release details - in real implementation, this would fetch from Discogs API
-    return {
-        "id": release_id,
-        "title": f"Mock Release {release_id}",
-        "artist": "Mock Artist",
-        "year": 2023,
-        "genres": ["Electronic"],
-        "styles": ["Ambient"],
-        "country": "US",
-        "thumbnail_url": "https://via.placeholder.com/150",
-        "resource_url": f"https://www.discogs.com/release/{release_id}",
-        "lowest_price": 25.99,
-        "lowest_price_currency": "USD"
-    }
-
-@app.post("/wanted-list/")
-async def create_wanted_list_entry_mock(entry_data: dict, session_id: str = None):
-    """Mock endpoint for creating wanted list entries"""
-    user = require_auth(session_id)
-    # Mock successful creation
-    return {"message": "Wanted list entry created successfully", "id": "mock_id_123"}
-
-@app.put("/wanted-list/{entry_id}")
-async def update_wanted_list_entry_mock(entry_id: str, entry_data: dict, session_id: str = None):
-    """Mock endpoint for updating wanted list entries"""
-    user = require_auth(session_id)
-    return {"message": "Wanted list entry updated successfully"}
-
-@app.delete("/wanted-list/{entry_id}")
-async def delete_wanted_list_entry_mock(entry_id: str, session_id: str = None):
-    """Mock endpoint for deleting wanted list entries"""
-    user = require_auth(session_id)
-    return {"message": "Wanted list entry deleted successfully"}
 
 if __name__ == "__main__":
     import uvicorn
