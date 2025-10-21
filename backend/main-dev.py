@@ -281,7 +281,9 @@ async def setup_auth():
     
     try:
         oauth = DiscogsOAuth(consumer_key, consumer_secret)
-        request_token, request_token_secret = oauth.get_request_token("http://localhost:3000/auth/callback")
+        frontend_url = os.getenv("FRONTEND_URL", "https://waxvalue.com")
+        callback_url = f"{frontend_url}/auth/callback"
+        request_token, request_token_secret = oauth.get_request_token(callback_url)
         auth_url = oauth.get_authorize_url(request_token)
         
         logger.info(f"OAuth setup complete, returning auth URL")
