@@ -547,7 +547,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
       setIsLoading(false)
       localStorage.removeItem('waxvalue_analysis_progress')
     }
-  }, [fetchSuggestions])
+  }, [fetchSuggestions]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Expose the simulate function to parent component
   // eslint-disable-next-line react-hooks/exhaustive-deps
