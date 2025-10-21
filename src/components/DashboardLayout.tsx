@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useApp } from './Providers'
@@ -36,42 +36,56 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, logout } = useApp()
   
 
-  // Monitor background analysis progress
+  // Monitor background analysis progress - optimized polling
   useEffect(() => {
     const checkAnalysisProgress = () => {
       try {
         const progressData = localStorage.getItem('waxvalue_analysis_progress')
         if (progressData) {
           const progress = JSON.parse(progressData)
-          // Show banner if analysis is running, even if total is still 0 (counting phase)
           if (progress.isRunning) {
             setAnalysisProgress({ 
               current: progress.current, 
-              total: progress.total || 0 // Use 0 as placeholder during counting
+              total: progress.total || 0
             })
-          } else {
-            setAnalysisProgress(null)
+            return true // Analysis is running
           }
-        } else {
-          setAnalysisProgress(null)
         }
+        setAnalysisProgress(null)
+        return false // No analysis running
       } catch (error) {
         console.error('Failed to check analysis progress:', error)
+        setAnalysisProgress(null)
+        return false
       }
     }
 
     // Check immediately
-    checkAnalysisProgress()
+    const isRunning = checkAnalysisProgress()
 
-    // Poll every 1 second while analysis might be running (faster for better UX)
-    const interval = setInterval(checkAnalysisProgress, 1000)
-    return () => clearInterval(interval)
+    // Only poll if analysis is running, with longer interval
+    let interval: NodeJS.Timeout | null = null
+    if (isRunning) {
+      interval = setInterval(() => {
+        const stillRunning = checkAnalysisProgress()
+        if (!stillRunning) {
+          clearInterval(interval!)
+        }
+      }, 2000) // Reduced frequency
+    }
+
+    return () => {
+      if (interval) clearInterval(interval)
+    }
   }, [])
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout()
     router.push('/')
-  }
+  }, [logout, router])
+
+  // Memoize navigation items to prevent unnecessary re-renders
+  const navigationItems = useMemo(() => navigation, [])
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -98,12 +112,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           
           <div className="mt-5 h-0 flex-1 overflow-y-auto">
           <nav className="space-y-1 px-2" role="navigation" aria-label="Main navigation">
-            {navigation.map((item) => {
+            {navigationItems.map((item) => {
               const isActive = pathname === item.href
               return (
                 <Link
                   key={item.name}
                   href={item.href}
+                  prefetch={true}
                   className={`group flex items-center px-3 py-3 text-base font-medium rounded-md transition-colors select-none cursor-pointer touch-manipulation min-h-[44px] ${
                     isActive
                       ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-900 dark:text-primary-100'
@@ -267,8 +282,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex items-center justify-center px-2 mt-[35px] mb-[20px] select-none">
             <Logo size="sm" variant="brandmark" className="pointer-events-none" />
           </div>
-          <nav className="flex-1 px-2 py-4 space-y-1" role="navigation" aria-label="Main navigation">
-            {navigation.map((item) => {
+            <nav className="flex-1 px-2 py-4 space-y-1" role="navigation" aria-label="Main navigation">
+              {navigationItems.map((item) => {
               const isActive = pathname === item.href
               return (
                 <Tooltip key={item.name} content={item.name} placement="right">

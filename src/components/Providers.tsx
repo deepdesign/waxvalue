@@ -112,7 +112,7 @@ export function Providers({ children }: { children: ReactNode }) {
     }
 
     checkAuth()
-  }, [])
+  }, []) // Empty dependency array to run only once
 
   const value = {
     user,

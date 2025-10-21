@@ -61,11 +61,11 @@ export default function DashboardPage() {
         localStorage.setItem('waxvalue_has_data', 'true')
         // Trigger refresh of summary cards after auto-fetch
         setTimeout(() => setRefreshTrigger(prev => prev + 1), 3000)
-      }, 1000)
+      }, 500) // Reduced delay for faster navigation
       
       return () => clearTimeout(timer)
     }
-  }, [user, hasAutoFetched])
+  }, [user?.discogsUserId, user?.accessToken, user?.accessTokenSecret, hasAutoFetched]) // More specific dependencies
 
   return (
     <AuthGuard>
