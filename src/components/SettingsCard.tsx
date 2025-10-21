@@ -58,7 +58,7 @@ export function SettingsCard() {
               id="itemsPerPage"
               value={settings.itemsPerPage}
               onChange={(e) => handleChange('itemsPerPage', parseInt(e.target.value))}
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-10 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-12 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value={50}>50 items</option>
               <option value={100}>100 items</option>
@@ -77,7 +77,7 @@ export function SettingsCard() {
               id="defaultSort"
               value={settings.defaultSort || 'priceDelta'}
               onChange={(e) => handleChange('defaultSort', e.target.value)}
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-10 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-12 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="priceDelta">Most underpriced first (largest price increase)</option>
               <option value="priceDeltaReverse">Most overpriced first (largest price decrease)</option>
@@ -99,7 +99,7 @@ export function SettingsCard() {
               id="viewDensity"
               value={settings.viewDensity || 'comfortable'}
               onChange={(e) => handleChange('viewDensity', e.target.value)}
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-10 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-12 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="compact">Compact</option>
               <option value="comfortable">Comfortable</option>
@@ -147,7 +147,7 @@ export function SettingsCard() {
               id="minPriceChange"
               value={settings.minPriceChangeThreshold || 1}
               onChange={(e) => handleChange('minPriceChangeThreshold', parseFloat(e.target.value))}
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-10 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-3 pr-12 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value={0.5}>$0.50</option>
               <option value={1}>$1.00</option>
