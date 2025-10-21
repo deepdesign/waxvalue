@@ -66,10 +66,6 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
       localStorage.setItem('discogs_request_token', result.requestToken)
       localStorage.setItem('discogs_request_token_secret', result.requestTokenSecret)
       
-      console.log('Stored tokens:', {
-        token: result.requestToken,
-        secret: result.requestTokenSecret
-      })
       
       // Redirect to Discogs authorization page in the same window
       window.location.href = result.authUrl

@@ -7,12 +7,10 @@ import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
-  XMarkIcon,
-  CheckIcon
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 import { Button } from './Button'
 import { FormField } from './FormField'
-import { Badge } from './Badge'
 
 export interface Column<T> {
   key: keyof T | string

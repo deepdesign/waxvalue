@@ -26,7 +26,6 @@ export function WelcomePage() {
         localStorage.setItem('discogs_request_token', data.requestToken)
         localStorage.setItem('discogs_request_token_secret', data.requestTokenSecret)
         
-        console.log('Stored OAuth tokens, redirecting to Discogs...')
         
         // Redirect to Discogs authorization
         window.location.href = data.authUrl

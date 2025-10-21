@@ -7,6 +7,18 @@ import Image from 'next/image'
 export function LandingHeroSplit4() {
   const [isConnecting, setIsConnecting] = useState(false)
 
+  // Array of all 4 Unsplash images
+  const unsplashImages = [
+    '/images/valentino-funghi-MEcxLZ8ENV8-unsplash.jpg',
+    '/images/julian-lates-aiXhMfF_8_k-unsplash.jpg',
+    '/images/matteo-panara-EMp3qGdtbKE-unsplash.jpg',
+    '/images/mr-cup-fabien-barral-o6GEPQXnqMY-unsplash.jpg'
+  ]
+
+  // Randomly select one image on each page load
+  const randomImageIndex = Math.floor(Math.random() * unsplashImages.length)
+  const selectedImage = unsplashImages[randomImageIndex]
+
   const handleConnectDiscogs = async () => {
     setIsConnecting(true)
     try {
@@ -106,11 +118,12 @@ export function LandingHeroSplit4() {
           {/* Hero image - full bleed */}
           <div className="absolute inset-0">
             <Image 
-              src="/images/valentino-funghi-MEcxLZ8ENV8-unsplash.jpg"
+              src={selectedImage}
               alt="Vinyl records collection"
               className="w-full h-full object-cover"
-              width={600}
-              height={400}
+              width={800}
+              height={600}
+              priority
             />
           </div>
           
@@ -131,6 +144,7 @@ export function LandingHeroSplit4() {
             transform: translateY(0);
           }
         }
+        
         @keyframes bounce-slow {
           0%, 100% {
             transform: translateY(0);

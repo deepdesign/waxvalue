@@ -59,19 +59,13 @@ export function SettingsDiscogs({ user, onConnectionChange }: SettingsDiscogsPro
         body: JSON.stringify({}),
       })
       
-      console.log('SettingsDiscogs: Response status:', response.status)
-
       if (!response.ok) {
         const errorText = await response.text()
-        console.log('SettingsDiscogs: Error response:', errorText)
         throw new Error('Failed to setup authentication')
       }
 
       const responseText = await response.text()
-      console.log('SettingsDiscogs: Raw response:', responseText)
-      
       const result = JSON.parse(responseText)
-      console.log('SettingsDiscogs: Parsed result:', result)
       
       setAuthUrl(result.authUrl)
       setRequestToken(result.requestToken)

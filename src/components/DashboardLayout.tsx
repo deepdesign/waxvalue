@@ -35,13 +35,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname()
   const { user, logout } = useApp()
   
-  // Debug: Log user data to console
-  useEffect(() => {
-    if (user) {
-      console.log('🔍 DashboardLayout user data:', user)
-      console.log('🔍 User avatar:', user.avatar)
-    }
-  }, [user])
 
   // Monitor background analysis progress
   useEffect(() => {
