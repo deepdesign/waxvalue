@@ -121,6 +121,7 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
           <div
             className={clsx(
               'tooltip-content px-3 py-2 text-sm text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg',
+              'z-[9999]', // Ensure tooltips are always on top
               'animate-fade-in'
             )}
             role="tooltip"

@@ -644,12 +644,17 @@ input[type="checkbox"].table-checkbox:checked::after {
         
         .tooltip-content {
           position: absolute;
-          z-index: 50;
+          z-index: 9999 !important;
           max-width: 300px;
           word-wrap: break-word;
           overflow-wrap: break-word;
           white-space: normal;
           line-height: 1.4;
+        }
+        
+        /* Ensure tooltips are always on top of everything */
+        .tooltip-content * {
+          z-index: 9999 !important;
         }
         
         /* Ensure tooltips don't go off screen */
