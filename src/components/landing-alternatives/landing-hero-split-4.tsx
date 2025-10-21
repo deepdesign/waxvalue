@@ -36,7 +36,7 @@ export function LandingHeroSplit4() {
       setIsImageLoaded(true)
     }
     img.src = imageToLoad
-  }, [])
+  }, [unsplashImages])
 
   const handleConnectDiscogs = async () => {
     setIsConnecting(true)
