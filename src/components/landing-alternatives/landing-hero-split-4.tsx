@@ -25,8 +25,8 @@ export function LandingHeroSplit4() {
     // Set the selected image immediately
     setSelectedImage(imageToLoad)
     
-    // Preload the image
-    const img = new Image()
+    // Preload the image using native HTML Image constructor
+    const img = new window.Image()
     img.onload = () => {
       setIsImageLoaded(true)
     }
