@@ -1308,7 +1308,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                     className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors w-full text-left"
                   >
                     RELEASE
-                    <svg className={`w-3 h-3 transition-transform ${
+                    <svg className={`w-4 h-4 transition-transform ${
                       sortConfig.key === 'artist' && sortConfig.direction === 'asc' ? 'rotate-180' : ''
                     }`} fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -1332,30 +1332,34 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                   ITEM ID
                 </th>
                 <th className="w-20 px-6 py-3 text-right text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  <button
-                    onClick={() => handleSort('currentPriceHigh')}
-                    className="flex items-center justify-end gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors w-full"
-                  >
-                    <span>CURRENT PRICE</span>
-                    <svg className={`w-3 h-3 transition-transform ${
-                      (sortConfig.key === 'currentPriceHigh' || sortConfig.key === 'currentPriceLow') && sortConfig.direction === 'asc' ? 'rotate-180' : ''
-                    }`} fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </button>
+                  <div className="flex items-center justify-end">
+                    <button
+                      onClick={() => handleSort('currentPriceHigh')}
+                      className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                    >
+                      <span>CURRENT PRICE</span>
+                      <svg className={`w-4 h-4 transition-transform ${
+                        (sortConfig.key === 'currentPriceHigh' || sortConfig.key === 'currentPriceLow') && sortConfig.direction === 'asc' ? 'rotate-180' : ''
+                      }`} fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
                 </th>
                 <th className="w-20 px-6 py-3 text-right text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  <button
-                    onClick={() => handleSort('priceDelta')}
-                    className="flex items-center justify-end gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors w-full"
-                  >
-                    <span>SUGGESTED PRICE</span>
-                    <svg className={`w-3 h-3 transition-transform ${
-                      sortConfig.key === 'priceDelta' && sortConfig.direction === 'asc' ? 'rotate-180' : ''
-                    }`} fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </button>
+                  <div className="flex items-center justify-end">
+                    <button
+                      onClick={() => handleSort('priceDelta')}
+                      className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                    >
+                      <span>SUGGESTED PRICE</span>
+                      <svg className={`w-4 h-4 transition-transform ${
+                        sortConfig.key === 'priceDelta' && sortConfig.direction === 'asc' ? 'rotate-180' : ''
+                      }`} fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
                 </th>
                 <th className="w-24 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   ACTIONS
