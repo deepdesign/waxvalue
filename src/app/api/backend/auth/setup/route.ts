@@ -3,7 +3,7 @@ import { buildBackendUrl } from '@/lib/api-config'
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('Frontend API: Proxying to backend /auth/setup')
+    // Frontend API: Proxying to backend /auth/setup
     
     // Proxy to backend
     const response = await fetch('http://127.0.0.1:8000/auth/setup', {
@@ -13,10 +13,10 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    console.log('Backend response status:', response.status)
+    // Backend response status received
 
     const data = await response.json()
-    console.log('Backend response data:', data)
+    // Backend response data processed
 
     if (!response.ok) {
       console.error('Backend error:', data)

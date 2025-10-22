@@ -47,13 +47,7 @@ export default function SettingsPage() {
       const response = await fetch(`/api/backend/user/profile?session_id=${sessionId}`)
       if (response.ok) {
         const profile = await response.json()
-        console.log('Profile data received:', profile)
-        console.log('Profile fields:', {
-          username: profile.username,
-          name: profile.name,
-          location: profile.location,
-          curr_abbr: profile.curr_abbr,
-          home_page: profile.home_page,
+        // Profile data received and processed
           profile: profile.profile
         })
         setUserProfile(profile)

@@ -102,7 +102,7 @@ export function Providers({ children }: { children: ReactNode }) {
             const updatedUser = { ...currentUser, avatar: data.avatar }
             setUser(updatedUser)
             localStorage.setItem('waxvalue_user', JSON.stringify(updatedUser))
-            console.log('Avatar refreshed successfully')
+            // Avatar refreshed successfully
           }
         }
       } catch (error) {
