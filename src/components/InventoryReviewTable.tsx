@@ -4,20 +4,12 @@ import { useState, useEffect, useMemo, forwardRef, useImperativeHandle, useCallb
 import Image from 'next/image'
 import {
   CheckIcon,
-  XMarkIcon,
-  EyeIcon,
-  EyeSlashIcon,
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  PencilIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
   DocumentMagnifyingGlassIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline'
 import { PriceSuggestion, FilterState } from '@/types'
 import { FilterState as TableFilterState } from './FiltersBar'
-import { ApiClient, RepriceResponse, RepriceItemResult, Decision } from '@/lib/apiClient'
+import { ApiClient, RepriceItemResult } from '@/lib/apiClient'
 import { Button } from '@/components/ui/Button'
 import { formatCurrency } from '@/lib/utils'
 import { Tooltip } from '@/components/ui/Tooltip'
