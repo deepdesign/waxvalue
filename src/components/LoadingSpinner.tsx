@@ -25,7 +25,7 @@ export function LoadingSpinner() {
     // Start preloading immediately
     Promise.allSettled(preloadPromises).then(results => {
       const successful = results.filter(result => result.status === 'fulfilled').length
-      // Preload completed silently
+      console.log(`Preloaded ${successful}/${unsplashImages.length} landing page images`)
     })
   }, [])
 

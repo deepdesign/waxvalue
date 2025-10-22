@@ -4,12 +4,20 @@ import { useState, useEffect, useMemo, forwardRef, useImperativeHandle, useCallb
 import Image from 'next/image'
 import {
   CheckIcon,
+  XMarkIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  PencilIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
   DocumentMagnifyingGlassIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline'
 import { PriceSuggestion, FilterState } from '@/types'
 import { FilterState as TableFilterState } from './FiltersBar'
-import { ApiClient, RepriceItemResult } from '@/lib/apiClient'
+import { ApiClient, RepriceResponse, RepriceItemResult, Decision } from '@/lib/apiClient'
 import { Button } from '@/components/ui/Button'
 import { formatCurrency } from '@/lib/utils'
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -221,7 +229,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
   useEffect(() => {
     return () => {
       // Clear any ongoing requests when component unmounts
-      // Component unmounting - cleaning up streaming requests
+      console.log('Component unmounting - cleaning up streaming requests')
     }
   }, [])
 
@@ -242,14 +250,14 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
       const isRejoining = existingProgress ? JSON.parse(existingProgress).isRunning : false
       
       if (isRejoining) {
-        // Rejoining analysis in progress
+        console.log('Rejoining analysis in progress...')
         // Keep existing progress, just ensure importing state is set
         setProcessingProgress(prev => ({
           ...prev,
           isImporting: true
         }))
       } else {
-        // Starting fresh analysis with progress tracking
+        console.log('Starting fresh analysis with progress tracking...')
         // Set importing state and start progress tracking
         setProcessingProgress({
           current: 0,
@@ -280,7 +288,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
       } catch (fetchError: any) {
         if (fetchError.name === 'AbortError') {
           // Request was aborted - this is normal when navigating away
-          // Stream request aborted (user navigated away)
+          console.log('Stream request aborted (user navigated away)')
           return
         }
         throw new Error(`Network error: ${fetchError.message || 'Failed to connect to server'}`)
@@ -390,7 +398,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                 case 'error':
                     // Handle "already in progress" gracefully - keep loading state active
                   if (data.error?.includes('already in progress')) {
-                      // Analysis already running, will continue polling
+                      console.info('Analysis already running, will continue polling')
                       // Ensure isImporting stays true to keep loading screen visible
                       setProcessingProgress(prev => ({
                         ...prev,
@@ -404,7 +412,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                           if (cachedData.suggestions && cachedData.suggestions.length > 0) {
                             setSuggestions(cachedData.suggestions)
                         setRepriceResults(cachedData.repriceResults || [])
-                            // Loaded cached suggestions while analysis continues
+                            console.info(`Loaded ${cachedData.suggestions.length} cached suggestions while analysis continues`)
                           }
                       }
                     } catch (cacheError) {
@@ -702,11 +710,11 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
     try {
       setIsApplying(true)
       const listingIds = Array.from(selectedItems)
-      // Bulk apply starting for listings
+      console.log('Bulk apply starting for listings:', listingIds)
       
       // Use the bulk apply API method
       const result = await api.bulkApply(listingIds) as any
-      // Bulk apply result processed
+      console.log('Bulk apply result:', result)
       
       // Show success message
       if (result.successful_updates > 0) {

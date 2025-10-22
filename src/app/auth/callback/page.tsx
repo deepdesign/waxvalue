@@ -37,7 +37,10 @@ function AuthCallbackContent() {
         const requestToken = localStorage.getItem('discogs_request_token')
         const requestTokenSecret = localStorage.getItem('discogs_request_token_secret')
         
-        // Retrieved tokens from localStorage
+        console.log('Retrieved tokens:', {
+          token: requestToken,
+          secret: requestTokenSecret
+        })
         
         if (!requestToken || !requestTokenSecret) {
           throw new Error('No request token found. Please try connecting again.')
@@ -56,7 +59,7 @@ function AuthCallbackContent() {
             .replace(/=/g, '')
           
           localStorage.setItem('waxvalue_session_id', sessionId)
-          // Created new session ID for OAuth flow
+          console.log('Created new session ID for OAuth flow:', sessionId.substring(0, 10) + '...')
         }
 
         // Verify the authorisation with the backend
@@ -81,7 +84,9 @@ function AuthCallbackContent() {
         const result = await response.json()
         
         // Debug logging
-        // OAuth result processed successfully
+        console.log('OAuth result:', result)
+        console.log('User data:', result.user)
+        console.log('Avatar URL:', result.user?.avatar)
 
         // Update user state in both localStorage and React context
         localStorage.setItem('waxvalue_user', JSON.stringify(result.user))
