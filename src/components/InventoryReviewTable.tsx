@@ -1476,10 +1476,10 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                           {formatCurrency(suggestion.suggestedPrice - suggestion.currentPrice, suggestion.currency)}
                         </div>
                       </div>
-                      <div className="flex flex-col space-y-1 ml-2">
+                      <div className="flex flex-col space-y-0.5 ml-2">
                         <button
                           onClick={() => handlePriceAdjust(suggestion.listingId, 1)}
-                          className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
+                          className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation hover:shadow-sm"
                           title="Increase by $1"
                           aria-label="Increase price by $1"
                         >
@@ -1489,7 +1489,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
                         </button>
                         <button
                           onClick={() => handlePriceAdjust(suggestion.listingId, -1)}
-                          className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
+                          className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation hover:shadow-sm"
                           title="Decrease by $1"
                           aria-label="Decrease price by $1"
                         >
