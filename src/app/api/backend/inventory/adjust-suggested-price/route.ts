@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const backendUrl = `http://127.0.0.1:8000/inventory/adjust-suggested-price?session_id=${sessionId}`
+    const backendUrl = buildBackendUrl(`inventory/adjust-suggested-price?session_id=${sessionId}`)
     
     const response = await fetch(backendUrl, {
       method: 'POST',

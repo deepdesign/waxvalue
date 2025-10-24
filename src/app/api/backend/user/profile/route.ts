@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const backendUrl = `http://127.0.0.1:8000/user/profile?session_id=${sessionId}`;
+    const backendUrl = buildBackendUrl(`user/profile?session_id=${sessionId}`);
     const response = await fetch(backendUrl, {
       method: 'GET',
       headers: {
