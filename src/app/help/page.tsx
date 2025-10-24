@@ -56,7 +56,7 @@ export default function HelpPage() {
   }, [user, isLoading, router])
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner fullPage />
   }
 
   if (!user) {

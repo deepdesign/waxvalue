@@ -46,9 +46,9 @@ export function SettingsDiscogs({ user, onConnectionChange }: SettingsDiscogsPro
   const handleGetAuthLink = async () => {
     setIsLoading(true)
     try {
-      console.log('SettingsDiscogs: Starting auth setup')
+      // SettingsDiscogs: Starting auth setup
       const token = localStorage.getItem('waxvalue_token')
-      console.log('SettingsDiscogs: Token found:', !!token)
+      // SettingsDiscogs: Token found and processed
       
       const response = await fetch('/api/backend/auth/setup', {
         method: 'POST',

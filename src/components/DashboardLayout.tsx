@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, memo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useApp } from './Providers'
@@ -28,7 +28,7 @@ const navigation = [
   { name: 'Help & support', href: '/help', icon: QuestionMarkCircleIcon },
 ]
 
-export function DashboardLayout({ children }: DashboardLayoutProps) {
+export const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [analysisProgress, setAnalysisProgress] = useState<{current: number, total: number} | null>(null)
   const router = useRouter()
@@ -84,6 +84,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     router.push('/')
   }, [logout, router])
 
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen(prev => !prev)
+  }, [])
+
   // Memoize navigation items to prevent unnecessary re-renders
   const navigationItems = useMemo(() => navigation, [])
 
@@ -99,7 +103,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <button
               type="button"
               className="ml-1 flex h-12 w-12 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white touch-manipulation"
-              onClick={() => setSidebarOpen(false)}
+                onClick={toggleSidebar}
             >
               <span className="sr-only">Close sidebar</span>
               <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
@@ -428,7 +432,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <button
             type="button"
             className="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 touch-manipulation active:bg-gray-100 dark:active:bg-gray-800"
-            onClick={() => setSidebarOpen(true)}
+                onClick={toggleSidebar}
           >
             <span className="sr-only">Open sidebar</span>
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
@@ -444,4 +448,4 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
     </div>
   )
-}
+})

@@ -19,7 +19,7 @@ export default function AutomationPage() {
   }, [user, isLoading, router])
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner fullPage />
   }
 
   if (!user) {

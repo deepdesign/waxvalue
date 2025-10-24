@@ -47,8 +47,8 @@ export default function SettingsPage() {
       const response = await fetch(`/api/backend/user/profile?session_id=${sessionId}`)
       if (response.ok) {
         const profile = await response.json()
-        console.log('Profile data received:', profile)
-        console.log('Profile fields:', {
+        // Profile data received and processed
+        setUserProfile({
           username: profile.username,
           name: profile.name,
           location: profile.location,
@@ -56,7 +56,6 @@ export default function SettingsPage() {
           home_page: profile.home_page,
           profile: profile.profile
         })
-        setUserProfile(profile)
       } else {
         const errorData = await response.json().catch(() => ({}))
         console.error('Failed to fetch user profile:', response.status, errorData)
@@ -106,13 +105,13 @@ export default function SettingsPage() {
         throw new Error('Failed to disconnect account')
       }
     } catch (error) {
-      console.error('Disconnect error:', error)
+      // Disconnect error - handled by toast
       toast.error('Failed to disconnect account')
     }
   }
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner fullPage />
   }
 
   if (!user) {

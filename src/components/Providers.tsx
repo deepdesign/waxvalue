@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback, memo } from 'react'
 import { ThemeProvider } from 'next-themes'
 import { User, UserSettings } from '@/types'
 import { InventoryProvider } from '@/contexts/InventoryContext'
@@ -25,19 +25,19 @@ export function useApp() {
   return context
 }
 
-export function Providers({ children }: { children: ReactNode }) {
+export const Providers = memo(function Providers({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [userSettings, setUserSettings] = useState<UserSettings | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null)
     setUserSettings(null)
     localStorage.removeItem('waxvalue_user')
     localStorage.removeItem('waxvalue_session_id')
     localStorage.removeItem('discogs_request_token')
     localStorage.removeItem('discogs_request_token_secret')
-  }
+  }, [])
 
   useEffect(() => {
     // Check for existing user session
@@ -80,7 +80,7 @@ export function Providers({ children }: { children: ReactNode }) {
           }
         }
       } catch (error) {
-        console.error('Auth check failed:', error)
+        // Auth check failed - handled silently
         // Clear invalid tokens
         localStorage.removeItem('waxvalue_user')
         localStorage.removeItem('waxvalue_token')
@@ -102,11 +102,11 @@ export function Providers({ children }: { children: ReactNode }) {
             const updatedUser = { ...currentUser, avatar: data.avatar }
             setUser(updatedUser)
             localStorage.setItem('waxvalue_user', JSON.stringify(updatedUser))
-            console.log('Avatar refreshed successfully')
+            // Avatar refreshed successfully
           }
         }
       } catch (error) {
-        console.error('Failed to refresh avatar:', error)
+        // Failed to refresh avatar - non-critical error
         // Non-critical error, don't show to user
       }
     }
@@ -133,4 +133,4 @@ export function Providers({ children }: { children: ReactNode }) {
       </AppContext.Provider>
     </ThemeProvider>
   )
-}
+})

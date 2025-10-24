@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useApp } from './Providers'
 import { LoadingSpinner } from './LoadingSpinner'
@@ -9,7 +9,7 @@ interface AuthGuardProps {
   children: React.ReactNode
 }
 
-export function AuthGuard({ children }: AuthGuardProps) {
+export const AuthGuard = memo(function AuthGuard({ children }: AuthGuardProps) {
   const { user, isLoading } = useApp()
   const router = useRouter()
 
@@ -20,7 +20,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }, [user, isLoading, router])
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner fullPage />
   }
 
   if (!user) {
@@ -28,4 +28,4 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }
 
   return <>{children}</>
-}
+})

@@ -17,7 +17,7 @@ export default function Home() {
   }, [user, isLoading, router])
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner fullPage />
   }
 
   if (!user) {

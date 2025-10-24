@@ -37,6 +37,7 @@ function AuthCallbackContent() {
         const requestToken = localStorage.getItem('discogs_request_token')
         const requestTokenSecret = localStorage.getItem('discogs_request_token_secret')
         
+        // Retrieved tokens for OAuth flow
         console.log('Retrieved tokens:', {
           token: requestToken,
           secret: requestTokenSecret
@@ -59,7 +60,7 @@ function AuthCallbackContent() {
             .replace(/=/g, '')
           
           localStorage.setItem('waxvalue_session_id', sessionId)
-          console.log('Created new session ID for OAuth flow:', sessionId.substring(0, 10) + '...')
+          // Created new session ID for OAuth flow
         }
 
         // Verify the authorisation with the backend
@@ -84,9 +85,7 @@ function AuthCallbackContent() {
         const result = await response.json()
         
         // Debug logging
-        console.log('OAuth result:', result)
-        console.log('User data:', result.user)
-        console.log('Avatar URL:', result.user?.avatar)
+        // OAuth result processed successfully
 
         // Update user state in both localStorage and React context
         localStorage.setItem('waxvalue_user', JSON.stringify(result.user))
@@ -105,7 +104,7 @@ function AuthCallbackContent() {
         }, 2000)
 
       } catch (error) {
-        console.error('Auth callback error:', error)
+        // Auth callback error - handled by UI
         setStatus('error')
         setMessage(error instanceof Error ? error.message : 'Failed to complete authorisation')
       }

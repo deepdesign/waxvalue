@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, forwardRef, useImperativeHandle, useCallback } from 'react'
+import { useState, useEffect, useMemo, forwardRef, useImperativeHandle, useCallback, memo } from 'react'
 import Image from 'next/image'
 import {
   CheckIcon,
@@ -36,7 +36,7 @@ export interface InventoryReviewTableRef {
   isLoading: boolean
 }
 
-export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, InventoryReviewTableProps>(
+export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, InventoryReviewTableProps>(
   ({ filters: _filters, onFiltersChange }, ref) => {
   // Use global inventory state from context (persists across navigation)
   const { 
@@ -229,7 +229,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
   useEffect(() => {
     return () => {
       // Clear any ongoing requests when component unmounts
-      console.log('Component unmounting - cleaning up streaming requests')
+      // Component unmounting - cleaning up streaming requests
     }
   }, [])
 
@@ -250,14 +250,14 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
       const isRejoining = existingProgress ? JSON.parse(existingProgress).isRunning : false
       
       if (isRejoining) {
-        console.log('Rejoining analysis in progress...')
+        // Rejoining analysis in progress
         // Keep existing progress, just ensure importing state is set
         setProcessingProgress(prev => ({
           ...prev,
           isImporting: true
         }))
       } else {
-        console.log('Starting fresh analysis with progress tracking...')
+        // Starting fresh analysis with progress tracking
         // Set importing state and start progress tracking
         setProcessingProgress({
           current: 0,
@@ -288,7 +288,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
       } catch (fetchError: any) {
         if (fetchError.name === 'AbortError') {
           // Request was aborted - this is normal when navigating away
-          console.log('Stream request aborted (user navigated away)')
+          // Stream request aborted (user navigated away)
           return
         }
         throw new Error(`Network error: ${fetchError.message || 'Failed to connect to server'}`)
@@ -710,11 +710,11 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
     try {
       setIsApplying(true)
       const listingIds = Array.from(selectedItems)
-      console.log('Bulk apply starting for listings:', listingIds)
+      // Bulk apply starting for listings
       
       // Use the bulk apply API method
       const result = await api.bulkApply(listingIds) as any
-      console.log('Bulk apply result:', result)
+      // Bulk apply result processed
       
       // Show success message
       if (result.successful_updates > 0) {
@@ -1818,7 +1818,7 @@ export const InventoryReviewTable = forwardRef<InventoryReviewTableRef, Inventor
       </div>
     </div>
   )
-})
+}))
 
 InventoryReviewTable.displayName = 'InventoryReviewTable'
 
