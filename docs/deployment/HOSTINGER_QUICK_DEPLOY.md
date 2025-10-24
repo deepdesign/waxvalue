@@ -79,7 +79,7 @@ su - waxvalue
 # Clone your repository (or upload via FTP)
 git clone https://github.com/YOUR_USERNAME/waxvalue.git
 # OR if you don't have it on GitHub yet:
-# Upload your project files to /home/waxvalue/waxvalue/
+# Upload your project files to /root/waxvalue/
 
 cd waxvalue
 
@@ -344,21 +344,20 @@ tail -f /var/log/nginx/error.log
 Create a deployment script on your VPS:
 
 ```bash
-cat > /home/waxvalue/deploy.sh << 'EOF'
+cat > /root/deploy.sh << 'EOF'
 #!/bin/bash
-cd /home/waxvalue/waxvalue
-git pull
+cd /root/waxvalue
+git pull origin feature/discogs-price-alerts
 npm install
 npm run build
-sudo systemctl restart waxvalue-frontend waxvalue-backend
+pm2 restart all
 EOF
 
-chmod +x /home/waxvalue/deploy.sh
+chmod +x /root/deploy.sh
 ```
 
 To update later:
 ```bash
-su - waxvalue
 ./deploy.sh
 ```
 
@@ -419,12 +418,11 @@ sudo systemctl restart waxvalue-backend
 sudo systemctl restart nginx
 
 # Update app
-su - waxvalue
-cd waxvalue
-git pull
+cd /root/waxvalue
+git pull origin feature/discogs-price-alerts
+npm install
 npm run build
-exit
-sudo systemctl restart waxvalue-frontend waxvalue-backend
+pm2 restart all
 ```
 
 ## 🔐 Security Best Practices

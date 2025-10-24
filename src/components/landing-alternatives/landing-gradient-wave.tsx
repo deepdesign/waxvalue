@@ -26,12 +26,48 @@ export function LandingGradientWave() {
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800">
       {/* Animated waves */}
-      <div className="absolute inset-0">
-        <svg className="absolute bottom-0 w-full h-1/2 animate-wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-          <path fill="#ffffff" fillOpacity="0.05" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+      <div className="absolute inset-0 overflow-hidden">
+        <svg 
+          className="absolute bottom-0 w-full h-1/2 animate-wave" 
+          xmlns="http://www.w3.org/2000/svg" 
+          viewBox="0 0 1440 320"
+          style={{ 
+            willChange: 'transform, opacity',
+            backfaceVisibility: 'hidden',
+            transform: 'translateZ(0)',
+            shapeRendering: 'optimizeSpeed'
+          }}
+        >
+          <path 
+            fill="#ffffff" 
+            fillOpacity="0.05" 
+            d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            style={{ 
+              vectorEffect: 'non-scaling-stroke',
+              shapeRendering: 'optimizeSpeed'
+            }}
+          />
         </svg>
-        <svg className="absolute bottom-0 w-full h-1/2 animate-wave-delayed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-          <path fill="#ffffff" fillOpacity="0.03" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,213.3C672,224,768,224,864,213.3C960,203,1056,181,1152,181.3C1248,181,1344,203,1392,213.3L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        <svg 
+          className="absolute bottom-0 w-full h-1/2 animate-wave-delayed" 
+          xmlns="http://www.w3.org/2000/svg" 
+          viewBox="0 0 1440 320"
+          style={{ 
+            willChange: 'transform, opacity',
+            backfaceVisibility: 'hidden',
+            transform: 'translateZ(0)',
+            shapeRendering: 'optimizeSpeed'
+          }}
+        >
+          <path 
+            fill="#ffffff" 
+            fillOpacity="0.03" 
+            d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,213.3C672,224,768,224,864,213.3C960,203,1056,181,1152,181.3C1248,181,1344,203,1392,213.3L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            style={{ 
+              vectorEffect: 'non-scaling-stroke',
+              shapeRendering: 'optimizeSpeed'
+            }}
+          />
         </svg>
       </div>
 
@@ -142,12 +178,24 @@ export function LandingGradientWave() {
 
       <style jsx>{`
         @keyframes wave {
-          0%, 100% { transform: translateX(0); }
-          50% { transform: translateX(-25%); }
+          0%, 100% { 
+            transform: translateX(0) scaleX(1);
+            opacity: 0.05;
+          }
+          50% { 
+            transform: translateX(-15%) scaleX(1.1);
+            opacity: 0.08;
+          }
         }
         @keyframes wave-delayed {
-          0%, 100% { transform: translateX(0); }
-          50% { transform: translateX(25%); }
+          0%, 100% { 
+            transform: translateX(0) scaleX(1);
+            opacity: 0.03;
+          }
+          50% { 
+            transform: translateX(15%) scaleX(1.1);
+            opacity: 0.06;
+          }
         }
         @keyframes float {
           0%, 100% { transform: translateY(0) rotate(6deg); }
@@ -189,8 +237,22 @@ export function LandingGradientWave() {
             background-position: 200% center;
           }
         }
-        .animate-wave { animation: wave 15s ease-in-out infinite; }
-        .animate-wave-delayed { animation: wave-delayed 20s ease-in-out infinite; }
+        .animate-wave { 
+          animation: wave 20s ease-in-out infinite;
+          will-change: transform, opacity;
+          backface-visibility: hidden;
+          transform: translateZ(0);
+          isolation: isolate;
+          contain: layout style paint;
+        }
+        .animate-wave-delayed { 
+          animation: wave-delayed 25s ease-in-out infinite;
+          will-change: transform, opacity;
+          backface-visibility: hidden;
+          transform: translateZ(0);
+          isolation: isolate;
+          contain: layout style paint;
+        }
         .animate-float { animation: float 6s ease-in-out infinite; }
         .animate-float-delayed { animation: float-delayed 8s ease-in-out infinite; }
         .animate-float-slower { animation: float-slower 10s ease-in-out infinite; }

@@ -74,9 +74,8 @@ sudo apt install -y git
 ### Option A: Using Git (Recommended)
 ```bash
 # Create directory
-cd /var/www
-sudo mkdir -p waxvalue
-sudo chown -R $USER:$USER waxvalue
+cd /root
+mkdir -p waxvalue
 cd waxvalue
 
 # Clone or upload your code
@@ -90,7 +89,7 @@ git clone YOUR_REPO_URL .
 1. Use **FileZilla** or **WinSCP** on Windows
 2. Connect to: `195.35.15.194`
 3. Username: `u728332901.waxvalue.com`
-4. Upload entire project to: `/var/www/waxvalue/`
+4. Upload entire project to: `/root/waxvalue/`
 
 ---
 
@@ -98,7 +97,7 @@ git clone YOUR_REPO_URL .
 
 ### Backend Environment Variables
 ```bash
-cd /var/www/waxvalue/backend
+cd /root/waxvalue/backend
 nano .env
 ```
 
@@ -116,7 +115,7 @@ LOG_LEVEL=INFO
 
 ### Frontend Environment Variables
 ```bash
-cd /var/www/waxvalue
+cd /root/waxvalue
 nano .env.production
 ```
 
@@ -133,7 +132,7 @@ NEXT_PUBLIC_BACKEND_URL=https://waxvalue.com/api/backend
 
 ### Backend Dependencies
 ```bash
-cd /var/www/waxvalue/backend
+cd /root/waxvalue/backend
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -141,7 +140,7 @@ pip install -r requirements.txt
 
 ### Frontend Dependencies
 ```bash
-cd /var/www/waxvalue
+cd /root/waxvalue
 npm install
 ```
 
@@ -150,7 +149,7 @@ npm install
 ## Step 6: Build Frontend
 
 ```bash
-cd /var/www/waxvalue
+cd /root/waxvalue
 npm run build
 ```
 
@@ -217,13 +216,13 @@ sudo systemctl restart nginx
 
 ### Start Backend
 ```bash
-cd /var/www/waxvalue/backend
+cd /root/waxvalue/backend
 pm2 start "venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000" --name waxvalue-backend
 ```
 
 ### Start Frontend
 ```bash
-cd /var/www/waxvalue
+cd /root/waxvalue
 pm2 start npm --name waxvalue-frontend -- start
 ```
 
@@ -354,12 +353,12 @@ sudo tail -f /var/log/nginx/error.log
 
 ## File Locations
 
-- **Application:** `/var/www/waxvalue/`
-- **Backend .env:** `/var/www/waxvalue/backend/.env`
-- **Frontend .env:** `/var/www/waxvalue/.env.production`
+- **Application:** `/root/waxvalue/`
+- **Backend .env:** `/root/waxvalue/backend/.env`
+- **Frontend .env:** `/root/waxvalue/.env.production`
 - **Nginx config:** `/etc/nginx/sites-available/waxvalue`
 - **PM2 logs:** `~/.pm2/logs/`
-- **Sessions:** `/var/www/waxvalue/backend/sessions.json`
+- **Sessions:** `/root/waxvalue/backend/sessions.json`
 
 ---
 
@@ -391,10 +390,10 @@ Save this as `deploy.sh` on your VPS:
 
 ```bash
 #!/bin/bash
-cd /var/www/waxvalue
+cd /root/waxvalue
 
-# Pull latest code (if using git)
-# git pull origin main
+# Pull latest code
+git pull origin feature/discogs-price-alerts
 
 # Backend
 cd backend

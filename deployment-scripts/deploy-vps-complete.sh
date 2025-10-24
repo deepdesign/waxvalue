@@ -9,7 +9,7 @@ echo "======================================"
 echo ""
 
 # Configuration
-PROJECT_DIR="/var/www/waxvalue"
+PROJECT_DIR="/root/waxvalue"
 DOMAIN="waxvalue.com"
 BACKUP_DIR="/var/backups/waxvalue"
 
@@ -86,5 +86,8 @@ echo ""
 echo "📁 Project directory ready at: $PROJECT_DIR"
 echo ""
 echo "Next: Upload your project files to $PROJECT_DIR"
+echo ""
+echo "Quick deployment command:"
+echo "cd /root/waxvalue && git pull origin feature/discogs-price-alerts && npm install && npm run build && pm2 restart all"
 echo ""
 

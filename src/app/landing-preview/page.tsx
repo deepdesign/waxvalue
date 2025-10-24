@@ -5,6 +5,7 @@ import {
   LandingHeroSplit4,
   LandingGradientWave,
 } from '@/components/landing-alternatives'
+import { WaveAnimationTest } from '@/components/WaveAnimationTest'
 
 const landingPages = [
   { 
@@ -18,6 +19,12 @@ const landingPages = [
     name: 'Gradient Wave', 
     component: LandingGradientWave, 
     description: 'Vibrant gradient with animated waves and dashboard screenshot.' 
+  },
+  { 
+    id: 'wave-test', 
+    name: 'Wave Animation Test', 
+    component: WaveAnimationTest, 
+    description: 'Test component to verify wave animation is working correctly.' 
   },
 ]
 
