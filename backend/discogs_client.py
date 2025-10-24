@@ -80,7 +80,7 @@ class TokenBucketRateLimiter:
             self.last_refill = now
             self._save_state()
     
-    def acquire_token(self, timeout: float = 10.0) -> bool:
+    def acquire_token(self, timeout: float = 60.0) -> bool:
         """
         Try to acquire a token (make a request)
         
@@ -107,7 +107,7 @@ class TokenBucketRateLimiter:
         logger.warning("Rate limiter timeout - no tokens available")
         return False
     
-    def wait_for_token(self, timeout: float = 10.0):
+    def wait_for_token(self, timeout: float = 60.0):
         """
         Wait for a token to become available
         
@@ -190,7 +190,7 @@ class DiscogsClient:
     def _handle_rate_limit(self):
         """Handle rate limiting using token bucket algorithm"""
         try:
-            self.rate_limiter.wait_for_token(timeout=10.0)
+            self.rate_limiter.wait_for_token(timeout=60.0)
         except DiscogsRateLimitError as e:
             logger.error(f"Rate limit exceeded: {e}")
             raise
