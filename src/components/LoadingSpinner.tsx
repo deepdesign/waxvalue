@@ -36,7 +36,6 @@ export const LoadingSpinner = memo(function LoadingSpinner({
     const unsplashImages = [
       '/images/valentino-funghi-MEcxLZ8ENV8-unsplash.jpg',
       '/images/julian-lates-aiXhMfF_8_k-unsplash.jpg',
-      '/images/matteo-panara-EMp3qGdtbKE-unsplash.jpg',
       '/images/mr-cup-fabien-barral-o6GEPQXnqMY-unsplash.jpg'
     ]
 

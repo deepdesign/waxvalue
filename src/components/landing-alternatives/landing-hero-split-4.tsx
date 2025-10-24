@@ -9,11 +9,10 @@ export function LandingHeroSplit4() {
   const [isImageLoaded, setIsImageLoaded] = useState(false)
   const [selectedImage, setSelectedImage] = useState('')
 
-  // Array of all 4 Unsplash images - memoized to prevent unnecessary re-renders
+  // Array of all 3 Unsplash images - memoized to prevent unnecessary re-renders
   const unsplashImages = useMemo(() => [
     '/images/valentino-funghi-MEcxLZ8ENV8-unsplash.jpg',
     '/images/julian-lates-aiXhMfF_8_k-unsplash.jpg',
-    '/images/matteo-panara-EMp3qGdtbKE-unsplash.jpg',
     '/images/mr-cup-fabien-barral-o6GEPQXnqMY-unsplash.jpg'
   ], [])
 
