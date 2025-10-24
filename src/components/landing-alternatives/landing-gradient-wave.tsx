@@ -15,7 +15,6 @@ export function LandingGradientWave() {
       if (data.authUrl) {
         localStorage.setItem('discogs_request_token', data.requestToken)
         localStorage.setItem('discogs_request_token_secret', data.requestTokenSecret)
-        // Open OAuth in same window - this is the correct approach for OAuth flow
         window.location.href = data.authUrl
       }
     } catch (error) {
