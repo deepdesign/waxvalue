@@ -433,9 +433,9 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
       
       {/* Footer - below sidebar and content, aligned with content area */}
-      <div className="lg:pl-16 xl:pl-64 px-4 sm:px-6 lg:px-8 pb-6">
+      <div className="lg:pl-16 xl:pl-64">
         <Footer 
-          logo={<Logo size="lg" variant="horizontal" />}
+          logo={<Logo size="md" variant="horizontal" />}
           strapline="Keep your Discogs prices in sync with the market"
           homeLink="/dashboard"
           settingsLink={null}
