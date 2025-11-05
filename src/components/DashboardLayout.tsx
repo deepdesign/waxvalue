@@ -33,7 +33,9 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [analysisProgress, setAnalysisProgress] = useState<{current: number, total: number} | null>(null)
   const [sidebarHeight, setSidebarHeight] = useState('100vh')
+  const [bottomSectionStyle, setBottomSectionStyle] = useState<React.CSSProperties>({})
   const footerRef = useRef<HTMLDivElement>(null)
+  const sidebarRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const pathname = usePathname()
   const { user, logout } = useApp()
@@ -82,25 +84,54 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
     }
   }, [])
 
-  // Calculate sidebar height to match footer position pixel-perfect
+  // Calculate sidebar height and bottom section position to stick to footer
   useEffect(() => {
-    const updateSidebarHeight = () => {
-      if (footerRef.current) {
+    const updateSidebarAndBottomPosition = () => {
+      if (footerRef.current && sidebarRef.current) {
         const footerRect = footerRef.current.getBoundingClientRect()
+        const sidebarRect = sidebarRef.current.getBoundingClientRect()
         const footerTop = footerRect.top
+        const viewportHeight = window.innerHeight
+        
+        // Set sidebar height to match footer position
         setSidebarHeight(`${footerTop}px`)
+        
+        // Calculate if footer is visible within the sidebar's vertical space
+        // Bottom section should stick to viewport bottom, then align bottom edge with footer top when footer is in view
+        const sidebarHeightValue = footerTop - sidebarRect.top
+        const bottomSectionHeight = 140 // Approximate height of bottom section (theme toggle + user info)
+        
+        // Check if footer is visible and within the sidebar's space
+        if (footerTop < viewportHeight && footerTop >= sidebarRect.top && sidebarHeightValue >= bottomSectionHeight) {
+          // Footer is visible: position bottom section so its bottom edge aligns with footer top
+          const distanceFromSidebarTop = footerTop - sidebarRect.top
+          setBottomSectionStyle({
+            position: 'absolute',
+            top: `${distanceFromSidebarTop - bottomSectionHeight}px`,
+            width: '100%',
+            zIndex: 10
+          })
+        } else {
+          // Footer not in view yet or not enough space: stick to bottom of sidebar (viewport bottom)
+          setBottomSectionStyle({
+            position: 'absolute',
+            bottom: 0,
+            width: '100%',
+            zIndex: 10
+          })
+        }
       }
     }
 
     // Initial calculation
-    updateSidebarHeight()
+    updateSidebarAndBottomPosition()
     
     // Update on resize and scroll
-    window.addEventListener('resize', updateSidebarHeight)
-    window.addEventListener('scroll', updateSidebarHeight)
+    window.addEventListener('resize', updateSidebarAndBottomPosition)
+    window.addEventListener('scroll', updateSidebarAndBottomPosition)
     
     // Use MutationObserver to watch for footer height changes
-    const observer = new MutationObserver(updateSidebarHeight)
+    const observer = new MutationObserver(updateSidebarAndBottomPosition)
     if (footerRef.current) {
       observer.observe(footerRef.current, {
         childList: true,
@@ -111,11 +142,11 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
     }
 
     // Also check periodically in case layout changes
-    const interval = setInterval(updateSidebarHeight, 100)
+    const interval = setInterval(updateSidebarAndBottomPosition, 50)
 
     return () => {
-      window.removeEventListener('resize', updateSidebarHeight)
-      window.removeEventListener('scroll', updateSidebarHeight)
+      window.removeEventListener('resize', updateSidebarAndBottomPosition)
+      window.removeEventListener('scroll', updateSidebarAndBottomPosition)
       observer.disconnect()
       clearInterval(interval)
     }
@@ -283,15 +314,15 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
 
       {/* Desktop sidebar - full width */}
-      <div className="hidden xl:fixed xl:top-0 xl:flex xl:w-64 xl:flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: sidebarHeight }}>
-        <div className="flex flex-col h-full">
+      <div ref={sidebarRef} className="hidden xl:fixed xl:top-0 xl:flex xl:w-64 xl:flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: sidebarHeight }}>
+        <div className="flex flex-col h-full relative">
           {/* Logo - fixed at top */}
           <div className="flex-shrink-0 flex items-center justify-center px-4 mt-[35px] mb-[20px] select-none">
             <Logo size="lg" className="scale-[1.17] pointer-events-none" />
           </div>
           
           {/* Navigation - scrollable middle section */}
-          <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1 min-h-0" role="navigation" aria-label="Main navigation">
+          <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1 min-h-0 pb-32" role="navigation" aria-label="Main navigation">
             {navigation.map((item) => {
               const isActive = pathname === item.href
               return (
@@ -317,8 +348,8 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
             })}
           </nav>
           
-          {/* Bottom section - fixed at bottom */}
-          <div className="flex-shrink-0 flex flex-col">
+          {/* Bottom section - sticky to viewport bottom, then sticks to footer top */}
+          <div className="flex-shrink-0 flex flex-col bg-white dark:bg-gray-900" style={bottomSectionStyle}>
             {/* Dark Mode Toggle */}
             <div className="px-4 py-3">
               <div className="w-full">
@@ -371,14 +402,14 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
 
       {/* Collapsed sidebar - icon only */}
       <div className="hidden lg:flex xl:hidden fixed top-0 w-16 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: sidebarHeight }}>
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full relative">
           {/* Logo - fixed at top */}
           <div className="flex-shrink-0 flex items-center justify-center px-2 mt-[35px] mb-[20px] select-none">
             <Logo size="sm" variant="brandmark" className="pointer-events-none" />
           </div>
           
           {/* Navigation - scrollable middle section */}
-          <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1 min-h-0" role="navigation" aria-label="Main navigation">
+          <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1 min-h-0 pb-20" role="navigation" aria-label="Main navigation">
             {navigationItems.map((item) => {
               const isActive = pathname === item.href
               return (
@@ -404,8 +435,8 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
             })}
           </nav>
           
-          {/* Bottom section - fixed at bottom */}
-          <div className="flex-shrink-0 flex flex-col">
+          {/* Bottom section - sticky to viewport bottom, then sticks to footer top */}
+          <div className="flex-shrink-0 flex flex-col bg-white dark:bg-gray-900" style={bottomSectionStyle}>
             {/* Dark Mode Toggle */}
             <div className="px-2 py-3">
               <div className="w-full flex justify-center">
