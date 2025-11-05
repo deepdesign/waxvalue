@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback, memo } from 'react'
+import { useState, useEffect, useMemo, useCallback, memo, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useApp } from './Providers'
@@ -32,6 +32,8 @@ const navigation = [
 export const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [analysisProgress, setAnalysisProgress] = useState<{current: number, total: number} | null>(null)
+  const [sidebarHeight, setSidebarHeight] = useState('100vh')
+  const footerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const pathname = usePathname()
   const { user, logout } = useApp()
@@ -77,6 +79,45 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
 
     return () => {
       if (interval) clearInterval(interval)
+    }
+  }, [])
+
+  // Calculate sidebar height to match footer position pixel-perfect
+  useEffect(() => {
+    const updateSidebarHeight = () => {
+      if (footerRef.current) {
+        const footerRect = footerRef.current.getBoundingClientRect()
+        const footerTop = footerRect.top
+        setSidebarHeight(`${footerTop}px`)
+      }
+    }
+
+    // Initial calculation
+    updateSidebarHeight()
+    
+    // Update on resize and scroll
+    window.addEventListener('resize', updateSidebarHeight)
+    window.addEventListener('scroll', updateSidebarHeight)
+    
+    // Use MutationObserver to watch for footer height changes
+    const observer = new MutationObserver(updateSidebarHeight)
+    if (footerRef.current) {
+      observer.observe(footerRef.current, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+      })
+    }
+
+    // Also check periodically in case layout changes
+    const interval = setInterval(updateSidebarHeight, 100)
+
+    return () => {
+      window.removeEventListener('resize', updateSidebarHeight)
+      window.removeEventListener('scroll', updateSidebarHeight)
+      observer.disconnect()
+      clearInterval(interval)
     }
   }, [])
 
@@ -242,7 +283,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
 
       {/* Desktop sidebar - full width */}
-      <div className="hidden xl:fixed xl:top-0 xl:flex xl:w-64 xl:flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: 'calc(100vh - 300px)', maxHeight: 'calc(100vh - 300px)' }}>
+      <div className="hidden xl:fixed xl:top-0 xl:flex xl:w-64 xl:flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: sidebarHeight }}>
         <div className="flex flex-col flex-grow">
           <div className="flex items-center justify-center px-4 mt-[35px] mb-[20px] select-none">
             <Logo size="lg" className="scale-[1.17] pointer-events-none" />
@@ -322,7 +363,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
 
       {/* Collapsed sidebar - icon only */}
-      <div className="hidden lg:flex xl:hidden fixed top-0 w-16 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: 'calc(100vh - 300px)', maxHeight: 'calc(100vh - 300px)' }}>
+      <div className="hidden lg:flex xl:hidden fixed top-0 w-16 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: sidebarHeight }}>
         <div className="flex flex-col flex-grow">
           <div className="flex items-center justify-center px-2 mt-[35px] mb-[20px] select-none">
             <Logo size="sm" variant="brandmark" className="pointer-events-none" />
@@ -433,7 +474,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
       
       {/* Footer - full width, sits vertically beneath sidebar and content */}
-      <div className="w-full border-t border-gray-200 dark:border-gray-700">
+      <div ref={footerRef} className="w-full border-t border-gray-200 dark:border-gray-700">
         <Footer 
           logo={<Logo size="md" variant="horizontal" />}
           strapline="Keep your Discogs prices in sync with the market"
