@@ -41,6 +41,7 @@ export function LandingHeroSplit4() {
   const handleConnectDiscogs = async () => {
     setIsConnecting(true)
     try {
+      console.log('Starting Discogs OAuth setup...')
       const response = await fetch('/api/backend/auth/setup', { 
         method: 'POST',
         headers: {
@@ -48,25 +49,31 @@ export function LandingHeroSplit4() {
         },
       })
       
+      console.log('Response status:', response.status)
+      const data = await response.json()
+      console.log('Response data:', data)
+      
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.detail || `HTTP error: ${response.status}`)
+        const errorMessage = data.detail || data.error || data.details || `HTTP error: ${response.status}`
+        console.error('OAuth setup failed:', errorMessage, data)
+        alert(`Failed to connect to Discogs: ${errorMessage}`)
+        setIsConnecting(false)
+        return
       }
 
-      const data = await response.json()
-      
-      if (data.authUrl) {
+      if (data.authUrl && data.requestToken && data.requestTokenSecret) {
+        console.log('OAuth setup successful, redirecting...')
         localStorage.setItem('discogs_request_token', data.requestToken)
         localStorage.setItem('discogs_request_token_secret', data.requestTokenSecret)
         window.location.href = data.authUrl
       } else {
-        console.error('No auth URL received:', data)
-        alert('Failed to get authorization URL. Please try again.')
+        console.error('Invalid response format:', data)
+        alert('Failed to get authorization URL. The server response was invalid.')
         setIsConnecting(false)
       }
     } catch (error: any) {
       console.error('Failed to start OAuth:', error)
-      alert(`Failed to connect to Discogs: ${error?.message || 'Unknown error'}`)
+      alert(`Failed to connect to Discogs: ${error?.message || 'Network error. Please check your connection and try again.'}`)
       setIsConnecting(false)
     }
   }
