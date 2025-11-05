@@ -58,12 +58,11 @@ export function LandingHeroSplit4() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      <div className="grid lg:grid-cols-2 min-h-screen">
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
+      <div className="grid lg:grid-cols-2 flex-1">
         {/* Left Content */}
-        <div className="flex flex-col justify-between px-8 lg:px-16 py-8 lg:py-12">
-          <div className="flex-1 flex items-center">
-            <div className="max-w-xl animate-fade-in-up">
+        <div className="flex flex-col justify-center px-8 lg:px-16 py-8 lg:py-12">
+          <div className="max-w-xl animate-fade-in-up">
             {/* Logo */}
             <div className="mb-6 lg:mb-12">
               <Image 
@@ -124,17 +123,6 @@ export function LandingHeroSplit4() {
             <p id="connect-description" className="text-sm text-gray-500 dark:text-gray-400">
               🔒 Secure OAuth • No password required • Free to start
             </p>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="max-w-xl w-full">
-            <Footer
-              logo={<Logo variant="horizontal" size="md" />}
-              strapline="Keep your Discogs prices in sync with the market"
-              homeLink="/"
-              settingsLink={null}
-            />
           </div>
         </div>
 
@@ -158,9 +146,18 @@ export function LandingHeroSplit4() {
           
           {/* Gradient overlay for better text contrast if needed */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-purple-500/10"></div>
-          
         </div>
       </div>
+
+      {/* Footer - full width below image */}
+      <footer className="w-full">
+        <Footer
+          logo={<Logo variant="horizontal" size="md" />}
+          strapline="Keep your Discogs prices in sync with the market"
+          homeLink="/"
+          settingsLink={null}
+        />
+      </footer>
 
       <style jsx>{`
         @keyframes fade-in-up {
