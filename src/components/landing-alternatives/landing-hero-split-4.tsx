@@ -78,8 +78,8 @@ export function LandingHeroSplit4() {
         <div className="flex flex-col justify-center px-8 lg:px-16 py-8 lg:py-12">
           <div className="max-w-xl animate-fade-in-up">
             {/* Logo */}
-            <div className="mb-6 lg:mb-12">
-              <div className="h-20 lg:h-24">
+            <div className="mb-6 lg:mb-12 pointer-events-none">
+              <div className="h-20 lg:h-24 pointer-events-auto">
                 <Logo variant="horizontal" size="xl" />
               </div>
             </div>
@@ -100,9 +100,13 @@ export function LandingHeroSplit4() {
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <button
                 type="button"
-                onClick={handleConnectDiscogs}
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleConnectDiscogs()
+                }}
                 disabled={isConnecting}
-                className="group relative px-8 py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-xl font-semibold text-lg shadow-xl shadow-primary-500/30 hover:shadow-2xl hover:shadow-primary-500/40 transition-all duration-300 hover:scale-105 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed will-change-transform transform-gpu touch-manipulation min-h-[56px] active:scale-95"
+                className="group relative px-8 py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-xl font-semibold text-lg shadow-xl shadow-primary-500/30 hover:shadow-2xl hover:shadow-primary-500/40 transition-all duration-300 hover:scale-105 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed will-change-transform transform-gpu touch-manipulation min-h-[56px] active:scale-95 z-10"
                 aria-label={isConnecting ? "Connecting to Discogs, please wait" : "Connect your Discogs account to start pricing analysis"}
                 aria-describedby="connect-description"
               >
