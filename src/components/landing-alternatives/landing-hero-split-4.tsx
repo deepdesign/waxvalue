@@ -3,10 +3,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { ArrowRightIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
-import dynamic from 'next/dynamic'
-import { Logo } from '../Logo'
-
-const Footer = dynamic(() => import('@/components/Footer'))
 
 export function LandingHeroSplit4() {
   const [isConnecting, setIsConnecting] = useState(false)
@@ -148,16 +144,6 @@ export function LandingHeroSplit4() {
           <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-purple-500/10"></div>
         </div>
       </div>
-
-      {/* Footer - full width below image */}
-      <footer className="w-full">
-        <Footer
-          logo={<Logo variant="horizontal" size="md" />}
-          strapline="Keep your Discogs prices in sync with the market"
-          homeLink="/"
-          settingsLink={null}
-        />
-      </footer>
 
       <style jsx>{`
         @keyframes fade-in-up {
