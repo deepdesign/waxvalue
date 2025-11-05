@@ -17,9 +17,7 @@ import Image from 'next/image'
 import { DarkModeToggleCollapsed } from './DarkModeToggleCollapsed'
 import { Logo } from './Logo'
 import { Tooltip } from './ui/Tooltip'
-import dynamic from 'next/dynamic'
-
-const FooterWrapper = dynamic(() => import('@/components/FooterWrapper'))
+import Footer from './Footer'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -95,7 +93,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
   const navigationItems = useMemo(() => navigation, [])
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-50 xl:hidden 
         ${sidebarOpen ? 'block' : 'hidden'}`}>
@@ -320,6 +318,13 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
               </div>
             </div>
           </div>
+          
+          {/* Copyright */}
+          <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
+            <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+              © {new Date().getFullYear()} Deep Design Australia Pty Ltd
+            </p>
+          </div>
         </div>
       </div>
 
@@ -376,11 +381,20 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
               </div>
             </div>
           </div>
+          
+          {/* Copyright */}
+          <div className="border-t border-gray-200 dark:border-gray-700 px-2 py-3">
+            <Tooltip content={`© ${new Date().getFullYear()} Deep Design Australia Pty Ltd`} placement="right">
+              <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                © {new Date().getFullYear()}
+              </p>
+            </Tooltip>
+          </div>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-16 xl:pl-64 flex flex-col flex-1 min-h-screen">
+      <div className="lg:pl-16 xl:pl-64 flex flex-col flex-1">
         {/* Background Analysis Banner - Only show when NOT on dashboard */}
         {analysisProgress && pathname !== '/dashboard' && (
           <div className="sticky top-0 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 shadow-sm animate-slide-down">
@@ -432,13 +446,13 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
             </div>
           </div>
         </main>
-        
+        <Footer 
+          logo={<Logo size="md" variant="horizontal" />}
+          strapline="Keep your Discogs prices in sync with the market"
+          homeLink="/dashboard"
+          settingsLink="/settings"
+        />
       </div>
-      
-      {/* Footer - full width, positioned at bottom beneath sidebar */}
-      <footer className="mt-auto w-full">
-        <FooterWrapper />
-      </footer>
     </div>
   )
 })

@@ -1,5 +1,3 @@
-'use client'
-
 /**
  * Reusable Footer Component for Deep Design Projects
  * 
@@ -20,10 +18,10 @@
  * - companyUrl: string - Company URL for copyright link (default: "https://jamescutts.me/")
  */
 
+'use client'
+
 import { useEffect, useState, ReactNode } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { useTheme } from 'next-themes'
 
 interface Project {
   name: string
@@ -76,23 +74,36 @@ export default function Footer({
   companyName = "Deep Design Pty Ltd",
   companyUrl = "https://jamescutts.me/"
 }: FooterProps) {
-  const { theme, resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const [isDark, setIsDark] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
+    const checkTheme = () => {
+      const isDarkMode =
+        document.documentElement.classList.contains('dark') ||
+        localStorage.getItem('color-theme') === 'dark' ||
+        (!('color-theme' in localStorage) &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches)
+      setIsDark(isDarkMode)
+    }
+
+    checkTheme()
+
+    const observer = new MutationObserver(() => {
+      checkTheme()
+    })
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    })
+
+    return () => {
+      observer.disconnect()
+    }
   }, [])
 
-  // Determine if we should use dark logo - check both theme and resolvedTheme
-  const isDark = mounted && (theme === 'dark' || resolvedTheme === 'dark')
-
-  // Don't render until mounted to avoid hydration mismatch
-  if (!mounted) {
-    return null
-  }
-
   return (
-    <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+    <footer className="bg-white rounded-lg shadow-sm m-4 dark:bg-gray-900">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Logo and Strapline */}
@@ -125,13 +136,10 @@ export default function Footer({
                       className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
                       aria-label={project.name}
                     >
-                      <Image
+                      <img
                         src={isDark ? project.logoDark : project.logoLight}
                         alt={project.name}
-                        width={40}
-                        height={40}
-                        className="h-[40px] w-auto object-contain opacity-100 hover:opacity-70 transition-opacity"
-                        unoptimized
+                        className="h-[40px] w-auto opacity-100 hover:opacity-70 transition-opacity"
                       />
                     </a>
                   </li>
@@ -154,13 +162,10 @@ export default function Footer({
                   className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
                   aria-label="JC Logo"
                 >
-                  <Image
+                  <img
                     src={isDark ? '/_other logos/jc-logo-dark.svg' : '/_other logos/jc-logo-light.svg'}
                     alt="JC"
-                    width={40}
-                    height={40}
-                    className="h-[40px] w-auto object-contain opacity-100 hover:opacity-70 transition-opacity"
-                    unoptimized
+                    className="h-[40px] w-auto opacity-100 hover:opacity-70 transition-opacity"
                   />
                 </a>
               </li>
@@ -172,13 +177,10 @@ export default function Footer({
                   className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
                   aria-label="GitHub"
                 >
-                  <Image
+                  <img
                     src={isDark ? '/_other logos/github-mark-dark.svg' : '/_other logos/github-mark-light.svg'}
                     alt="GitHub"
-                    width={40}
-                    height={40}
-                    className="h-[40px] w-auto object-contain opacity-100 hover:opacity-70 transition-opacity"
-                    unoptimized
+                    className="h-[40px] w-auto opacity-100 hover:opacity-70 transition-opacity"
                   />
                 </a>
               </li>
