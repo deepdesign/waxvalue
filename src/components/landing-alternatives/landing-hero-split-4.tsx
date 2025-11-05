@@ -3,6 +3,10 @@
 import { useState, useEffect, useMemo } from 'react'
 import { ArrowRightIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
+import { Logo } from '../Logo'
+
+const Footer = dynamic(() => import('@/components/Footer'))
 
 export function LandingHeroSplit4() {
   const [isConnecting, setIsConnecting] = useState(false)
@@ -123,11 +127,14 @@ export function LandingHeroSplit4() {
             </div>
           </div>
 
-          {/* Copyright */}
-          <div className="max-w-xl">
-            <p className="text-xs text-gray-600 dark:text-gray-400">
-              © {new Date().getFullYear()} Deep Design Australia Pty Ltd. All rights reserved.
-            </p>
+          {/* Footer */}
+          <div className="max-w-xl w-full">
+            <Footer
+              logo={<Logo variant="horizontal" size="md" />}
+              strapline="Keep your Discogs prices in sync with the market"
+              homeLink="/"
+              settingsLink={null}
+            />
           </div>
         </div>
 

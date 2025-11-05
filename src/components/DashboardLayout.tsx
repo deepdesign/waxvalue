@@ -17,6 +17,9 @@ import Image from 'next/image'
 import { DarkModeToggleCollapsed } from './DarkModeToggleCollapsed'
 import { Logo } from './Logo'
 import { Tooltip } from './ui/Tooltip'
+import dynamic from 'next/dynamic'
+
+const FooterWrapper = dynamic(() => import('@/components/FooterWrapper'))
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -393,7 +396,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-16 xl:pl-64 flex flex-col flex-1">
+      <div className="lg:pl-16 xl:pl-64 flex flex-col flex-1 min-h-screen">
         {/* Background Analysis Banner - Only show when NOT on dashboard */}
         {analysisProgress && pathname !== '/dashboard' && (
           <div className="sticky top-0 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 shadow-sm animate-slide-down">
@@ -445,6 +448,11 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
             </div>
           </div>
         </main>
+        
+        {/* Footer - positioned at bottom of main content area */}
+        <footer className="mt-auto">
+          <FooterWrapper />
+        </footer>
       </div>
     </div>
   )
