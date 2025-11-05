@@ -5,7 +5,7 @@ import { Logo } from './Logo'
 
 const Footer = dynamic(() => import('@/components/Footer'), { ssr: false })
 
-export function FooterWrapper() {
+export default function FooterWrapper() {
   return (
     <Footer
       logo={<Logo variant="horizontal" size="md" />}
