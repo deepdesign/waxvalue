@@ -22,7 +22,6 @@
 
 import { useEffect, useState, ReactNode } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 interface Project {
   name: string
@@ -137,13 +136,9 @@ export default function Footer({
                       className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
                       aria-label={project.name}
                     >
-                      <Image
-                        key={isDark ? project.logoDark : project.logoLight}
+                      <img
                         src={isDark ? project.logoDark : project.logoLight}
                         alt={project.name}
-                        width={40}
-                        height={40}
-                        unoptimized
                         className="h-[40px] w-auto opacity-100 hover:opacity-70 transition-opacity"
                       />
                     </a>
@@ -167,13 +162,9 @@ export default function Footer({
                   className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
                   aria-label="JC Logo"
                 >
-                  <Image
-                    key={isDark ? 'jc-dark' : 'jc-light'}
+                  <img
                     src={isDark ? '/_other logos/jc-logo-dark.svg' : '/_other logos/jc-logo-light.svg'}
                     alt="JC"
-                    width={40}
-                    height={40}
-                    unoptimized
                     className="h-[40px] w-auto opacity-100 hover:opacity-70 transition-opacity"
                   />
                 </a>
@@ -186,13 +177,9 @@ export default function Footer({
                   className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
                   aria-label="GitHub"
                 >
-                  <Image
-                    key={isDark ? 'github-dark' : 'github-light'}
+                  <img
                     src={isDark ? '/_other logos/github-mark-dark.svg' : '/_other logos/github-mark-light.svg'}
                     alt="GitHub"
-                    width={40}
-                    height={40}
-                    unoptimized
                     className="h-[40px] w-auto opacity-100 hover:opacity-70 transition-opacity"
                   />
                 </a>

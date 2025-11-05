@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback, memo, useRef } from 'react'
+import { useState, useEffect, useMemo, useCallback, memo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useApp } from './Providers'
@@ -32,10 +32,6 @@ const navigation = [
 export const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [analysisProgress, setAnalysisProgress] = useState<{current: number, total: number} | null>(null)
-  const [sidebarHeight, setSidebarHeight] = useState('100vh')
-  const [bottomSectionStyle, setBottomSectionStyle] = useState<React.CSSProperties>({})
-  const footerRef = useRef<HTMLDivElement>(null)
-  const sidebarRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const pathname = usePathname()
   const { user, logout } = useApp()
@@ -81,76 +77,6 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
 
     return () => {
       if (interval) clearInterval(interval)
-    }
-  }, [])
-
-  // Calculate sidebar height and bottom section position: sticky to viewport bottom, then move up when footer is visible
-  useEffect(() => {
-    const updateBottomPosition = () => {
-      if (footerRef.current && sidebarRef.current) {
-        const footerRect = footerRef.current.getBoundingClientRect()
-        const sidebarRect = sidebarRef.current.getBoundingClientRect()
-        const footerTop = footerRect.top
-        const viewportHeight = window.innerHeight
-        const viewportBottom = viewportHeight
-        
-        // Set sidebar height to stop at footer (so border stops at footer)
-        setSidebarHeight(`${footerTop}px`)
-        
-        // Bottom section should stick to viewport bottom, then move up when footer is visible
-        const bottomSectionHeight = 140 // Approximate height of bottom section (theme toggle + user info)
-        
-        // Check if footer is visible in viewport and would overlap with bottom section
-        if (footerTop < viewportBottom && footerTop >= sidebarRect.top) {
-          // Footer is visible: position bottom section above footer (align bottom of section with top of footer)
-          const distanceFromViewportTop = footerTop
-          const sidebarTop = sidebarRect.top
-          const distanceFromSidebarTop = distanceFromViewportTop - sidebarTop
-          
-          setBottomSectionStyle({
-            position: 'absolute',
-            top: `${distanceFromSidebarTop - bottomSectionHeight}px`,
-            width: '100%',
-            zIndex: 10
-          })
-        } else {
-          // Footer not in view: stick to bottom of viewport
-          setBottomSectionStyle({
-            position: 'absolute',
-            bottom: 0,
-            width: '100%',
-            zIndex: 10
-          })
-        }
-      }
-    }
-
-    // Initial calculation
-    updateBottomPosition()
-    
-    // Update on resize and scroll
-    window.addEventListener('resize', updateBottomPosition)
-    window.addEventListener('scroll', updateBottomPosition)
-    
-    // Use MutationObserver to watch for footer height changes
-    const observer = new MutationObserver(updateBottomPosition)
-    if (footerRef.current) {
-      observer.observe(footerRef.current, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['style', 'class']
-      })
-    }
-
-    // Also check periodically in case layout changes
-    const interval = setInterval(updateBottomPosition, 50)
-
-    return () => {
-      window.removeEventListener('resize', updateBottomPosition)
-      window.removeEventListener('scroll', updateBottomPosition)
-      observer.disconnect()
-      clearInterval(interval)
     }
   }, [])
 
@@ -316,15 +242,12 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
 
       {/* Desktop sidebar - full width */}
-      <div ref={sidebarRef} className="hidden xl:fixed xl:top-0 xl:flex xl:w-64 xl:flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: sidebarHeight }}>
-        <div className="flex flex-col h-full relative overflow-hidden">
-          {/* Logo - fixed at top */}
-          <div className="flex-shrink-0 flex items-center justify-center px-4 mt-[35px] mb-[20px] select-none">
+      <div className="hidden xl:fixed xl:inset-y-0 xl:flex xl:w-64 xl:flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col flex-grow">
+          <div className="flex items-center justify-center px-4 mt-[35px] mb-[20px] select-none">
             <Logo size="lg" className="scale-[1.17] pointer-events-none" />
           </div>
-          
-          {/* Navigation - scrollable middle section */}
-          <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1 min-h-0 pb-32" role="navigation" aria-label="Main navigation">
+          <nav className="flex-1 px-4 py-4 space-y-1" role="navigation" aria-label="Main navigation">
             {navigation.map((item) => {
               const isActive = pathname === item.href
               return (
@@ -350,52 +273,48 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
             })}
           </nav>
           
-          {/* Bottom section - sticky to viewport bottom, then sticks to footer top */}
-          <div className="flex-shrink-0 flex flex-col bg-white dark:bg-gray-900" style={bottomSectionStyle}>
-            {/* Dark Mode Toggle */}
-            <div className="px-4 py-3">
-              <div className="w-full">
-                <DarkModeToggle />
-              </div>
+          {/* Dark Mode Toggle */}
+          <div className="px-4 py-3">
+            <div className="w-full">
+              <DarkModeToggle />
             </div>
-            
-            {/* User info and Sign out */}
-            <div className="border-t border-gray-200 dark:border-gray-700 p-4">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  {user?.avatar ? (
-                    <Image
-                      className="h-8 w-8 rounded-full object-cover"
-                      src={user.avatar}
-                      alt={user.name || user.username}
-                      width={32}
-                      height={32}
-                      onError={(e) => {
-                        console.error('Avatar failed to load:', user.avatar)
-                        e.currentTarget.style.display = 'none'
-                      }}
-                    />
-                  ) : (
-                    <div className="h-8 w-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {(user?.name || user?.username)?.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="ml-3 select-none">
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{user?.name || user?.username}</p>
-                  {user?.email && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
-                  )}
-                  <button
-                    onClick={handleLogout}
-                    className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 flex items-center mt-1 select-none"
-                  >
-                    <ArrowRightOnRectangleIcon className="h-3 w-3 mr-1" />
-                    Sign out
-                  </button>
-                </div>
+          </div>
+          
+          <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                {user?.avatar ? (
+                  <Image
+                    className="h-8 w-8 rounded-full object-cover"
+                    src={user.avatar}
+                    alt={user.name || user.username}
+                    width={32}
+                    height={32}
+                    onError={(e) => {
+                      console.error('Avatar failed to load:', user.avatar)
+                      e.currentTarget.style.display = 'none'
+                    }}
+                  />
+                ) : (
+                  <div className="h-8 w-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {(user?.name || user?.username)?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="ml-3 select-none">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{user?.name || user?.username}</p>
+                {user?.email && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 flex items-center mt-1 select-none"
+                >
+                  <ArrowRightOnRectangleIcon className="h-3 w-3 mr-1" />
+                  Sign out
+                </button>
               </div>
             </div>
           </div>
@@ -403,16 +322,13 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
 
       {/* Collapsed sidebar - icon only */}
-      <div className="hidden lg:flex xl:hidden fixed top-0 w-16 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: sidebarHeight }}>
-        <div className="flex flex-col h-full relative overflow-hidden">
-          {/* Logo - fixed at top */}
-          <div className="flex-shrink-0 flex items-center justify-center px-2 mt-[35px] mb-[20px] select-none">
+      <div className="hidden lg:flex xl:hidden fixed inset-y-0 w-16 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col flex-grow">
+          <div className="flex items-center justify-center px-2 mt-[35px] mb-[20px] select-none">
             <Logo size="sm" variant="brandmark" className="pointer-events-none" />
           </div>
-          
-          {/* Navigation - scrollable middle section */}
-          <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1 min-h-0 pb-20" role="navigation" aria-label="Main navigation">
-            {navigationItems.map((item) => {
+            <nav className="flex-1 px-2 py-4 space-y-1" role="navigation" aria-label="Main navigation">
+              {navigationItems.map((item) => {
               const isActive = pathname === item.href
               return (
                 <Tooltip key={item.name} content={item.name} placement="right">
@@ -437,12 +353,24 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
             })}
           </nav>
           
-          {/* Bottom section - sticky to viewport bottom, then sticks to footer top */}
-          <div className="flex-shrink-0 flex flex-col bg-white dark:bg-gray-900" style={bottomSectionStyle}>
-            {/* Dark Mode Toggle */}
-            <div className="px-2 py-3">
-              <div className="w-full flex justify-center">
-                <DarkModeToggleCollapsed />
+          {/* Dark Mode Toggle */}
+          <div className="px-2 py-3">
+            <div className="w-full flex justify-center">
+              <DarkModeToggleCollapsed />
+            </div>
+          </div>
+          
+          {/* User profile section hidden in collapsed sidebar */}
+          <div className="border-t border-gray-200 dark:border-gray-700 p-2 hidden">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <Image
+                  className="h-8 w-8 rounded-full"
+                  src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || user?.username || 'User')}&background=6366f1&color=ffffff`}
+                  alt={user?.name || user?.username || 'User'}
+                  width={32}
+                  height={32}
+                />
               </div>
             </div>
           </div>
@@ -504,15 +432,13 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
         </main>
       </div>
       
-      {/* Footer - full width, sits vertically beneath sidebar and content */}
-      <div ref={footerRef} className="w-full border-t border-gray-200 dark:border-gray-700 relative z-10 bg-white dark:bg-gray-900">
-        <Footer 
-          logo={<Logo size="lg" variant="horizontal" className="scale-[1.17]" />}
-          strapline="Keep your Discogs prices in sync with the market"
-          homeLink="/dashboard"
-          settingsLink={null}
-        />
-      </div>
+      {/* Footer - full width below sidebar and content */}
+      <Footer 
+        logo={<Logo size="md" variant="horizontal" />}
+        strapline="Keep your Discogs prices in sync with the market"
+        homeLink="/dashboard"
+        settingsLink={null}
+      />
     </div>
   )
 })
