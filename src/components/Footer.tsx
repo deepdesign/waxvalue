@@ -104,7 +104,7 @@ export default function Footer({
 
   return (
     <footer className="bg-white shadow-sm border-t border-gray-200 dark:bg-gray-900 dark:border-gray-700">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+      <div className="w-full max-w-7xl mx-auto py-4 md:py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Logo and Strapline */}
           {logo && (
@@ -113,7 +113,7 @@ export default function Footer({
                 {logo}
               </Link>
               {strapline && (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                   {strapline}
                 </p>
               )}
@@ -191,7 +191,7 @@ export default function Footer({
         {/* Divider and Copyright */}
         <hr className="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
         <div className="sm:flex sm:items-center sm:justify-between">
-          <span className="text-sm text-gray-500 sm:text-center dark:text-gray-400">
+          <span className="text-xs text-gray-500 sm:text-center dark:text-gray-400">
             © {new Date().getFullYear()}{' '}
             <a
               href={companyUrl}
