@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { ArrowRightIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
+import { Logo } from '../Logo'
 
 export function LandingHeroSplit4() {
   const [isConnecting, setIsConnecting] = useState(false)
@@ -40,15 +41,32 @@ export function LandingHeroSplit4() {
   const handleConnectDiscogs = async () => {
     setIsConnecting(true)
     try {
-      const response = await fetch('/api/backend/auth/setup', { method: 'POST' })
+      const response = await fetch('/api/backend/auth/setup', { 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.detail || `HTTP error: ${response.status}`)
+      }
+
       const data = await response.json()
+      
       if (data.authUrl) {
         localStorage.setItem('discogs_request_token', data.requestToken)
         localStorage.setItem('discogs_request_token_secret', data.requestTokenSecret)
         window.location.href = data.authUrl
+      } else {
+        console.error('No auth URL received:', data)
+        alert('Failed to get authorization URL. Please try again.')
+        setIsConnecting(false)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to start OAuth:', error)
+      alert(`Failed to connect to Discogs: ${error?.message || 'Unknown error'}`)
       setIsConnecting(false)
     }
   }
@@ -61,20 +79,9 @@ export function LandingHeroSplit4() {
           <div className="max-w-xl animate-fade-in-up">
             {/* Logo */}
             <div className="mb-6 lg:mb-12">
-              <Image 
-                src="/svg/light/waxvalue-horizontal-light.svg"
-                alt="waxvalue"
-                className="h-20 lg:h-24 w-auto dark:hidden"
-                width={200}
-                height={80}
-              />
-              <Image 
-                src="/svg/dark/waxvalue-horizontal-dark.svg"
-                alt="waxvalue"
-                className="h-20 lg:h-24 w-auto hidden dark:block"
-                width={200}
-                height={80}
-              />
+              <div className="h-20 lg:h-24">
+                <Logo variant="horizontal" size="xl" />
+              </div>
             </div>
 
             {/* Main content */}
@@ -92,6 +99,7 @@ export function LandingHeroSplit4() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <button
+                type="button"
                 onClick={handleConnectDiscogs}
                 disabled={isConnecting}
                 className="group relative px-8 py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-xl font-semibold text-lg shadow-xl shadow-primary-500/30 hover:shadow-2xl hover:shadow-primary-500/40 transition-all duration-300 hover:scale-105 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed will-change-transform transform-gpu touch-manipulation min-h-[56px] active:scale-95"
