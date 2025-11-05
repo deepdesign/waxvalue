@@ -242,7 +242,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
 
       {/* Desktop sidebar - full width */}
-      <div className="hidden xl:fixed xl:inset-y-0 xl:flex xl:w-64 xl:flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
+      <div className="hidden xl:fixed xl:top-0 xl:flex xl:w-64 xl:flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: 'calc(100vh - 300px)', maxHeight: 'calc(100vh - 300px)' }}>
         <div className="flex flex-col flex-grow">
           <div className="flex items-center justify-center px-4 mt-[35px] mb-[20px] select-none">
             <Logo size="lg" className="scale-[1.17] pointer-events-none" />
@@ -322,7 +322,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
 
       {/* Collapsed sidebar - icon only */}
-      <div className="hidden lg:flex xl:hidden fixed inset-y-0 w-16 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
+      <div className="hidden lg:flex xl:hidden fixed top-0 w-16 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: 'calc(100vh - 300px)', maxHeight: 'calc(100vh - 300px)' }}>
         <div className="flex flex-col flex-grow">
           <div className="flex items-center justify-center px-2 mt-[35px] mb-[20px] select-none">
             <Logo size="sm" variant="brandmark" className="pointer-events-none" />
@@ -433,7 +433,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
       
       {/* Footer - full width, sits vertically beneath sidebar and content */}
-      <div className="w-full">
+      <div className="w-full border-t border-gray-200 dark:border-gray-700">
         <Footer 
           logo={<Logo size="md" variant="horizontal" />}
           strapline="Keep your Discogs prices in sync with the market"
