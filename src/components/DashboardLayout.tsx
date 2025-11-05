@@ -32,7 +32,6 @@ const navigation = [
 export const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [analysisProgress, setAnalysisProgress] = useState<{current: number, total: number} | null>(null)
-  const [sidebarHeight, setSidebarHeight] = useState('100vh')
   const [bottomSectionStyle, setBottomSectionStyle] = useState<React.CSSProperties>({})
   const footerRef = useRef<HTMLDivElement>(null)
   const sidebarRef = useRef<HTMLDivElement>(null)
@@ -84,27 +83,26 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
     }
   }, [])
 
-  // Calculate sidebar height and bottom section position to stick to footer
+  // Calculate bottom section position: sticky to viewport bottom, then move up when footer is visible
   useEffect(() => {
-    const updateSidebarAndBottomPosition = () => {
+    const updateBottomPosition = () => {
       if (footerRef.current && sidebarRef.current) {
         const footerRect = footerRef.current.getBoundingClientRect()
         const sidebarRect = sidebarRef.current.getBoundingClientRect()
         const footerTop = footerRect.top
         const viewportHeight = window.innerHeight
+        const viewportBottom = viewportHeight
         
-        // Set sidebar height to match footer position
-        setSidebarHeight(`${footerTop}px`)
-        
-        // Calculate if footer is visible within the sidebar's vertical space
-        // Bottom section should stick to viewport bottom, then align bottom edge with footer top when footer is in view
-        const sidebarHeightValue = footerTop - sidebarRect.top
+        // Bottom section should stick to viewport bottom, then move up when footer is visible
         const bottomSectionHeight = 140 // Approximate height of bottom section (theme toggle + user info)
         
-        // Check if footer is visible and within the sidebar's space
-        if (footerTop < viewportHeight && footerTop >= sidebarRect.top && sidebarHeightValue >= bottomSectionHeight) {
-          // Footer is visible: position bottom section so its bottom edge aligns with footer top
-          const distanceFromSidebarTop = footerTop - sidebarRect.top
+        // Check if footer is visible in viewport and would overlap with bottom section
+        if (footerTop < viewportBottom && footerTop >= sidebarRect.top) {
+          // Footer is visible: position bottom section above footer (align bottom of section with top of footer)
+          const distanceFromViewportTop = footerTop
+          const sidebarTop = sidebarRect.top
+          const distanceFromSidebarTop = distanceFromViewportTop - sidebarTop
+          
           setBottomSectionStyle({
             position: 'absolute',
             top: `${distanceFromSidebarTop - bottomSectionHeight}px`,
@@ -112,7 +110,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
             zIndex: 10
           })
         } else {
-          // Footer not in view yet or not enough space: stick to bottom of sidebar (viewport bottom)
+          // Footer not in view: stick to bottom of viewport
           setBottomSectionStyle({
             position: 'absolute',
             bottom: 0,
@@ -124,14 +122,14 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
     }
 
     // Initial calculation
-    updateSidebarAndBottomPosition()
+    updateBottomPosition()
     
     // Update on resize and scroll
-    window.addEventListener('resize', updateSidebarAndBottomPosition)
-    window.addEventListener('scroll', updateSidebarAndBottomPosition)
+    window.addEventListener('resize', updateBottomPosition)
+    window.addEventListener('scroll', updateBottomPosition)
     
     // Use MutationObserver to watch for footer height changes
-    const observer = new MutationObserver(updateSidebarAndBottomPosition)
+    const observer = new MutationObserver(updateBottomPosition)
     if (footerRef.current) {
       observer.observe(footerRef.current, {
         childList: true,
@@ -142,11 +140,11 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
     }
 
     // Also check periodically in case layout changes
-    const interval = setInterval(updateSidebarAndBottomPosition, 50)
+    const interval = setInterval(updateBottomPosition, 50)
 
     return () => {
-      window.removeEventListener('resize', updateSidebarAndBottomPosition)
-      window.removeEventListener('scroll', updateSidebarAndBottomPosition)
+      window.removeEventListener('resize', updateBottomPosition)
+      window.removeEventListener('scroll', updateBottomPosition)
       observer.disconnect()
       clearInterval(interval)
     }
@@ -314,8 +312,8 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
 
       {/* Desktop sidebar - full width */}
-      <div ref={sidebarRef} className="hidden xl:fixed xl:top-0 xl:flex xl:w-64 xl:flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: sidebarHeight }}>
-        <div className="flex flex-col h-full relative">
+      <div ref={sidebarRef} className="hidden xl:fixed xl:top-0 xl:flex xl:w-64 xl:flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: '100vh', maxHeight: '100vh' }}>
+        <div className="flex flex-col h-full relative overflow-hidden">
           {/* Logo - fixed at top */}
           <div className="flex-shrink-0 flex items-center justify-center px-4 mt-[35px] mb-[20px] select-none">
             <Logo size="lg" className="scale-[1.17] pointer-events-none" />
@@ -401,8 +399,8 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
 
       {/* Collapsed sidebar - icon only */}
-      <div className="hidden lg:flex xl:hidden fixed top-0 w-16 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: sidebarHeight }}>
-        <div className="flex flex-col h-full relative">
+      <div className="hidden lg:flex xl:hidden fixed top-0 w-16 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: '100vh', maxHeight: '100vh' }}>
+        <div className="flex flex-col h-full relative overflow-hidden">
           {/* Logo - fixed at top */}
           <div className="flex-shrink-0 flex items-center justify-center px-2 mt-[35px] mb-[20px] select-none">
             <Logo size="sm" variant="brandmark" className="pointer-events-none" />
