@@ -55,25 +55,52 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
         body: JSON.stringify({}),
       })
       
+      // Handle non-OK responses
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.detail || `HTTP error: ${response.status}`)
+        let errorMessage = `HTTP error: ${response.status}`
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.detail || errorData.error || errorData.message || errorMessage
+        } catch (jsonError) {
+          // Response is not JSON, try to get text
+          try {
+            const text = await response.text()
+            errorMessage = text || errorMessage
+          } catch (textError) {
+            // Can't read response at all
+            console.error('Failed to read error response:', textError)
+          }
+        }
+        throw new Error(errorMessage)
       }
 
-      const result = await response.json()
+      // Parse response
+      let result
+      try {
+        result = await response.json()
+      } catch (jsonError) {
+        throw new Error('Invalid response from server. Please try again.')
+      }
+      
+      // Validate response has required fields
+      if (!result.authUrl || !result.requestToken || !result.requestTokenSecret) {
+        throw new Error('Invalid response from server. Missing required data.')
+      }
       
       // Store the request token and secret for later verification
       localStorage.setItem('discogs_request_token', result.requestToken)
       localStorage.setItem('discogs_request_token_secret', result.requestTokenSecret)
       
-      
       // Redirect to Discogs authorization page in the same window
       window.location.href = result.authUrl
       
+      // Note: We don't set isConnecting to false here because we're navigating away
+      // The finally block will still run, but that's okay since we're leaving the page
+      
     } catch (error: any) {
       console.error('Connection error:', error)
-      alert(`Failed to connect to Discogs: ${error?.message || 'Unknown error'}`)
-    } finally {
+      const errorMessage = error?.message || 'Unknown error occurred'
+      alert(`Failed to connect to Discogs: ${errorMessage}\n\nPlease check:\n- Your internet connection\n- That the backend server is running\n- Your browser console for more details`)
       setIsConnecting(false)
     }
   }
