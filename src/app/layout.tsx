@@ -28,6 +28,7 @@ export const metadata: Metadata = {
 }
 
 const ToasterClient = dynamic(() => import('@/components/ToasterClient'))
+const FooterWrapper = dynamic(() => import('@/components/FooterWrapper'), { ssr: false })
 
 export default function RootLayout({
   children,
@@ -56,6 +57,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <ToasterClient />
+          <FooterWrapper />
         </Providers>
       </body>
     </html>

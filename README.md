@@ -1,10 +1,29 @@
-# Waxvalue - Discogs pricing optimisation
+<div align="center">
+
+# Waxvalue
+
+![Waxvalue Logo](public/svg/light/waxvalue-horizontal-light.svg#gh-light-mode-only)
+![Waxvalue Logo](public/svg/dark/waxvalue-horizontal-dark.svg#gh-dark-mode-only)
+
+### Keep your Discogs prices in sync with the market
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![Status](https://img.shields.io/badge/status-production--ready-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-A professional web application that helps Discogs sellers optimise their pricing using real-time market data analysis.
+---
+
+</div>
+
+A professional web application that helps Discogs sellers optimise their pricing using real-time market data analysis. Connect your Discogs account, analyse your entire inventory, and adjust prices in bulk with one click.
+
+---
+
+<div align="center">
+
+![Waxvalue Screenshot](public/images/waxvalue-screenshot-01.png)
+
+</div>
 
 ---
 
@@ -13,42 +32,47 @@ A professional web application that helps Discogs sellers optimise their pricing
 Waxvalue connects to your Discogs account and analyses your entire inventory against current market data. It identifies underpriced and overpriced items, then lets you adjust prices in bulk with one click.
 
 **Key benefits:**
-- 📊 Scan your entire catalogue for mispriced items
-- 💰 Identify underpriced items leaving money on the table
-- ⚡ Update prices in bulk with visual confirmation
-- 🎨 Beautiful, responsive interface with dark mode
-- 🔒 Secure OAuth integration - never stores your password
+- 📊 **Scan your entire catalogue** for mispriced items
+- 💰 **Identify underpriced items** leaving money on the table
+- ⚡ **Update prices in bulk** with visual confirmation
+- 🎨 **Beautiful, responsive interface** with dark mode
+- 🔒 **Secure OAuth integration** - never stores your password
 
 ---
 
 ## ✨ Features
 
-### Core functionality
-- **Discogs OAuth integration** - Secure authentication with Gravatar avatar support
-- **Real-time analysis** - Server-Sent Events (SSE) streaming for live progress
-- **Smart pricing** - Condition-specific recommendations based on market data
-- **Bulk operations** - Apply or decline multiple price changes at once
-- **Advanced filtering** - Filter by status, condition, price range with persistence
-- **Smart sorting** - Default sort by price delta (underpriced items first)
+### Core Functionality
 
-### User experience
-- **Loading screen** - 65 randomised vinyl facts to educate while processing
-- **Visual feedback** - Animated row repositioning with 2-second green highlight
-- **Settings persistence** - Filters and preferences saved across sessions
-- **Responsive design** - Optimised for desktop, tablet, and mobile
-- **Dark mode** - Full dark theme support
-- **British English** - Proper spelling and grammar throughout
+| Feature | Description |
+|---------|-------------|
+| **Discogs OAuth Integration** | Secure authentication with Gravatar avatar support |
+| **Real-time Analysis** | Server-Sent Events (SSE) streaming for live progress |
+| **Smart Pricing** | Condition-specific recommendations based on market data |
+| **Bulk Operations** | Apply or decline multiple price changes at once |
+| **Advanced Filtering** | Filter by status, condition, price range with persistence |
+| **Smart Sorting** | Default sort by price delta (underpriced items first) |
 
-### Landing page
+### User Experience
+
+- 🎓 **Loading screen** - 65 randomised vinyl facts to educate while processing
+- ✨ **Visual feedback** - Animated row repositioning with 2-second green highlight
+- 💾 **Settings persistence** - Filters and preferences saved across sessions
+- 📱 **Responsive design** - Optimised for desktop, tablet, and mobile
+- 🌙 **Dark mode** - Full dark theme support
+- 🇬🇧 **British English** - Proper spelling and grammar throughout
+
+### Landing Page
+
 - Modern, responsive design with animated gradients
 - Edge-to-edge hero imagery
 - Single call-to-action (Connect with Discogs)
 
 ---
 
-## 🚀 Quick start
+## 🚀 Quick Start
 
-### Local development
+### Local Development
 
 **Prerequisites:**
 - Node.js 18+
@@ -85,7 +109,7 @@ python main-dev.py
 
 ---
 
-## 📦 Production deployment
+## 📦 Production Deployment
 
 Waxvalue is production-ready and tested. See deployment guides:
 
@@ -100,7 +124,7 @@ bash deploy-final.sh
 
 ---
 
-## 🛠 Technology stack
+## 🛠 Technology Stack
 
 ### Frontend
 - **Framework:** Next.js 15.5.4 (React 19)
@@ -127,7 +151,7 @@ bash deploy-final.sh
 
 ## ⚙️ Configuration
 
-### Backend environment (`backend/.env`)
+### Backend Environment (`backend/.env`)
 
 ```bash
 DISCOGS_CONSUMER_KEY=your_consumer_key
@@ -138,7 +162,7 @@ SESSION_SECRET=your_random_secret_key
 LOG_LEVEL=INFO
 ```
 
-### Frontend environment (`.env.production`)
+### Frontend Environment (`.env.production`)
 
 ```bash
 NEXT_PUBLIC_BACKEND_URL=https://yourdomain.com/api/backend
@@ -150,7 +174,7 @@ See [docs/ENV_TEMPLATE.md](docs/ENV_TEMPLATE.md) for complete configuration.
 
 ## 📚 Documentation
 
-### Getting started
+### Getting Started
 - [Quick Start Guide](#-quick-start)
 - [Environment Setup](docs/ENV_TEMPLATE.md)
 - [Development Guidelines](docs/development/DEVELOPMENT_GUIDELINES.md)
@@ -169,22 +193,22 @@ See [docs/ENV_TEMPLATE.md](docs/ENV_TEMPLATE.md) for complete configuration.
 
 ---
 
-## 🎨 Features in detail
+## 🎨 Features in Detail
 
-### Pricing analysis
-- Fetches all &ldquo;For Sale&rdquo; items from your Discogs inventory
-- Uses Discogs&apos; official price suggestion API
+### Pricing Analysis
+- Fetches all "For Sale" items from your Discogs inventory
+- Uses Discogs' official price suggestion API
 - Matches exact item condition (media + sleeve) to market data
 - Classifies as underpriced (10%+ higher), overpriced (10%+ lower), or fairly priced
 - Real-time progress with Server-Sent Events
 
-### Apply flow
-1. User clicks &ldquo;Apply&rdquo; → Button turns green with checkmark
+### Apply Flow
+1. User clicks "Apply" → Button turns green with checkmark
 2. 2-second pause for visual confirmation
 3. Row smoothly animates to new sorted position (200ms transition)
 4. Applied rows show subtle green tint
 
-### Filtering and sorting
+### Filtering and Sorting
 - Filter by status, condition, price range
 - Default sort: underpriced items first (largest delta to smallest)
 - Filters persist across browser sessions
@@ -204,7 +228,7 @@ npm run lint         # Run ESLint
 npm run type-check   # TypeScript validation
 ```
 
-### Project structure
+### Project Structure
 
 ```
 waxvalue/
@@ -244,7 +268,7 @@ npm run build  # Should complete with 31 pages generated
 
 ---
 
-## 📊 Production statistics
+## 📊 Production Statistics
 
 - **Build Size:** 102 kB (gzipped)
 - **Pages:** 31 static pages
@@ -257,12 +281,12 @@ npm run build  # Should complete with 31 pages generated
 
 ## 🔐 Security
 
-- OAuth 1.0a authentication (no password storage)
-- Session-based authentication
-- CORS configured for production domains
-- Environment variables for secrets
-- HTTPS required for OAuth callbacks
-- Rate limiting on API endpoints
+- ✅ OAuth 1.0a authentication (no password storage)
+- ✅ Session-based authentication
+- ✅ CORS configured for production domains
+- ✅ Environment variables for secrets
+- ✅ HTTPS required for OAuth callbacks
+- ✅ Rate limiting on API endpoints
 
 ---
 
@@ -280,6 +304,8 @@ This project is licensed under the MIT License.
 
 ---
 
+<div align="center">
+
 ## 🙏 Credits
 
 **Development:** October 2025  
@@ -292,5 +318,4 @@ This project is licensed under the MIT License.
 
 **Waxvalue** - Keep your Discogs prices market-perfect. 🎵
 
-![Waxvalue](public/svg/light/waxvalue-horizontal-light.svg#gh-light-mode-only)
-![Waxvalue](public/svg/dark/waxvalue-horizontal-dark.svg#gh-dark-mode-only)
+</div>
