@@ -22,6 +22,7 @@
 
 import { useEffect, useState, ReactNode } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Project {
   name: string
@@ -103,8 +104,8 @@ export default function Footer({
   }, [])
 
   return (
-    <footer className="bg-gray-100 shadow-sm dark:bg-gray-950">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+    <footer className="bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="w-full max-w-7xl mx-auto px-6 py-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Logo and Strapline */}
           {logo && (
@@ -136,9 +137,11 @@ export default function Footer({
                       className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
                       aria-label={project.name}
                     >
-                      <img
+                      <Image
                         src={isDark ? project.logoDark : project.logoLight}
                         alt={project.name}
+                        width={40}
+                        height={40}
                         className="h-[40px] w-auto opacity-100 hover:opacity-70 transition-opacity"
                       />
                     </a>
@@ -162,9 +165,11 @@ export default function Footer({
                   className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
                   aria-label="JC Logo"
                 >
-                  <img
+                  <Image
                     src={isDark ? '/_other logos/jc-logo-dark.svg' : '/_other logos/jc-logo-light.svg'}
                     alt="JC"
+                    width={40}
+                    height={40}
                     className="h-[40px] w-auto opacity-100 hover:opacity-70 transition-opacity"
                   />
                 </a>
@@ -177,9 +182,11 @@ export default function Footer({
                   className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
                   aria-label="GitHub"
                 >
-                  <img
+                  <Image
                     src={isDark ? '/_other logos/github-mark-dark.svg' : '/_other logos/github-mark-light.svg'}
                     alt="GitHub"
+                    width={40}
+                    height={40}
                     className="h-[40px] w-auto opacity-100 hover:opacity-70 transition-opacity"
                   />
                 </a>
