@@ -3,7 +3,10 @@
 import { useState, useEffect, useMemo } from 'react'
 import { ArrowRightIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import { Logo } from '../Logo'
+
+const Footer = dynamic(() => import('@/components/Footer'))
 
 export function LandingHeroSplit4() {
   const [isConnecting, setIsConnecting] = useState(false)
@@ -41,54 +44,42 @@ export function LandingHeroSplit4() {
   const handleConnectDiscogs = async () => {
     setIsConnecting(true)
     try {
-      console.log('Starting Discogs OAuth setup...')
-      const response = await fetch('/api/backend/auth/setup', { 
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      
-      console.log('Response status:', response.status)
+      const response = await fetch('/api/backend/auth/setup', { method: 'POST' })
       const data = await response.json()
-      console.log('Response data:', data)
-      
-      if (!response.ok) {
-        const errorMessage = data.detail || data.error || data.details || `HTTP error: ${response.status}`
-        console.error('OAuth setup failed:', errorMessage, data)
-        alert(`Failed to connect to Discogs: ${errorMessage}`)
-        setIsConnecting(false)
-        return
-      }
-
-      if (data.authUrl && data.requestToken && data.requestTokenSecret) {
-        console.log('OAuth setup successful, redirecting...')
+      if (data.authUrl) {
         localStorage.setItem('discogs_request_token', data.requestToken)
         localStorage.setItem('discogs_request_token_secret', data.requestTokenSecret)
         window.location.href = data.authUrl
-      } else {
-        console.error('Invalid response format:', data)
-        alert('Failed to get authorization URL. The server response was invalid.')
-        setIsConnecting(false)
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to start OAuth:', error)
-      alert(`Failed to connect to Discogs: ${error?.message || 'Network error. Please check your connection and try again.'}`)
       setIsConnecting(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
-      <div className="grid lg:grid-cols-2 flex-1">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
+      <div className="grid lg:grid-cols-2 min-h-screen">
         {/* Left Content */}
-        <div className="flex flex-col justify-center px-8 lg:px-16 py-8 lg:py-12">
-          <div className="max-w-xl animate-fade-in-up">
+        <div className="flex flex-col justify-between px-8 lg:px-16 py-8 lg:py-12">
+          <div className="flex-1 flex items-center">
+            <div className="max-w-xl animate-fade-in-up">
             {/* Logo */}
-            <div className="mb-6 lg:mb-12 pointer-events-none">
-              <div className="h-20 lg:h-24 pointer-events-auto">
-                <Logo variant="horizontal" size="xl" />
-              </div>
+            <div className="mb-6 lg:mb-12">
+              <Image 
+                src="/svg/light/waxvalue-horizontal-light.svg"
+                alt="waxvalue"
+                className="h-20 lg:h-24 w-auto dark:hidden"
+                width={200}
+                height={80}
+              />
+              <Image 
+                src="/svg/dark/waxvalue-horizontal-dark.svg"
+                alt="waxvalue"
+                className="h-20 lg:h-24 w-auto hidden dark:block"
+                width={200}
+                height={80}
+              />
             </div>
 
             {/* Main content */}
@@ -106,14 +97,9 @@ export function LandingHeroSplit4() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  handleConnectDiscogs()
-                }}
+                onClick={handleConnectDiscogs}
                 disabled={isConnecting}
-                className="group relative px-8 py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-xl font-semibold text-lg shadow-xl shadow-primary-500/30 hover:shadow-2xl hover:shadow-primary-500/40 transition-all duration-300 hover:scale-105 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed will-change-transform transform-gpu touch-manipulation min-h-[56px] active:scale-95 z-10"
+                className="group relative px-8 py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-xl font-semibold text-lg shadow-xl shadow-primary-500/30 hover:shadow-2xl hover:shadow-primary-500/40 transition-all duration-300 hover:scale-105 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed will-change-transform transform-gpu touch-manipulation min-h-[56px] active:scale-95"
                 aria-label={isConnecting ? "Connecting to Discogs, please wait" : "Connect your Discogs account to start pricing analysis"}
                 aria-describedby="connect-description"
               >
@@ -138,6 +124,17 @@ export function LandingHeroSplit4() {
             <p id="connect-description" className="text-sm text-gray-500 dark:text-gray-400">
               🔒 Secure OAuth • No password required • Free to start
             </p>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="max-w-xl w-full">
+            <Footer
+              logo={<Logo variant="horizontal" size="md" />}
+              strapline="Keep your Discogs prices in sync with the market"
+              homeLink="/"
+              settingsLink={null}
+            />
           </div>
         </div>
 
@@ -161,6 +158,7 @@ export function LandingHeroSplit4() {
           
           {/* Gradient overlay for better text contrast if needed */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-purple-500/10"></div>
+          
         </div>
       </div>
 
