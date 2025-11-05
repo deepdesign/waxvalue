@@ -476,7 +476,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       {/* Footer - full width, sits vertically beneath sidebar and content */}
       <div ref={footerRef} className="w-full border-t border-gray-200 dark:border-gray-700">
         <Footer 
-          logo={<Logo size="md" variant="horizontal" />}
+          logo={<Logo size="lg" variant="horizontal" className="scale-[1.17]" />}
           strapline="Keep your Discogs prices in sync with the market"
           homeLink="/dashboard"
           settingsLink={null}
