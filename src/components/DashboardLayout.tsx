@@ -284,11 +284,14 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
 
       {/* Desktop sidebar - full width */}
       <div className="hidden xl:fixed xl:top-0 xl:flex xl:w-64 xl:flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: sidebarHeight }}>
-        <div className="flex flex-col flex-grow">
-          <div className="flex items-center justify-center px-4 mt-[35px] mb-[20px] select-none">
+        <div className="flex flex-col h-full">
+          {/* Logo - fixed at top */}
+          <div className="flex-shrink-0 flex items-center justify-center px-4 mt-[35px] mb-[20px] select-none">
             <Logo size="lg" className="scale-[1.17] pointer-events-none" />
           </div>
-          <nav className="flex-1 px-4 py-4 space-y-1" role="navigation" aria-label="Main navigation">
+          
+          {/* Navigation - scrollable middle section */}
+          <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1 min-h-0" role="navigation" aria-label="Main navigation">
             {navigation.map((item) => {
               const isActive = pathname === item.href
               return (
@@ -314,48 +317,52 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
             })}
           </nav>
           
-          {/* Dark Mode Toggle */}
-          <div className="px-4 py-3">
-            <div className="w-full">
-              <DarkModeToggle />
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-200 dark:border-gray-700 p-4">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                {user?.avatar ? (
-                  <Image
-                    className="h-8 w-8 rounded-full object-cover"
-                    src={user.avatar}
-                    alt={user.name || user.username}
-                    width={32}
-                    height={32}
-                    onError={(e) => {
-                      console.error('Avatar failed to load:', user.avatar)
-                      e.currentTarget.style.display = 'none'
-                    }}
-                  />
-                ) : (
-                  <div className="h-8 w-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {(user?.name || user?.username)?.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                )}
+          {/* Bottom section - fixed at bottom */}
+          <div className="flex-shrink-0 flex flex-col">
+            {/* Dark Mode Toggle */}
+            <div className="px-4 py-3">
+              <div className="w-full">
+                <DarkModeToggle />
               </div>
-              <div className="ml-3 select-none">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{user?.name || user?.username}</p>
-                {user?.email && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 flex items-center mt-1 select-none"
-                >
-                  <ArrowRightOnRectangleIcon className="h-3 w-3 mr-1" />
-                  Sign out
-                </button>
+            </div>
+            
+            {/* User info and Sign out */}
+            <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  {user?.avatar ? (
+                    <Image
+                      className="h-8 w-8 rounded-full object-cover"
+                      src={user.avatar}
+                      alt={user.name || user.username}
+                      width={32}
+                      height={32}
+                      onError={(e) => {
+                        console.error('Avatar failed to load:', user.avatar)
+                        e.currentTarget.style.display = 'none'
+                      }}
+                    />
+                  ) : (
+                    <div className="h-8 w-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {(user?.name || user?.username)?.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="ml-3 select-none">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{user?.name || user?.username}</p>
+                  {user?.email && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 flex items-center mt-1 select-none"
+                  >
+                    <ArrowRightOnRectangleIcon className="h-3 w-3 mr-1" />
+                    Sign out
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -364,12 +371,15 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
 
       {/* Collapsed sidebar - icon only */}
       <div className="hidden lg:flex xl:hidden fixed top-0 w-16 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: sidebarHeight }}>
-        <div className="flex flex-col flex-grow">
-          <div className="flex items-center justify-center px-2 mt-[35px] mb-[20px] select-none">
+        <div className="flex flex-col h-full">
+          {/* Logo - fixed at top */}
+          <div className="flex-shrink-0 flex items-center justify-center px-2 mt-[35px] mb-[20px] select-none">
             <Logo size="sm" variant="brandmark" className="pointer-events-none" />
           </div>
-            <nav className="flex-1 px-2 py-4 space-y-1" role="navigation" aria-label="Main navigation">
-              {navigationItems.map((item) => {
+          
+          {/* Navigation - scrollable middle section */}
+          <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1 min-h-0" role="navigation" aria-label="Main navigation">
+            {navigationItems.map((item) => {
               const isActive = pathname === item.href
               return (
                 <Tooltip key={item.name} content={item.name} placement="right">
@@ -394,24 +404,12 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
             })}
           </nav>
           
-          {/* Dark Mode Toggle */}
-          <div className="px-2 py-3">
-            <div className="w-full flex justify-center">
-              <DarkModeToggleCollapsed />
-            </div>
-          </div>
-          
-          {/* User profile section hidden in collapsed sidebar */}
-          <div className="border-t border-gray-200 dark:border-gray-700 p-2 hidden">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <Image
-                  className="h-8 w-8 rounded-full"
-                  src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || user?.username || 'User')}&background=6366f1&color=ffffff`}
-                  alt={user?.name || user?.username || 'User'}
-                  width={32}
-                  height={32}
-                />
+          {/* Bottom section - fixed at bottom */}
+          <div className="flex-shrink-0 flex flex-col">
+            {/* Dark Mode Toggle */}
+            <div className="px-2 py-3">
+              <div className="w-full flex justify-center">
+                <DarkModeToggleCollapsed />
               </div>
             </div>
           </div>
