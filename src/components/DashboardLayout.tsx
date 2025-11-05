@@ -95,7 +95,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
   const navigationItems = useMemo(() => navigation, [])
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-50 xl:hidden 
         ${sidebarOpen ? 'block' : 'hidden'}`}>
@@ -320,13 +320,6 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
               </div>
             </div>
           </div>
-          
-          {/* Copyright */}
-          <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
-            <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-              © {new Date().getFullYear()} Deep Design Australia Pty Ltd
-            </p>
-          </div>
         </div>
       </div>
 
@@ -382,15 +375,6 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
                 />
               </div>
             </div>
-          </div>
-          
-          {/* Copyright */}
-          <div className="border-t border-gray-200 dark:border-gray-700 px-2 py-3">
-            <Tooltip content={`© ${new Date().getFullYear()} Deep Design Australia Pty Ltd`} placement="right">
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                © {new Date().getFullYear()}
-              </p>
-            </Tooltip>
           </div>
         </div>
       </div>
@@ -449,11 +433,12 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
           </div>
         </main>
         
-        {/* Footer - positioned at bottom of main content area */}
-        <footer className="mt-auto">
-          <FooterWrapper />
-        </footer>
       </div>
+      
+      {/* Footer - full width, positioned at bottom beneath sidebar */}
+      <footer className="mt-auto w-full">
+        <FooterWrapper />
+      </footer>
     </div>
   )
 })

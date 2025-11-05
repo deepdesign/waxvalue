@@ -11,7 +11,7 @@ export default function FooterWrapper() {
       logo={<Logo variant="horizontal" size="md" />}
       strapline="Keep your Discogs prices in sync with the market"
       homeLink="/"
-      settingsLink="/settings"
+      settingsLink={null}
     />
   )
 }
