@@ -32,6 +32,7 @@ const navigation = [
 export const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [analysisProgress, setAnalysisProgress] = useState<{current: number, total: number} | null>(null)
+  const [sidebarHeight, setSidebarHeight] = useState('100vh')
   const [bottomSectionStyle, setBottomSectionStyle] = useState<React.CSSProperties>({})
   const footerRef = useRef<HTMLDivElement>(null)
   const sidebarRef = useRef<HTMLDivElement>(null)
@@ -83,7 +84,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
     }
   }, [])
 
-  // Calculate bottom section position: sticky to viewport bottom, then move up when footer is visible
+  // Calculate sidebar height and bottom section position: sticky to viewport bottom, then move up when footer is visible
   useEffect(() => {
     const updateBottomPosition = () => {
       if (footerRef.current && sidebarRef.current) {
@@ -92,6 +93,9 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
         const footerTop = footerRect.top
         const viewportHeight = window.innerHeight
         const viewportBottom = viewportHeight
+        
+        // Set sidebar height to stop at footer (so border stops at footer)
+        setSidebarHeight(`${footerTop}px`)
         
         // Bottom section should stick to viewport bottom, then move up when footer is visible
         const bottomSectionHeight = 140 // Approximate height of bottom section (theme toggle + user info)
@@ -312,7 +316,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
 
       {/* Desktop sidebar - full width */}
-      <div ref={sidebarRef} className="hidden xl:fixed xl:top-0 xl:flex xl:w-64 xl:flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: '100vh', maxHeight: '100vh' }}>
+      <div ref={sidebarRef} className="hidden xl:fixed xl:top-0 xl:flex xl:w-64 xl:flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: sidebarHeight }}>
         <div className="flex flex-col h-full relative overflow-hidden">
           {/* Logo - fixed at top */}
           <div className="flex-shrink-0 flex items-center justify-center px-4 mt-[35px] mb-[20px] select-none">
@@ -399,7 +403,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
 
       {/* Collapsed sidebar - icon only */}
-      <div className="hidden lg:flex xl:hidden fixed top-0 w-16 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: '100vh', maxHeight: '100vh' }}>
+      <div className="hidden lg:flex xl:hidden fixed top-0 w-16 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ height: sidebarHeight }}>
         <div className="flex flex-col h-full relative overflow-hidden">
           {/* Logo - fixed at top */}
           <div className="flex-shrink-0 flex items-center justify-center px-2 mt-[35px] mb-[20px] select-none">
@@ -501,7 +505,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
       </div>
       
       {/* Footer - full width, sits vertically beneath sidebar and content */}
-      <div ref={footerRef} className="w-full border-t border-gray-200 dark:border-gray-700">
+      <div ref={footerRef} className="w-full border-t border-gray-200 dark:border-gray-700 relative z-10 bg-white dark:bg-gray-900">
         <Footer 
           logo={<Logo size="lg" variant="horizontal" className="scale-[1.17]" />}
           strapline="Keep your Discogs prices in sync with the market"
