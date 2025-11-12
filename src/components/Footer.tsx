@@ -60,16 +60,16 @@ export default function Footer({
       logoLight: "/_other logos/podmate-circle-light.svg"
     },
     {
-      name: "Walljazzle",
-      url: "https://walljazzle.com/",
-      logoDark: "/_other logos/walljazzle-circle-dark.svg",
-      logoLight: "/_other logos/walljazzle-circle-light.svg"
-    },
-    {
       name: "Waxvalue",
       url: "https://www.waxvalue.com/",
       logoDark: "/_other logos/waxvalue-circle-dark.svg",
       logoLight: "/_other logos/waxvalue-circle-light.svg"
+    },
+    {
+      name: "Walljazzle",
+      url: "https://walljazzle.com/",
+      logoDark: "/_other logos/walljazzle-circle-dark.svg",
+      logoLight: "/_other logos/walljazzle-circle-light.svg"
     },
     {
       name: "Bitlab",
