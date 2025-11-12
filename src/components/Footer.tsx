@@ -70,6 +70,12 @@ export default function Footer({
       url: "https://www.waxvalue.com/",
       logoDark: "/_other logos/waxvalue-circle-dark.svg",
       logoLight: "/_other logos/waxvalue-circle-light.svg"
+    },
+    {
+      name: "Bitlab",
+      url: "https://www.bitlab.jamescutts.me",
+      logoDark: "/_other logos/bitlab-logo-circle-dark.svg",
+      logoLight: "/_other logos/bitlab-logo-circle-light.svg"
     }
   ],
   companyName = "Deep Design Pty Ltd",
