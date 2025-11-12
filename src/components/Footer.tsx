@@ -73,7 +73,7 @@ export default function Footer({
     },
     {
       name: "Bitlab",
-      url: "https://www.bitlab.jamescutts.me",
+      url: "https://bitlab.jamescutts.me/",
       logoDark: "/_other logos/bitlab-logo-circle-dark.svg",
       logoLight: "/_other logos/bitlab-logo-circle-light.svg"
     }
