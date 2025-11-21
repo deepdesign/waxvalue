@@ -72,10 +72,10 @@ export default function Footer({
       logoLight: "/_other logos/walljazzle-circle-light.svg"
     },
     {
-      name: "Bitlab",
-      url: "https://bitlab.jamescutts.me/",
-      logoDark: "/_other logos/bitlab-logo-circle-dark.svg",
-      logoLight: "/_other logos/bitlab-logo-circle-light.svg"
+      name: "Pixli",
+      url: "https://pixli.jamescutts.me/",
+      logoDark: "/_other logos/pixli-logo-circle-dark.svg",
+      logoLight: "/_other logos/pixli-logo-circle-light.svg"
     }
   ],
   companyName = "Deep Design Pty Ltd",
