@@ -21,6 +21,7 @@
 'use client'
 
 import { useEffect, useState, ReactNode } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -117,7 +118,10 @@ export default function Footer({
           {logo && (
             <div>
               <Link href={homeLink} className="flex items-center mb-4">
-                {logo}
+                {/* Clone logo with disableLink prop to prevent nested links */}
+                {React.isValidElement(logo)
+                  ? React.cloneElement(logo as React.ReactElement, { disableLink: true })
+                  : logo}
               </Link>
               {strapline && (
                 <p className="text-sm text-gray-500 dark:text-gray-400">

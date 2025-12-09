@@ -10,13 +10,15 @@ interface LogoProps {
   variant?: 'horizontal' | 'vertical' | 'brandmark'
   className?: string
   forceDark?: boolean
+  disableLink?: boolean
 }
 
 export function Logo({ 
   size = 'md', 
   variant = 'horizontal',
   className = '',
-  forceDark = false
+  forceDark = false,
+  disableLink = false
 }: LogoProps) {
   const { theme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -80,18 +82,26 @@ export function Logo({
 
   const logoPath = getLogoPath()
 
+  const logoContent = (
+    <div className={`relative ${sizeClasses[variant][size]} ${className}`}>
+      <Image
+        key={logoPath}
+        src={logoPath}
+        alt="waxvalue"
+        className="w-auto h-full object-contain"
+        width={200}
+        height={60}
+      />
+    </div>
+  )
+
+  if (disableLink) {
+    return logoContent
+  }
+
   return (
     <Link href="/dashboard" className="cursor-pointer">
-      <div className={`relative ${sizeClasses[variant][size]} ${className}`}>
-        <Image
-          key={logoPath}
-          src={logoPath}
-          alt="waxvalue"
-          className="w-auto h-full object-contain"
-          width={200}
-          height={60}
-        />
-      </div>
+      {logoContent}
     </Link>
   )
 }
