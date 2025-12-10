@@ -29,65 +29,23 @@
     @apply transition-colors duration-200;
   }
   
-  /* NO I-BEAM CURSOR ANYWHERE - default cursor for most elements */
+  /* Allow text selection everywhere, but hide I-beam cursor */
   * {
     cursor: default;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+  }
+  
+  /* Hide blinking caret (I-beam cursor) in input fields */
+  input, textarea, [contenteditable="true"] {
+    caret-color: transparent;
   }
   
   /* Interactive elements should have pointer cursor */
   button, a, [role="button"], input[type="checkbox"], input[type="radio"], label {
     cursor: pointer;
-  }
-  
-  /* Only show text cursor in actual text input fields */
-  input[type="text"], input[type="email"], input[type="password"], input[type="search"], input[type="url"], textarea, [contenteditable="true"] {
-    cursor: text !important;
-    user-select: text !important;
-    -webkit-user-select: text !important;
-    -moz-user-select: text !important;
-    -ms-user-select: text !important;
-  }
-  
-  /* Allow text selection on content (but keep default cursor, not I-beam) */
-  p, td, li, pre, code, .allow-select, 
-  /* Add more specific selectors for better text selection */
-  .text-content, .copyable-text, .selectable-text,
-  /* Table content should be selectable */
-  .table-cell, .table-content,
-  /* Navigation text should be selectable */
-  .nav-text, .menu-text,
-  /* Card content should be selectable */
-  .card-content, .content-text,
-  /* Dashboard content should be selectable */
-  .dashboard-content, .stats-text, .metric-text {
-    user-select: text;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    cursor: default; /* Keep default cursor, not I-beam */
-  }
-  
-  /* Special handling for specific content areas */
-  .copyable-content {
-    user-select: text;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    cursor: default;
-    /* Add subtle visual hint that text is selectable */
-    transition: background-color 0.2s ease;
-  }
-  
-  .copyable-content:hover {
-    background-color: rgba(59, 130, 246, 0.05); /* Very subtle blue hint */
-  }
-  
-  .copyable-content:active {
-    background-color: rgba(59, 130, 246, 0.1); /* Slightly more visible on click */
   }
 
   /* Mobile optimizations */
@@ -124,9 +82,31 @@
     @apply bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100;
   }
   
-  /* Focus states for accessibility */
-  input:focus, textarea:focus, select:focus {
-    @apply ring-2 ring-primary-500 dark:ring-primary-400 border-primary-500 dark:border-primary-400;
+  /* Remove all focus outlines and rings */
+  *:focus,
+  *:focus-visible,
+  *:focus-within,
+  *:focus-visible::before,
+  *:focus-visible::after {
+    outline: none !important;
+    box-shadow: none !important;
+    --tw-ring-offset-shadow: 0 0 #0000 !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
+    --tw-shadow: 0 0 #0000 !important;
+    --tw-shadow-colored: 0 0 #0000 !important;
+  }
+  
+  input:focus, 
+  textarea:focus, 
+  select:focus,
+  button:focus,
+  a:focus,
+  [role="button"]:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: inherit;
+    --tw-ring-offset-shadow: 0 0 #0000 !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
   }
 
 }
@@ -279,9 +259,9 @@
     @apply bg-white dark:bg-gray-800 rounded-lg shadow-lg shadow-gray-200/50 dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl hover:shadow-gray-200/60 dark:hover:shadow-gray-900/60 transition-shadow duration-300;
   }
   
-  /* Input component - enhanced with modern focus states */
+  /* Input component - no focus outlines */
   .input-base {
-    @apply block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:focus:ring-primary-400/50 focus:border-primary-500 dark:focus:border-primary-400 focus:shadow-lg focus:shadow-primary-500/20 dark:focus:shadow-primary-400/20 transition-all duration-200;
+    @apply block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none transition-all duration-200;
   }
   
   /* Badge component - enhanced with colored shadows */
@@ -303,7 +283,7 @@
   
   /* Navigation link - consistent nav styling */
   .nav-link {
-    @apply flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors select-none cursor-pointer;
+    @apply flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer;
   }
   
   .nav-link-active {
@@ -436,13 +416,13 @@
     scroll-snap-stop: always;
   }
   
-  /* Enhanced Focus States */
+  /* Enhanced Focus States - no outlines */
   .focus-ring-modern {
-    @apply focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900;
+    @apply focus:outline-none;
   }
   
   .focus-ring-colored {
-    @apply focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 focus:shadow-lg focus:shadow-primary-500/20;
+    @apply focus:outline-none;
   }
   
   /* Enhanced Striped Background Animation */

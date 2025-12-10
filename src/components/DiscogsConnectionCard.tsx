@@ -88,8 +88,11 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
       }
       
       // Store the request token and secret for later verification
+      // Store in both localStorage and sessionStorage for reliability
       localStorage.setItem('discogs_request_token', result.requestToken)
       localStorage.setItem('discogs_request_token_secret', result.requestTokenSecret)
+      sessionStorage.setItem('discogs_request_token', result.requestToken)
+      sessionStorage.setItem('discogs_request_token_secret', result.requestTokenSecret)
       
       // Redirect to Discogs authorization page in the same window
       window.location.href = result.authUrl

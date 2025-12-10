@@ -23,9 +23,11 @@ export function WelcomePage() {
       
       if (data.authUrl) {
         // Store OAuth tokens for callback (session will be created after auth)
+        // Store in both localStorage and sessionStorage for reliability
         localStorage.setItem('discogs_request_token', data.requestToken)
         localStorage.setItem('discogs_request_token_secret', data.requestTokenSecret)
-        
+        sessionStorage.setItem('discogs_request_token', data.requestToken)
+        sessionStorage.setItem('discogs_request_token_secret', data.requestTokenSecret)
         
         // Redirect to Discogs authorization
         window.location.href = data.authUrl

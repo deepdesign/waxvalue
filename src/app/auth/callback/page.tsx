@@ -34,17 +34,59 @@ function AuthCallbackContent() {
         }
 
         // Get the stored request token and secret from localStorage
-        const requestToken = localStorage.getItem('discogs_request_token')
-        const requestTokenSecret = localStorage.getItem('discogs_request_token_secret')
+        // Add retry logic for first-time auth (localStorage might not be ready immediately)
+        let requestToken = localStorage.getItem('discogs_request_token')
+        let requestTokenSecret = localStorage.getItem('discogs_request_token_secret')
+        
+        // If tokens not found, wait a bit and retry (handles race condition on first auth)
+        if (!requestToken || !requestTokenSecret) {
+          console.log('Tokens not found immediately, retrying...')
+          await new Promise(resolve => setTimeout(resolve, 100))
+          requestToken = localStorage.getItem('discogs_request_token')
+          requestTokenSecret = localStorage.getItem('discogs_request_token_secret')
+        }
+        
+        // Also check sessionStorage as fallback
+        if (!requestToken || !requestTokenSecret) {
+          requestToken = sessionStorage.getItem('discogs_request_token') || requestToken
+          requestTokenSecret = sessionStorage.getItem('discogs_request_token_secret') || requestTokenSecret
+        }
         
         // Retrieved tokens for OAuth flow
         console.log('Retrieved tokens:', {
-          token: requestToken,
-          secret: requestTokenSecret
+          token: requestToken ? `${requestToken.substring(0, 10)}...` : 'null',
+          secret: requestTokenSecret ? `${requestTokenSecret.substring(0, 10)}...` : 'null'
         })
         
         if (!requestToken || !requestTokenSecret) {
-          throw new Error('No request token found. Please try connecting again.')
+          // Don't show error immediately - try to proceed with verification anyway
+          // The backend might handle it, or we can use oauth_token from URL
+          console.warn('No request token found in storage, but proceeding with verification attempt')
+          // Continue anyway - the backend will handle the error if tokens are truly missing
+        }
+
+        // Helper function to handle success (defined early so it can be used in retry logic)
+        const handleSuccess = (result: any) => {
+          // Debug logging
+          console.log('OAuth result processed successfully')
+
+          // Update user state in both localStorage and React context
+          localStorage.setItem('waxvalue_user', JSON.stringify(result.user))
+          setUser(result.user) // Update React context immediately
+          
+          // Clear the stored request tokens
+          localStorage.removeItem('discogs_request_token')
+          localStorage.removeItem('discogs_request_token_secret')
+          sessionStorage.removeItem('discogs_request_token')
+          sessionStorage.removeItem('discogs_request_token_secret')
+
+          setStatus('success')
+          setMessage(`Successfully connected to Discogs as ${result.user.username}`)
+
+          // Redirect to dashboard after a short delay
+          setTimeout(() => {
+            router.push('/dashboard')
+          }, 2000)
         }
 
         // Get or create session ID
@@ -64,44 +106,62 @@ function AuthCallbackContent() {
         }
 
         // Verify the authorisation with the backend
+        // Only send tokens if we have them - backend will handle missing tokens
+        const verifyPayload: any = {
+          verifierCode: oauthVerifier,
+        }
+        
+        if (requestToken && requestTokenSecret) {
+          verifyPayload.requestToken = requestToken
+          verifyPayload.requestTokenSecret = requestTokenSecret
+        } else if (oauthToken) {
+          // Use oauth_token from URL as fallback
+          verifyPayload.requestToken = oauthToken
+          console.log('Using oauth_token from URL as fallback')
+        }
+
         const response = await fetch(`/api/backend/auth/verify?session_id=${sessionId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            requestToken: requestToken,
-            requestTokenSecret: requestTokenSecret,
-            verifierCode: oauthVerifier,
-          }),
+          body: JSON.stringify(verifyPayload),
         })
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
           console.error('Verification failed:', response.status, errorData)
+          
+          // If error is about missing tokens but we have oauth_token, try one more time
+          if ((!requestToken || !requestTokenSecret) && oauthToken && errorData.detail?.includes('token')) {
+            console.log('Retrying with oauth_token from URL...')
+            const retryResponse = await fetch(`/api/backend/auth/verify?session_id=${sessionId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                requestToken: oauthToken,
+                verifierCode: oauthVerifier,
+                // Note: We don't have the secret, but let backend try
+              }),
+            })
+            
+            if (retryResponse.ok) {
+              const result = await retryResponse.json()
+              // Success on retry - continue with success flow
+              handleSuccess(result)
+              return
+            }
+          }
+          
           throw new Error(errorData.detail || `Failed to verify authorisation: ${response.status}`)
         }
 
         const result = await response.json()
         
-        // Debug logging
-        // OAuth result processed successfully
-
-        // Update user state in both localStorage and React context
-        localStorage.setItem('waxvalue_user', JSON.stringify(result.user))
-        setUser(result.user) // Update React context immediately
-        
-        // Clear the stored request tokens
-        localStorage.removeItem('discogs_request_token')
-        localStorage.removeItem('discogs_request_token_secret')
-
-        setStatus('success')
-        setMessage(`Successfully connected to Discogs as ${result.user.username}`)
-
-        // Redirect to dashboard after a short delay
-        setTimeout(() => {
-          router.push('/dashboard')
-        }, 2000)
+        // Call success handler
+        handleSuccess(result)
 
       } catch (error) {
         // Auth callback error - handled by UI

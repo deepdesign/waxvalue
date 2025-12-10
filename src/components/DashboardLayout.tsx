@@ -124,7 +124,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
                   key={item.name}
                   href={item.href}
                   prefetch={true}
-                  className={`group relative flex items-center px-3 py-3 text-base font-medium rounded-lg select-none cursor-pointer touch-manipulation min-h-[44px] overflow-hidden transition-all duration-300 ease-out transform hover:scale-[1.02] hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-gray-900/20 active:scale-[0.98] active:transition-transform active:duration-150 sidebar-nav-item ${
+                  className={`group relative flex items-center px-3 py-3 text-base font-medium rounded-lg cursor-pointer touch-manipulation min-h-[44px] overflow-hidden transition-all duration-300 ease-out transform hover:scale-[1.02] hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-gray-900/20 active:scale-[0.98] active:transition-transform active:duration-150 sidebar-nav-item ${
                     isActive
                       ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-900 dark:text-primary-100 shadow-sm shadow-primary-200/30 dark:shadow-primary-900/20'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 active:bg-gray-100 dark:active:bg-gray-700'
@@ -223,14 +223,14 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
                   </div>
                 )}
               </div>
-              <div className="ml-3 select-none">
+              <div className="ml-3">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{user?.name || user?.username}</p>
                 {user?.email && (
                   <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
                 )}
                 <button
                   onClick={handleLogout}
-                  className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 flex items-center mt-1 select-none"
+                  className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 flex items-center mt-1"
                 >
                   <ArrowRightOnRectangleIcon className="h-3 w-3 mr-1" />
                   Sign out
@@ -254,7 +254,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors select-none cursor-pointer ${
+                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                     isActive
                       ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-900 dark:text-primary-100'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
@@ -303,14 +303,14 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
                   </div>
                 )}
               </div>
-              <div className="ml-3 select-none">
+              <div className="ml-3">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{user?.name || user?.username}</p>
                 {user?.email && (
                   <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
                 )}
                 <button
                   onClick={handleLogout}
-                  className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 flex items-center mt-1 select-none"
+                  className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 flex items-center mt-1"
                 >
                   <ArrowRightOnRectangleIcon className="h-3 w-3 mr-1" />
                   Sign out
@@ -334,7 +334,7 @@ export const DashboardLayout = memo(function DashboardLayout({ children }: Dashb
                 <Tooltip key={item.name} content={item.name} placement="right">
                   <Link
                     href={item.href}
-                    className={`group flex items-center justify-center px-2 py-2 text-sm font-medium rounded-md transition-colors select-none cursor-pointer ${
+                    className={`group flex items-center justify-center px-2 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                       isActive
                         ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-900 dark:text-primary-100'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
