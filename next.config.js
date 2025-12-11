@@ -10,6 +10,8 @@ const nextConfig = {
   },
   compress: true,
   poweredByHeader: false,
+  // Disable Next.js dev tools indicator completely
+  devIndicators: false,
   // Allow build to succeed with warnings
   eslint: {
     ignoreDuringBuilds: false, // Still run ESLint but don't fail build
