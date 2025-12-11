@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildBackendUrl } from '@/lib/api-config'
+import { withSecurity } from '@/lib/api-security'
 
-export async function POST(request: NextRequest) {
+async function handleAdjustPrice(request: NextRequest) {
   try {
     const body = await request.json()
     const sessionId = request.headers.get('x-session-id') || 
@@ -42,3 +43,5 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export const POST = withSecurity(handleAdjustPrice, { allowPublic: false })

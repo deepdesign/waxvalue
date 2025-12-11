@@ -148,6 +148,7 @@ export default function Footer({
                       aria-label={project.name}
                     >
                       <Image
+                        key={`${project.name}-${isDark ? 'dark' : 'light'}`}
                         src={isDark ? project.logoDark : project.logoLight}
                         alt={project.name}
                         width={40}
@@ -176,6 +177,7 @@ export default function Footer({
                   aria-label="JC Logo"
                 >
                   <Image
+                    key={`jc-logo-${isDark ? 'dark' : 'light'}`}
                     src={isDark ? '/_other logos/jc-logo-dark.svg' : '/_other logos/jc-logo-light.svg'}
                     alt="JC"
                     width={40}
@@ -193,6 +195,7 @@ export default function Footer({
                   aria-label="GitHub"
                 >
                   <Image
+                    key={`github-logo-${isDark ? 'dark' : 'light'}`}
                     src={isDark ? '/_other logos/github-mark-dark.svg' : '/_other logos/github-mark-light.svg'}
                     alt="GitHub"
                     width={40}

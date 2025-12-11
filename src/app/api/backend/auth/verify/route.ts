@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildBackendUrl } from '@/lib/api-config'
+import { withSecurity } from '@/lib/api-security'
 
-export async function POST(request: NextRequest) {
+async function handleVerify(request: NextRequest) {
   try {
     const body = await request.json()
     
@@ -39,6 +40,8 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export const POST = withSecurity(handleVerify, { allowPublic: true })
 
 
 

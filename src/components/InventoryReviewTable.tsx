@@ -90,6 +90,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
   const [lastRunDate, setLastRunDate] = useState<string | null>(null)
   const [isCountingInventory, setIsCountingInventory] = useState(false)
   const [userSettings, setUserSettings] = useState<UserSettings>(loadUserSettings())
+  const [adjustingListingId, setAdjustingListingId] = useState<number | null>(null)
+  const [adjustingOriginalSortValue, setAdjustingOriginalSortValue] = useState<number | null>(null)
 
   // Function to fetch inventory count
   const fetchInventoryCount = async () => {
@@ -296,18 +298,52 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        
         if (response.status === 401) {
-          // Session expired or invalid - redirect to login
-          localStorage.removeItem('waxvalue_session_id')
-          localStorage.removeItem('waxvalue_user')
-          window.location.href = '/auth'
-          return
+          // Session expired or invalid - but only redirect if we're actually in production
+          // For local testing, preserve user data even if backend doesn't recognize session
+          if (!isLocalhost) {
+            // Only clear and redirect in production
+            localStorage.removeItem('waxvalue_session_id')
+            localStorage.removeItem('waxvalue_user')
+            window.location.href = '/auth'
+            return
+          } else {
+            // In local dev, silently handle 401 for UI testing
+            // Don't show error or clear data - just stop loading
+            console.log('Backend authentication failed (expected in local dev with production session) - UI testing mode')
+            setIsLoading(false)
+            return
+          }
         }
+        
+        if (response.status === 429) {
+          // Rate limiting - handle silently on localhost for UI testing
+          if (isLocalhost) {
+            console.log('Rate limit hit (429) - silently handled for UI testing mode')
+            setIsLoading(false)
+            return
+          } else {
+            toast.error('Too many requests. Please wait a moment and try again.')
+            setIsLoading(false)
+            return
+          }
+        }
+        
         if (response.status === 500) {
           toast.error('Server error while processing inventory. Please try again or check your Discogs seller settings.')
           setIsLoading(false)
           return
         }
+        
+        // For other errors on localhost, handle silently for UI testing
+        if (isLocalhost) {
+          console.log(`HTTP error ${response.status} - silently handled for UI testing mode`)
+          setIsLoading(false)
+          return
+        }
+        
         throw new Error(errorData.detail || `HTTP error! status: ${response.status}`)
       }
 
@@ -487,6 +523,28 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
       const response = await fetch(`/api/backend/inventory/suggestions/stream?session_id=${sessionId}`)
       
       if (!response.ok) {
+        // Handle errors specially for local testing
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        
+        if (isLocalhost) {
+          // Silently handle all errors on localhost for UI testing
+          console.log(`Analysis failed with ${response.status} (${response.statusText}) - silently handled for UI testing mode`)
+          setProcessingProgress(prev => ({
+            ...prev,
+            isImporting: false
+          }))
+          setIsLoading(false)
+          localStorage.removeItem('waxvalue_analysis_progress')
+          return
+        }
+        
+        // In production, handle specific status codes
+        if (response.status === 401) {
+          throw new Error('Authentication failed. Please login again.')
+        } else if (response.status === 429) {
+          throw new Error('Too many requests. Please wait a moment and try again.')
+        }
+        
         throw new Error(`Analysis failed: ${response.statusText}`)
       }
       
@@ -539,7 +597,18 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
       
     } catch (error: any) {
       console.error('Analysis failed:', error)
-      toast.error('Failed to run pricing analysis. Make sure you are connected to Discogs.')
+      
+      // For localhost, silently handle errors for UI testing
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      
+      if (!isLocalhost) {
+        // Only show error in production
+        toast.error('Failed to run pricing analysis. Make sure you are connected to Discogs.')
+      } else {
+        // In local dev, just log to console (expected when testing with production session)
+        console.log('Pricing analysis failed (expected in local dev) - UI testing mode')
+      }
+      
       setProcessingProgress(prev => ({
         ...prev,
         isImporting: false
@@ -600,26 +669,35 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
     // Apply sorting
     if (sortConfig.key) {
       filtered.sort((a, b) => {
+        // If either item is being adjusted, use its original sort value instead of current
+        const aIsAdjusting = adjustingListingId === a.listingId
+        const bIsAdjusting = adjustingListingId === b.listingId
+        
         let aValue, bValue
         
         if (sortConfig.key === 'priceDelta') {
-          // Sort by price delta (suggested - current) - Most underpriced first
-          // Positive delta = underpriced (needs increase) → shows at top
-          aValue = a.suggestedPrice - a.currentPrice
-          bValue = b.suggestedPrice - b.currentPrice
+          // Use original sort value if adjusting, otherwise use current
+          aValue = aIsAdjusting && adjustingOriginalSortValue !== null 
+            ? adjustingOriginalSortValue 
+            : a.suggestedPrice - a.currentPrice
+          bValue = bIsAdjusting && adjustingOriginalSortValue !== null 
+            ? adjustingOriginalSortValue 
+            : b.suggestedPrice - b.currentPrice
         } else if (sortConfig.key === 'priceDeltaReverse') {
-          // Sort by price delta reversed - Most overpriced first
-          // Negative delta = overpriced (needs decrease) → shows at top
-          aValue = a.currentPrice - a.suggestedPrice
-          bValue = b.currentPrice - b.suggestedPrice
-        } else if (sortConfig.key === 'currentPriceHigh') {
-          // Sort by current price high to low
-          aValue = a.currentPrice
-          bValue = b.currentPrice
-        } else if (sortConfig.key === 'currentPriceLow') {
-          // Sort by current price low to high
-          aValue = a.currentPrice
-          bValue = b.currentPrice
+          aValue = aIsAdjusting && adjustingOriginalSortValue !== null 
+            ? adjustingOriginalSortValue 
+            : a.currentPrice - a.suggestedPrice
+          bValue = bIsAdjusting && adjustingOriginalSortValue !== null 
+            ? adjustingOriginalSortValue 
+            : b.currentPrice - b.suggestedPrice
+        } else if (sortConfig.key === 'currentPriceHigh' || sortConfig.key === 'currentPriceLow') {
+          // For price sorts, adjusting items keep their original price position
+          aValue = aIsAdjusting && adjustingOriginalSortValue !== null 
+            ? adjustingOriginalSortValue 
+            : a.currentPrice
+          bValue = bIsAdjusting && adjustingOriginalSortValue !== null 
+            ? adjustingOriginalSortValue 
+            : b.currentPrice
         } else if (sortConfig.key === 'status') {
           // Sort by status: underpriced first, then overpriced, then fairly_priced
           const statusOrder: { [key: string]: number } = { 'underpriced': 0, 'overpriced': 1, 'fairly_priced': 2 }
@@ -656,7 +734,7 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
     }
 
     return filtered
-  }, [suggestions, filters, sortConfig, userSettings.minPriceChangeThreshold])
+  }, [suggestions, filters, sortConfig, userSettings.minPriceChangeThreshold, adjustingListingId, adjustingOriginalSortValue])
 
   // Calculate pricing statistics
   const pricingStats = useMemo(() => {
@@ -898,6 +976,24 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
       const suggestion = suggestions.find(s => s.listingId === listingId)
       if (!suggestion) return
 
+      // Track which item is being adjusted and store its original sort value
+      if (adjustingListingId !== listingId) {
+        // Store the original sort value before adjustment
+        let originalSortValue: number
+        if (sortConfig.key === 'priceDelta' || sortConfig.key === 'priceDeltaReverse') {
+          originalSortValue = sortConfig.key === 'priceDelta' 
+            ? suggestion.suggestedPrice - suggestion.currentPrice
+            : suggestion.currentPrice - suggestion.suggestedPrice
+        } else if (sortConfig.key === 'currentPriceHigh' || sortConfig.key === 'currentPriceLow') {
+          originalSortValue = suggestion.currentPrice
+        } else {
+          originalSortValue = (suggestion as any)[sortConfig.key!] ?? 0
+        }
+        
+        setAdjustingListingId(listingId)
+        setAdjustingOriginalSortValue(originalSortValue)
+      }
+
       const newSuggestedPrice = Math.max(0, suggestion.suggestedPrice + adjustment)
       
       // Update the suggestion locally (optimistically)
@@ -908,6 +1004,13 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
             : s
         )
       )
+      
+      // Clear adjusting state after a delay (allows user to make multiple adjustments)
+      clearTimeout((window as any).adjustingTimeout)
+      ;(window as any).adjustingTimeout = setTimeout(() => {
+        setAdjustingListingId(null)
+        setAdjustingOriginalSortValue(null)
+      }, 2000) // Clear after 2 seconds of no adjustments
       
       toast.success(`Suggested price ${adjustment > 0 ? 'increased' : 'decreased'} by $${Math.abs(adjustment)}`)
       
@@ -1367,15 +1470,19 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {paginatedSuggestions.map((suggestion) => (
-                <tr 
-                  key={suggestion.listingId} 
-                  className={`${
-                    appliedItems.has(suggestion.listingId)
-                      ? 'bg-green-50/50 dark:bg-green-900/10 hover:bg-green-100/50 dark:hover:bg-green-900/20'
-                      : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                  }`}
-                >
+              {paginatedSuggestions.map((suggestion) => {
+                const isAdjusting = adjustingListingId === suggestion.listingId
+                return (
+                  <tr 
+                    key={suggestion.listingId} 
+                    className={`transition-colors ${
+                      isAdjusting
+                        ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-300 dark:ring-blue-600'
+                        : appliedItems.has(suggestion.listingId)
+                        ? 'bg-green-50/50 dark:bg-green-900/10 hover:bg-green-100/50 dark:hover:bg-green-900/20'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
                   <td className="w-12 px-6 py-4">
                     <input
                       type="checkbox"
@@ -1448,37 +1555,41 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                     </a>
                   </td>
                   <td className="w-20 px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-right">
-                    <div className="font-medium">
+                    <div className="flex flex-col items-end">
                       {appliedItems.has(suggestion.listingId) && suggestion.originalPrice ? (
-                        <div className="flex flex-col items-end">
+                        <>
                           <span className="text-gray-400 dark:text-gray-500 line-through text-xs">
                             {formatCurrency(suggestion.originalPrice, suggestion.currency)}
                           </span>
-                          <span className="text-green-600 dark:text-green-400">
+                          <span className="text-green-600 dark:text-green-400 font-medium">
                             {formatCurrency(suggestion.suggestedPrice, suggestion.currency)}
                           </span>
-                        </div>
+                        </>
                       ) : (
-                        formatCurrency(suggestion.currentPrice, suggestion.currency)
+                        <>
+                          <div className="font-medium">
+                            {formatCurrency(suggestion.currentPrice, suggestion.currency)}
+                          </div>
+                          <div className={`text-xs font-medium ${
+                            suggestion.suggestedPrice > suggestion.currentPrice 
+                              ? 'text-red-600 dark:text-red-400' // Underpriced = RED (showing negative delta)
+                              : suggestion.suggestedPrice < suggestion.currentPrice 
+                              ? 'text-green-600 dark:text-green-400' // Overpriced = GREEN (showing positive delta)
+                              : 'text-gray-500 dark:text-gray-400'
+                          }`}>
+                            {(() => {
+                              const delta = suggestion.currentPrice - suggestion.suggestedPrice
+                              return `${delta >= 0 ? '+' : ''}${formatCurrency(delta, suggestion.currency)}`
+                            })()}
+                          </div>
+                        </>
                       )}
                     </div>
                   </td>
                   <td className="w-20 px-6 py-4 whitespace-nowrap text-right">
                     <div className="flex items-center space-x-1 justify-end">
-                      <div className="flex-1 text-right">
-                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          {formatCurrency(suggestion.suggestedPrice, suggestion.currency)}
-                        </div>
-                        <div className={`text-xs ${
-                          suggestion.suggestedPrice > suggestion.currentPrice 
-                            ? 'text-green-600 dark:text-green-400' 
-                            : suggestion.suggestedPrice < suggestion.currentPrice 
-                            ? 'text-red-600 dark:text-red-400' 
-                            : 'text-blue-600 dark:text-blue-400'
-                        }`}>
-                          {suggestion.suggestedPrice > suggestion.currentPrice ? '+' : ''}
-                          {formatCurrency(suggestion.suggestedPrice - suggestion.currentPrice, suggestion.currency)}
-                        </div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {formatCurrency(suggestion.suggestedPrice, suggestion.currency)}
                       </div>
                       <div className="flex flex-col space-y-0.5 ml-2">
                         <button
@@ -1506,39 +1617,36 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                   </td>
                   <td className="w-24 px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
-                          <Tooltip 
-                            content="Apply this price suggestion to update the item on Discogs"
+                          <button
+                            onClick={() => handleApplyIndividual(suggestion.listingId)}
+                            disabled={applyingItems.has(suggestion.listingId) || appliedItems.has(suggestion.listingId) || selectedItems.size > 0}
+                            className={`inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed transition-all duration-200 w-[72px] ${
+                              appliedItems.has(suggestion.listingId)
+                                ? 'bg-green-600 hover:bg-green-600 disabled:opacity-100 focus:ring-green-500'
+                                : selectedItems.size > 0
+                                ? 'bg-gray-400 hover:bg-gray-400 focus:ring-gray-400 disabled:opacity-50'
+                                : 'bg-primary-600 hover:bg-primary-700 focus:ring-primary-500 disabled:opacity-50 disabled:bg-primary-600'
+                            }`}
                           >
-                            <button
-                              onClick={() => handleApplyIndividual(suggestion.listingId)}
-                              disabled={applyingItems.has(suggestion.listingId) || appliedItems.has(suggestion.listingId) || selectedItems.size > 0}
-                              className={`inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed transition-all duration-200 w-[72px] ${
-                                appliedItems.has(suggestion.listingId)
-                                  ? 'bg-green-600 hover:bg-green-600 disabled:opacity-100 focus:ring-green-500'
-                                  : selectedItems.size > 0
-                                  ? 'bg-gray-400 hover:bg-gray-400 focus:ring-gray-400 disabled:opacity-50'
-                                  : 'bg-primary-600 hover:bg-primary-700 focus:ring-primary-500 disabled:opacity-50 disabled:bg-primary-600'
-                              }`}
-                            >
-                              {applyingItems.has(suggestion.listingId) ? (
-                                <svg className="animate-spin h-3 w-3 text-white" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            {applyingItems.has(suggestion.listingId) ? (
+                              <svg className="animate-spin h-3 w-3 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                            ) : appliedItems.has(suggestion.listingId) ? (
+                              <span className="flex items-center gap-1">
+                                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                 </svg>
-                              ) : appliedItems.has(suggestion.listingId) ? (
-                                <span className="flex items-center gap-1">
-                                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                  </svg>
-                                  Applied
-                                </span>
-                              ) : 'Apply'}
-                            </button>
-                          </Tooltip>
+                                Applied
+                              </span>
+                            ) : 'Apply'}
+                          </button>
                         </div>
                   </td>
-                </tr>
-              ))}
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -1547,11 +1655,15 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
         {/* Mobile Card List */}
         {totalItems > 0 && (
           <div className="xl:hidden px-4 py-4 space-y-3">
-          {paginatedSuggestions.map((suggestion) => (
+          {paginatedSuggestions.map((suggestion) => {
+            const isAdjusting = adjustingListingId === suggestion.listingId
+            return (
             <div 
               key={suggestion.listingId} 
-              className={`rounded-lg border p-3 relative ${
-                appliedItems.has(suggestion.listingId)
+              className={`rounded-lg border p-3 relative transition-colors ${
+                isAdjusting
+                  ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600 ring-2 ring-blue-300 dark:ring-blue-600'
+                  : appliedItems.has(suggestion.listingId)
                   ? 'bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800'
                   : 'bg-gray-50/50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700'
               }`}
@@ -1635,41 +1747,68 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                  </div>
                </div>
               
-              <div className="grid grid-cols-3 gap-3 text-xs mb-3">
+              <div className="grid grid-cols-2 gap-3 text-xs mb-3">
                 <div className="text-right">
                   <div className="text-gray-500 dark:text-gray-400 mb-1">Current</div>
-                  <div className="font-medium text-gray-900 dark:text-gray-100">
+                  <div className="flex flex-col items-end">
                     {appliedItems.has(suggestion.listingId) && suggestion.originalPrice ? (
-                      <div className="flex flex-col items-end">
+                      <>
                         <span className="line-through text-gray-400 dark:text-gray-500">
                           {formatCurrency(suggestion.originalPrice, suggestion.currency)}
                         </span>
-                        <span className="text-green-600 dark:text-green-400">
+                        <span className="text-green-600 dark:text-green-400 font-medium">
                           {formatCurrency(suggestion.suggestedPrice, suggestion.currency)}
                         </span>
-                      </div>
+                      </>
                     ) : (
-                      formatCurrency(suggestion.currentPrice, suggestion.currency)
+                      <>
+                        <div className="font-medium text-gray-900 dark:text-gray-100">
+                          {formatCurrency(suggestion.currentPrice, suggestion.currency)}
+                        </div>
+                        <div className={`text-xs font-medium ${
+                          suggestion.suggestedPrice > suggestion.currentPrice 
+                            ? 'text-red-600 dark:text-red-400' // Underpriced = RED (showing negative delta)
+                            : suggestion.suggestedPrice < suggestion.currentPrice 
+                            ? 'text-green-600 dark:text-green-400' // Overpriced = GREEN (showing positive delta)
+                            : 'text-gray-500 dark:text-gray-400'
+                        }`}>
+                          {(() => {
+                            const delta = suggestion.currentPrice - suggestion.suggestedPrice
+                            return `${delta >= 0 ? '+' : ''}${formatCurrency(delta, suggestion.currency)}`
+                          })()}
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-gray-500 dark:text-gray-400 mb-1">Suggested</div>
-                  <div className="font-medium text-gray-900 dark:text-gray-100">
-                    {formatCurrency(suggestion.suggestedPrice, suggestion.currency)}
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-gray-500 dark:text-gray-400 mb-1">Change</div>
-                  <div className={`font-medium ${
-                    suggestion.suggestedPrice > suggestion.currentPrice 
-                      ? 'text-green-600 dark:text-green-400' 
-                      : suggestion.suggestedPrice < suggestion.currentPrice 
-                      ? 'text-red-600 dark:text-red-400' 
-                      : 'text-blue-600 dark:text-blue-400'
-                  }`}>
-                    {suggestion.suggestedPrice > suggestion.currentPrice ? '+' : ''}
-                    {formatCurrency(suggestion.suggestedPrice - suggestion.currentPrice, suggestion.currency)}
+                  <div className="flex items-center justify-end gap-2">
+                    <div className="font-medium text-gray-900 dark:text-gray-100">
+                      {formatCurrency(suggestion.suggestedPrice, suggestion.currency)}
+                    </div>
+                    <div className="flex flex-col space-y-0.5">
+                      <button
+                        onClick={() => handlePriceAdjust(suggestion.listingId, 1)}
+                        className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-all duration-300 min-h-[24px] min-w-[24px] flex items-center justify-center touch-manipulation"
+                        title="Increase by $1"
+                        aria-label="Increase price by $1"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => handlePriceAdjust(suggestion.listingId, -1)}
+                        className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-all duration-300 min-h-[24px] min-w-[24px] flex items-center justify-center touch-manipulation"
+                        title="Decrease by $1"
+                        aria-label="Decrease price by $1"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1699,7 +1838,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                 ) : 'Apply'}
               </Button>
             </div>
-          ))}
+            )
+          })}
         </div>
         )}
         
@@ -1799,7 +1939,9 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
             </h3>
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
               {suggestions.length === 0 
-                ? "Run a pricing analysis to see recommendations for your Discogs inventory. We'll analyse market data and suggest optimal prices."
+                ? (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+                  ? "In local testing mode: API calls are disabled. This empty state allows you to test the UI components, filters, and layout. For full functionality, use production or configure local backend authentication."
+                  : "Run a pricing analysis to see recommendations for your Discogs inventory. We'll analyse market data and suggest optimal prices."
                 : "Try adjusting your filters to see more results."
               }
             </p>

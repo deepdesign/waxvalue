@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildBackendUrl } from '@/lib/api-config'
+import { withSecurity } from '@/lib/api-security'
 
-export async function POST(request: NextRequest) {
+async function handleDecline(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
     const body = await request.json()
@@ -29,6 +30,8 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export const POST = withSecurity(handleDecline, { allowPublic: false })
 
 
 

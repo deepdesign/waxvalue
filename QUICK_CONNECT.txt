@@ -1,0 +1,16 @@
+QUICK VPS CONNECTION COMMANDS
+=============================
+
+If you're stuck in a multi-line prompt (>>), press Ctrl+C to cancel.
+
+Then try ONE of these:
+
+OPTION 1 (Easiest - copy/paste this entire line):
+C:\Windows\System32\OpenSSH\ssh.exe -i "$env:USERPROFILE\.ssh\id_ed25519" root@93.127.200.187
+
+OPTION 2 (Two steps):
+Step 1: $env:Path = "C:\Windows\System32\OpenSSH;" + $env:Path
+Step 2: ssh -i "$env:USERPROFILE\.ssh\id_ed25519" root@93.127.200.187
+
+When prompted, enter passphrase: Babylon1!
+

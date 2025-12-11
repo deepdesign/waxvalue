@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildBackendUrl } from '@/lib/api-config'
+import { withSecurity } from '@/lib/api-security'
 
-export async function GET(request: NextRequest) {
+async function handleCount(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const sessionId = searchParams.get('session_id')
@@ -30,3 +31,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export const GET = withSecurity(handleCount, { allowPublic: false })

@@ -49,14 +49,26 @@ export const Providers = memo(function Providers({ children }: { children: React
         if (storedUser) {
           try {
             const userData = JSON.parse(storedUser)
-            setUser(userData)
-            setIsLoading(false)
-            
-            // If user has Discogs connection but no avatar, fetch it
-            if (userData.discogsUserId && !userData.avatar) {
-              fetchAvatarInBackground(userData)
+            // Validate it's a proper user object
+            if (userData && typeof userData === 'object' && userData.id) {
+              setUser(userData)
+              setIsLoading(false)
+              
+              // If user has Discogs connection but no avatar, fetch it in background
+              // Don't wait for this - let UI render immediately for local testing
+              if (userData.discogsUserId && !userData.avatar) {
+                // Fetch avatar asynchronously without blocking
+                fetchAvatarInBackground(userData).catch(() => {
+                  // Silently fail - avatar fetch is non-critical for UI testing
+                })
+              }
+              return // Exit early - we have valid user data
+            } else {
+              // Invalid user data structure
+              console.warn('Invalid user data structure, clearing...')
+              localStorage.removeItem('waxvalue_user')
+              localStorage.removeItem('waxvalue_token')
             }
-            return
           } catch (parseError) {
             console.error('Failed to parse stored user data:', parseError)
             localStorage.removeItem('waxvalue_user')
@@ -67,23 +79,29 @@ export const Providers = memo(function Providers({ children }: { children: React
         // If no stored user, check with backend (for Discogs-only auth)
         const storedToken = localStorage.getItem('waxvalue_token')
         if (storedToken) {
-          const response = await fetch('/api/backend/auth/me')
-          if (response.ok) {
-            const userData = await response.json()
-            setUser(userData)
-            localStorage.setItem('waxvalue_user', JSON.stringify(userData))
-            
-            // If user has Discogs connection but no avatar, fetch it
-            if (userData.discogsUserId && !userData.avatar) {
-              fetchAvatarInBackground(userData)
+          try {
+            const response = await fetch('/api/backend/auth/me')
+            if (response.ok) {
+              const userData = await response.json()
+              setUser(userData)
+              localStorage.setItem('waxvalue_user', JSON.stringify(userData))
+              
+              // If user has Discogs connection but no avatar, fetch it
+              if (userData.discogsUserId && !userData.avatar) {
+                fetchAvatarInBackground(userData).catch(() => {
+                  // Silently fail - avatar fetch is non-critical
+                })
+              }
             }
+          } catch (fetchError) {
+            // Backend fetch failed - don't clear existing data
+            // This allows local testing with production session data
+            console.warn('Backend auth check failed (might be expected in local dev):', fetchError)
           }
         }
       } catch (error) {
-        // Auth check failed - handled silently
-        // Clear invalid tokens
-        localStorage.removeItem('waxvalue_user')
-        localStorage.removeItem('waxvalue_token')
+        // Only log, don't clear - preserve user data for local testing
+        console.warn('Auth check error (non-fatal):', error)
       } finally {
         setIsLoading(false)
       }

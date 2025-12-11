@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildBackendUrl } from '@/lib/api-config'
+import { withSecurity } from '@/lib/api-security'
 
-export async function GET(req: NextRequest) {
+async function handleProfile(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const sessionId = searchParams.get('session_id');
 
@@ -30,3 +31,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ detail: 'Failed to fetch user profile' }, { status: 500 });
   }
 }
+
+export const GET = withSecurity(handleProfile, { allowPublic: false })

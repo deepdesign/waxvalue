@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildBackendUrl } from '@/lib/api-config'
+import { withSecurity } from '@/lib/api-security'
 
-export async function GET(request: NextRequest) {
+async function handleMe(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
     
@@ -29,6 +30,8 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+export const GET = withSecurity(handleMe, { allowPublic: false })
 
 
 

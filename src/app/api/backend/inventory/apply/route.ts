@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildBackendUrl } from '@/lib/api-config'
+import { withSecurity } from '@/lib/api-security'
 
-export async function POST(request: NextRequest) {
+async function handleApply(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const sessionId = searchParams.get('session_id')
@@ -38,6 +39,8 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export const POST = withSecurity(handleApply, { allowPublic: false })
 
 
 

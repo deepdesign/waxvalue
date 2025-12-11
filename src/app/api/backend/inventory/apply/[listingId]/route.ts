@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildBackendUrl } from '@/lib/api-config'
+import { withSecurity } from '@/lib/api-security'
 
-export async function POST(
+async function handleApplyListing(
   request: NextRequest,
   { params }: { params: Promise<{ listingId: string }> }
 ) {
@@ -37,3 +38,5 @@ export async function POST(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export const POST = withSecurity(handleApplyListing, { allowPublic: false })

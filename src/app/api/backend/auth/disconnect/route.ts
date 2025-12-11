@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildBackendUrl } from '@/lib/api-config'
+import { withSecurity } from '@/lib/api-security'
 
-export async function POST(request: NextRequest) {
+async function handleDisconnect(request: NextRequest) {
   try {
     // Get session ID from request body or query parameters
     const body = await request.json().catch(() => ({}))
@@ -36,6 +37,8 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export const POST = withSecurity(handleDisconnect, { allowPublic: false })
 
 
 

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildBackendUrl } from '@/lib/api-config'
+import { withSecurity } from '@/lib/api-security'
 
-export async function PUT(request: NextRequest) {
+async function handleSettings(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
     const body = await request.json()
@@ -29,6 +30,8 @@ export async function PUT(request: NextRequest) {
     )
   }
 }
+
+export const PUT = withSecurity(handleSettings, { allowPublic: false })
 
 
 

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Copy Production Session to Localhost</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; margin-top: 0; }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #0070f3;
+            border-radius: 4px;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .button {
+            background: #0070f3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .button:hover {
+            background: #0051cc;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Copy Production Session to Localhost</h1>
+        <p>Use this tool to quickly authenticate on localhost using your production session.</p>
+        
+        <div class="step">
+            <h3>Step 1: Get Data from Production</h3>
+            <ol>
+                <li>Open <a href="https://www.waxvalue.com" target="_blank">www.waxvalue.com</a></li>
+                <li>Press <code>F12</code> to open DevTools</li>
+                <li>Go to <code>Application</code> tab → <code>Local Storage</code> → <code>https://www.waxvalue.com</code></li>
+                <li>Find <code>waxvalue_session_id</code> and double-click the <strong>Value</strong> column to select and copy</li>
+                <li>Find <code>waxvalue_user</code> - <strong>Important:</strong> The value should start with <code>{"</code> and contain JSON data. Double-click the entire value in the Value column to copy it all</li>
+            </ol>
+            <p style="margin-top:10px;padding:10px;background:#fff3cd;border-radius:4px;">
+                <strong>💡 Tip:</strong> The user data is usually a long JSON string. Make sure you copy the <strong>entire</strong> value, not just part of it. It should look like: <code>{"id":123,"username":"..."}</code>
+            </p>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Paste Data Below</h3>
+            <p>Make sure you're on <strong>http://localhost:3000</strong> before proceeding!</p>
+            <label style="display:block;margin:10px 0 5px 0;font-weight:bold;">Session ID:</label>
+            <input type="text" id="sessionId" placeholder="Paste your waxvalue_session_id here..." />
+            <label style="display:block;margin:15px 0 5px 0;font-weight:bold;">User Data (JSON):</label>
+            <textarea id="userData" placeholder='Paste your waxvalue_user JSON here (starts with {"id":...)' style="width:100%;padding:10px;margin:10px 0;border:1px solid #ddd;border-radius:4px;font-size:14px;min-height:100px;font-family:monospace;"></textarea>
+            <button class="button" onclick="setSession()">Set Session & User Data & Reload</button>
+            <div id="result"></div>
+        </div>
+
+        <div class="step">
+            <h3>Alternative: One-Click Copy Script (Easier!)</h3>
+            <p><strong>Step 1:</strong> On <strong>www.waxvalue.com</strong>, open Console (F12) and run:</p>
+            <pre style="font-size:11px;max-height:150px;overflow-y:auto;">// Copy this entire block and paste in console on www.waxvalue.com
+(function() {
+    const sessionId = localStorage.getItem('waxvalue_session_id');
+    const userData = localStorage.getItem('waxvalue_user');
+    
+    if (!sessionId || !userData) {
+        console.error('❌ Missing data! Make sure you are logged in on www.waxvalue.com');
+        return;
+    }
+    
+    // Create a textarea to copy from
+    const textarea = document.createElement('textarea');
+    textarea.value = `Session ID:\n${sessionId}\n\nUser Data:\n${userData}`;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    
+    console.log('✅ Copied to clipboard!');
+    console.log('Session ID:', sessionId.substring(0, 20) + '...');
+    console.log('User Data:', userData.substring(0, 50) + '...');
+    console.log('\n👉 Now paste in the form above on localhost:3000');
+})();</pre>
+            <p style="margin-top:10px;"><strong>Step 2:</strong> Paste the copied values in the form above, then click the button.</p>
+        </div>
+
+        <div class="step">
+            <h3>What This Does</h3>
+            <ul>
+                <li>✅ Authenticates you on localhost with your production Discogs connection</li>
+                <li>✅ Lets you test all UI changes with real data</li>
+                <li>✅ No OAuth setup needed</li>
+                <li>✅ Works immediately</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function setSession() {
+            const sessionId = document.getElementById('sessionId').value.trim();
+            const userData = document.getElementById('userData').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!sessionId) {
+                resultDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:4px;">Please enter a session ID</div>';
+                return;
+            }
+
+            if (!userData) {
+                resultDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:4px;">Please enter user data (JSON)</div>';
+                return;
+            }
+
+            // Try to fix common JSON issues
+            let cleanedUserData = userData.trim();
+            
+            // If it looks like a JavaScript object literal (not stringified), try to parse it
+            if (cleanedUserData.startsWith('{') && !cleanedUserData.startsWith('{"')) {
+                // Might be formatted as object, try to stringify it
+                try {
+                    // Remove line breaks and extra spaces, then parse
+                    cleanedUserData = cleanedUserData.replace(/\n/g, '').replace(/\s+/g, ' ');
+                    // Try to eval it as JSON (safe in this context since it's user input we're validating)
+                    const tempObj = eval('(' + cleanedUserData + ')');
+                    cleanedUserData = JSON.stringify(tempObj);
+                } catch (e) {
+                    // If that fails, try direct parse
+                }
+            }
+            
+            // Validate JSON
+            let parsedUser;
+            try {
+                parsedUser = JSON.parse(cleanedUserData);
+            } catch (e) {
+                // Try one more time with the original data
+                try {
+                    parsedUser = JSON.parse(userData);
+                } catch (e2) {
+                    resultDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:4px;margin:10px 0;">' +
+                        '<strong>Invalid JSON in user data.</strong><br><br>' +
+                        'The user data should be a JSON object starting with <code>{"</code>.<br>' +
+                        'You pasted: <code>' + (userData.length > 100 ? userData.substring(0, 100) + '...' : userData) + '</code><br><br>' +
+                        '<strong>Try this instead:</strong><br>' +
+                        'On www.waxvalue.com, run this in Console:<br>' +
+                        '<code style="display:block;background:#f4f4f4;padding:10px;margin:10px 0;border-radius:4px;font-size:11px;">copy(localStorage.getItem(\'waxvalue_user\'))</code>' +
+                        'Then paste here. It should start with <code>{"id":</code> or <code>{"accessToken":</code><br><br>' +
+                        'Error: ' + e2.message + '</div>';
+                    return;
+                }
+            }
+            
+            // Validate it has expected user fields
+            if (!parsedUser || (typeof parsedUser !== 'object')) {
+                resultDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:4px;">User data must be a JSON object. Please check your paste.</div>';
+                return;
+            }
+
+            // Check if we're on localhost
+            if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                resultDiv.innerHTML = '<div style="background:#fff3cd;color:#856404;padding:10px;border-radius:4px;">⚠️ You must be on localhost:3000 to use this. Current URL: ' + window.location.href + '</div>';
+                return;
+            }
+
+            try {
+                localStorage.setItem('waxvalue_session_id', sessionId);
+                localStorage.setItem('waxvalue_user', cleanedUserData);
+                resultDiv.innerHTML = '<div class="success">✅ Session ID and user data set! Redirecting to dashboard...</div>';
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1000);
+            } catch (e) {
+                resultDiv.innerHTML = '<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:4px;">Error: ' + e.message + '</div>';
+            }
+        }
+
+        // Allow Ctrl+Enter to submit
+        document.getElementById('userData').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                setSession();
+            }
+        });
+    </script>
+</body>
+</html>
+

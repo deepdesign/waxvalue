@@ -29,7 +29,7 @@
     @apply transition-colors duration-200;
   }
   
-  /* Allow text selection everywhere, but hide I-beam cursor */
+  /* Allow text selection everywhere, but hide I-beam cursor on regular content */
   * {
     cursor: default;
     user-select: text;
@@ -38,9 +38,15 @@
     -ms-user-select: text;
   }
   
-  /* Hide blinking caret (I-beam cursor) in input fields */
-  input, textarea, [contenteditable="true"] {
+  /* Hide caret (blinking I-beam) on regular page content when clicking */
+  body, div, p, span, h1, h2, h3, h4, h5, h6, li, td, th, label:not([for]), section, article, aside, main, header, footer {
     caret-color: transparent;
+  }
+  
+  /* Input fields should show caret normally (visible) */
+  input, textarea, [contenteditable="true"] {
+    caret-color: auto; /* Standard visible caret */
+    cursor: text; /* Show text cursor in input fields */
   }
   
   /* Interactive elements should have pointer cursor */

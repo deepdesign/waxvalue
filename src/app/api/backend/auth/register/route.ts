@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildBackendUrl } from '@/lib/api-config'
+import { withSecurity } from '@/lib/api-security'
 
-export async function POST(request: NextRequest) {
+async function handleRegister(request: NextRequest) {
   try {
     const body = await request.json()
     const { firstName, lastName, email, password } = body
@@ -56,6 +57,8 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export const POST = withSecurity(handleRegister, { allowPublic: true })
 
 
 

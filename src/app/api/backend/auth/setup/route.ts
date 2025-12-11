@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildBackendUrl } from '@/lib/api-config'
+import { withSecurity } from '@/lib/api-security'
 
-export async function POST(request: NextRequest) {
+async function handleSetup(request: NextRequest) {
   try {
     console.log('Frontend API: Proxying to backend /auth/setup')
     const backendUrl = buildBackendUrl('auth/setup')
@@ -63,6 +64,9 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+// Export with security middleware (rate limiting + input validation)
+export const POST = withSecurity(handleSetup, { allowPublic: true })
 
 
 
