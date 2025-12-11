@@ -20,7 +20,6 @@ import { FilterState as TableFilterState } from './FiltersBar'
 import { ApiClient, RepriceResponse, RepriceItemResult, Decision } from '@/lib/apiClient'
 import { Button } from '@/components/ui/Button'
 import { formatCurrency } from '@/lib/utils'
-import { Tooltip } from '@/components/ui/Tooltip'
 import { loadUserSettings, UserSettings } from '@/lib/userSettings'
 import toast from 'react-hot-toast'
 import { useInventory } from '@/contexts/InventoryContext'
@@ -1247,7 +1246,9 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                     setFilters(newFilters)
                     onFiltersChange?.(newFilters)
                   }}
-                    className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors ${
+                  aria-label="Show all price directions"
+                  title="Show all price directions"
+                  className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors ${
                     !filters?.priceDirection
                       ? 'bg-primary-600 dark:bg-primary-500 text-white'
                       : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
@@ -1261,7 +1262,9 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                     setFilters(newFilters)
                     onFiltersChange?.(newFilters)
                   }}
-                    className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors sm:border-l border-gray-200 dark:border-gray-700 ${
+                  aria-label="Filter by underpriced items"
+                  title="Filter by underpriced items"
+                  className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors sm:border-l border-gray-200 dark:border-gray-700 ${
                       filters?.priceDirection === 'underpriced'
                       ? 'bg-primary-600 dark:bg-primary-500 text-white'
                       : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
@@ -1275,7 +1278,9 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                     setFilters(newFilters)
                     onFiltersChange?.(newFilters)
                   }}
-                    className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors sm:border-l border-gray-200 dark:border-gray-700 sm:rounded-r-lg ${
+                  aria-label="Filter by overpriced items"
+                  title="Filter by overpriced items"
+                  className={`px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors sm:border-l border-gray-200 dark:border-gray-700 sm:rounded-r-lg ${
                       filters?.priceDirection === 'overpriced'
                       ? 'bg-primary-600 dark:bg-primary-500 text-white'
                       : 'text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:text-gray-800 dark:hover:text-gray-200'
@@ -1287,9 +1292,6 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
 
                 {/* Show Fairly Priced Checkbox */}
                 <div className="flex items-center">
-              <Tooltip 
-                    content="Show items that are priced within the minimum change threshold. Unchecked to focus on items needing significant price changes."
-                  >
                     <label className="flex items-center">
                       <input
                         type="checkbox"
@@ -1299,6 +1301,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                           setFilters(newFilters)
                           onFiltersChange?.(newFilters)
                         }}
+                        aria-label="Show items that are priced within the minimum change threshold. Unchecked to focus on items needing significant price changes."
+                        title="Show items that are priced within the minimum change threshold. Unchecked to focus on items needing significant price changes."
                         className="table-checkbox"
                       />
                       <span className="ml-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
@@ -1312,17 +1316,15 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                         </a>
                       </span>
                     </label>
-                  </Tooltip>
                 </div>
               </div>
 
               {/* Refresh Analysis Button - Moved to right side */}
-              <Tooltip 
-                content="Re-analyse your entire Discogs inventory to get fresh pricing suggestions for all items"
-              >
                 <button
                   onClick={handleSimulateSelection}
                   disabled={isLoading}
+                  aria-label="Re-analyse your entire Discogs inventory to get fresh pricing suggestions for all items"
+                  title="Re-analyse your entire Discogs inventory to get fresh pricing suggestions for all items"
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-400 shadow-theme-xs hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 disabled:opacity-50"
                 >
                   <svg
@@ -1340,7 +1342,6 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                   </svg>
                   {isLoading ? 'Refreshing...' : 'Refresh analysis'}
                 </button>
-              </Tooltip>
             </div>
           </div>
         </div>
@@ -1357,6 +1358,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                   setSelectedItems(new Set())
                   setIsSelectAll(false)
                 }}
+                aria-label="Clear selection"
+                title="Clear selection"
                 className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 underline"
               >
                 Clear selection
@@ -1367,6 +1370,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
               <button
                 onClick={handleBulkApply}
                 disabled={isApplying}
+                aria-label={`Apply suggested prices to ${selectedItems.size} selected item${selectedItems.size !== 1 ? 's' : ''}`}
+                title={`Apply suggested prices to ${selectedItems.size} selected item${selectedItems.size !== 1 ? 's' : ''}`}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
               >
                 {isApplying ? (
@@ -1402,12 +1407,16 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                     type="checkbox"
                     checked={isSelectAll && paginatedSuggestions.length > 0}
                     onChange={handleSelectAll}
+                    aria-label="Select all items"
+                    title="Select all items"
                     className="table-checkbox"
                   />
                 </th>
                 <th className="w-64 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   <button
                     onClick={() => handleSort('artist')}
+                    aria-label={`Sort by release ${sortConfig.key === 'artist' ? (sortConfig.direction === 'asc' ? '(ascending)' : '(descending)') : ''}`}
+                    title={`Sort by release ${sortConfig.key === 'artist' ? (sortConfig.direction === 'asc' ? '(ascending)' : '(descending)') : ''}`}
                     className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors w-full text-left"
                   >
                     RELEASE
@@ -1421,6 +1430,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                 <th className="w-20 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   <button
                     onClick={() => handleSort('condition')}
+                    aria-label={`Sort by condition ${sortConfig.key === 'condition' ? (sortConfig.direction === 'asc' ? '(ascending)' : '(descending)') : ''}`}
+                    title={`Sort by condition ${sortConfig.key === 'condition' ? (sortConfig.direction === 'asc' ? '(ascending)' : '(descending)') : ''}`}
                     className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors w-full text-left"
                   >
                     CONDITION
@@ -1431,13 +1442,12 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                     </svg>
                   </button>
                 </th>
-                <th className="w-20 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  ITEM ID
-                </th>
                 <th className="w-20 px-6 py-3 text-right text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   <div className="flex items-center justify-end">
                     <button
                       onClick={() => handleSort('currentPriceHigh')}
+                      aria-label={`Sort by current price ${(sortConfig.key === 'currentPriceHigh' || sortConfig.key === 'currentPriceLow') ? (sortConfig.direction === 'asc' ? '(ascending)' : '(descending)') : ''}`}
+                      title={`Sort by current price ${(sortConfig.key === 'currentPriceHigh' || sortConfig.key === 'currentPriceLow') ? (sortConfig.direction === 'asc' ? '(ascending)' : '(descending)') : ''}`}
                       className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                     >
                       <span>CURRENT PRICE</span>
@@ -1453,6 +1463,25 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                   <div className="flex items-center justify-end">
                     <button
                       onClick={() => handleSort('priceDelta')}
+                      aria-label={`Sort by price delta ${sortConfig.key === 'priceDelta' ? (sortConfig.direction === 'asc' ? '(ascending)' : '(descending)') : ''}`}
+                      title={`Sort by price delta ${sortConfig.key === 'priceDelta' ? (sortConfig.direction === 'asc' ? '(ascending)' : '(descending)') : ''}`}
+                      className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                    >
+                      <span>DELTA</span>
+                      <svg className={`w-4 h-4 transition-transform ${
+                        sortConfig.key === 'priceDelta' && sortConfig.direction === 'asc' ? 'rotate-180' : ''
+                      }`} fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                </th>
+                <th className="w-20 px-6 py-3 text-right text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                  <div className="flex items-center justify-end">
+                    <button
+                      onClick={() => handleSort('priceDelta')}
+                      aria-label={`Sort by suggested price ${sortConfig.key === 'priceDelta' ? (sortConfig.direction === 'asc' ? '(ascending)' : '(descending)') : ''}`}
+                      title={`Sort by suggested price ${sortConfig.key === 'priceDelta' ? (sortConfig.direction === 'asc' ? '(ascending)' : '(descending)') : ''}`}
                       className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                     >
                       <span>SUGGESTED PRICE</span>
@@ -1488,6 +1517,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                       type="checkbox"
                       checked={selectedItems.has(suggestion.listingId)}
                       onChange={() => handleSelectItem(suggestion.listingId)}
+                      aria-label={`Select item ${suggestion.listingId}`}
+                      title={`Select item ${suggestion.listingId}`}
                       className="table-checkbox"
                     />
                   </td>
@@ -1516,6 +1547,18 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                         <div className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
                           {suggestion.label || 'Unknown Label'}
                         </div>
+                        <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                          <a
+                            href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`View item ${suggestion.listingId} on Discogs`}
+                            title={`View item ${suggestion.listingId} on Discogs`}
+                            className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-mono cursor-pointer"
+                          >
+                            ID: {suggestion.listingId}
+                          </a>
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -1541,19 +1584,6 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                       ))}
                     </div>
                   </td>
-                  <td className="w-20 px-6 py-4 whitespace-nowrap">
-                    <a
-                      href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-mono text-sm inline-flex items-center gap-1.5 cursor-pointer"
-                    >
-                      {suggestion.listingId}
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </a>
-                  </td>
                   <td className="w-20 px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-right">
                     <div className="flex flex-col items-end">
                       {appliedItems.has(suggestion.listingId) && suggestion.originalPrice ? (
@@ -1566,24 +1596,24 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                           </span>
                         </>
                       ) : (
-                        <>
-                          <div className="font-medium">
-                            {formatCurrency(suggestion.currentPrice, suggestion.currency)}
-                          </div>
-                          <div className={`text-xs font-medium ${
-                            suggestion.suggestedPrice > suggestion.currentPrice 
-                              ? 'text-red-600 dark:text-red-400' // Underpriced = RED (showing negative delta)
-                              : suggestion.suggestedPrice < suggestion.currentPrice 
-                              ? 'text-green-600 dark:text-green-400' // Overpriced = GREEN (showing positive delta)
-                              : 'text-gray-500 dark:text-gray-400'
-                          }`}>
-                            {(() => {
-                              const delta = suggestion.currentPrice - suggestion.suggestedPrice
-                              return `${delta >= 0 ? '+' : ''}${formatCurrency(delta, suggestion.currency)}`
-                            })()}
-                          </div>
-                        </>
+                        <div className="font-medium">
+                          {formatCurrency(suggestion.currentPrice, suggestion.currency)}
+                        </div>
                       )}
+                    </div>
+                  </td>
+                  <td className="w-20 px-6 py-4 whitespace-nowrap text-sm text-right">
+                    <div className={`text-sm font-medium ${
+                      suggestion.suggestedPrice > suggestion.currentPrice 
+                        ? 'text-red-600 dark:text-red-400' // Underpriced = RED (showing negative delta)
+                        : suggestion.suggestedPrice < suggestion.currentPrice 
+                        ? 'text-green-600 dark:text-green-400' // Overpriced = GREEN (showing positive delta)
+                        : 'text-gray-500 dark:text-gray-400'
+                    }`}>
+                      {(() => {
+                        const delta = suggestion.currentPrice - suggestion.suggestedPrice
+                        return `${delta >= 0 ? '+' : ''}${formatCurrency(delta, suggestion.currency)}`
+                      })()}
                     </div>
                   </td>
                   <td className="w-20 px-6 py-4 whitespace-nowrap text-right">
@@ -1620,6 +1650,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                           <button
                             onClick={() => handleApplyIndividual(suggestion.listingId)}
                             disabled={applyingItems.has(suggestion.listingId) || appliedItems.has(suggestion.listingId) || selectedItems.size > 0}
+                            aria-label="Apply suggested price to Discogs listing"
+                            title="Apply suggested price to Discogs listing"
                             className={`inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed transition-all duration-200 w-[72px] ${
                               appliedItems.has(suggestion.listingId)
                                 ? 'bg-green-600 hover:bg-green-600 disabled:opacity-100 focus:ring-green-500'
@@ -1668,23 +1700,15 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                   : 'bg-gray-50/50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700'
               }`}
             >
-              {/* Discogs Link and ID - Top Right */}
-              <div className="absolute top-3 right-3 flex items-center gap-2">
+              {/* Discogs Link - Top Right */}
+              <div className="absolute top-3 right-3">
                 <a
                   href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-xs font-mono cursor-pointer"
-                  title={`View on Discogs: ${suggestion.listingId}`}
-                >
-                  {suggestion.listingId}
-                </a>
-                <a
-                  href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  aria-label={`View item ${suggestion.listingId} on Discogs`}
+                  title={`View item ${suggestion.listingId} on Discogs`}
                   className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 cursor-pointer"
-                  title={`View on Discogs: ${suggestion.listingId}`}
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -1697,6 +1721,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                   type="checkbox"
                   checked={selectedItems.has(suggestion.listingId)}
                   onChange={() => handleSelectItem(suggestion.listingId)}
+                  aria-label={`Select item ${suggestion.listingId}`}
+                  title={`Select item ${suggestion.listingId}`}
                   className="table-checkbox mt-1 flex-shrink-0"
                 />
                 <div className="flex gap-2 flex-1 min-w-0 pr-8">
@@ -1718,8 +1744,20 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                      <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate mb-1">
                        {typeof suggestion.artist === 'object' ? (suggestion.artist as any)?.name : suggestion.artist || 'Unknown Artist'}
                      </p>
-                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate mb-1">
                        {suggestion.label || 'Unknown Label'}
+                     </p>
+                     <p className="text-xs text-gray-400 dark:text-gray-500">
+                       <a
+                         href={`https://www.discogs.com/sell/item/${suggestion.listingId}`}
+                         target="_blank"
+                         rel="noopener noreferrer"
+                         aria-label={`View item ${suggestion.listingId} on Discogs`}
+                         title={`View item ${suggestion.listingId} on Discogs`}
+                         className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-mono cursor-pointer"
+                       >
+                         ID: {suggestion.listingId}
+                       </a>
                      </p>
                    </div>
                 </div>
@@ -1747,7 +1785,7 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                  </div>
                </div>
               
-              <div className="grid grid-cols-2 gap-3 text-xs mb-3">
+              <div className="grid grid-cols-3 gap-3 text-xs mb-3">
                 <div className="text-right">
                   <div className="text-gray-500 dark:text-gray-400 mb-1">Current</div>
                   <div className="flex flex-col items-end">
@@ -1761,24 +1799,25 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                         </span>
                       </>
                     ) : (
-                      <>
-                        <div className="font-medium text-gray-900 dark:text-gray-100">
-                          {formatCurrency(suggestion.currentPrice, suggestion.currency)}
-                        </div>
-                        <div className={`text-xs font-medium ${
-                          suggestion.suggestedPrice > suggestion.currentPrice 
-                            ? 'text-red-600 dark:text-red-400' // Underpriced = RED (showing negative delta)
-                            : suggestion.suggestedPrice < suggestion.currentPrice 
-                            ? 'text-green-600 dark:text-green-400' // Overpriced = GREEN (showing positive delta)
-                            : 'text-gray-500 dark:text-gray-400'
-                        }`}>
-                          {(() => {
-                            const delta = suggestion.currentPrice - suggestion.suggestedPrice
-                            return `${delta >= 0 ? '+' : ''}${formatCurrency(delta, suggestion.currency)}`
-                          })()}
-                        </div>
-                      </>
+                      <div className="font-medium text-gray-900 dark:text-gray-100">
+                        {formatCurrency(suggestion.currentPrice, suggestion.currency)}
+                      </div>
                     )}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-gray-500 dark:text-gray-400 mb-1">Delta</div>
+                  <div className={`text-sm font-medium ${
+                    suggestion.suggestedPrice > suggestion.currentPrice 
+                      ? 'text-red-600 dark:text-red-400' // Underpriced = RED (showing negative delta)
+                      : suggestion.suggestedPrice < suggestion.currentPrice 
+                      ? 'text-green-600 dark:text-green-400' // Overpriced = GREEN (showing positive delta)
+                      : 'text-gray-500 dark:text-gray-400'
+                  }`}>
+                    {(() => {
+                      const delta = suggestion.currentPrice - suggestion.suggestedPrice
+                      return `${delta >= 0 ? '+' : ''}${formatCurrency(delta, suggestion.currency)}`
+                    })()}
                   </div>
                 </div>
                 <div className="text-right">
@@ -1816,6 +1855,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
               <Button
                 onClick={() => handleApplyIndividual(suggestion.listingId)}
                 disabled={applyingItems.has(suggestion.listingId) || appliedItems.has(suggestion.listingId) || selectedItems.size > 0}
+                aria-label="Apply suggested price to Discogs listing"
+                title="Apply suggested price to Discogs listing"
                 variant="primary"
                 className={`w-full text-sm ${
                   appliedItems.has(suggestion.listingId)
@@ -1856,6 +1897,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                     id="itemsPerPage"
                     value={itemsPerPage}
                     onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                    aria-label="Items per page"
+                    title="Select number of items to display per page"
                     className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 pl-3 pr-12 py-1.5 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 appearance-none"
                   >
                     <option value={50}>50</option>
@@ -1881,6 +1924,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
               <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
+                aria-label="Go to previous page"
+                title="Go to previous page"
                 className="inline-flex items-center px-3 py-1.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous
@@ -1903,6 +1948,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                     <button
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
+                      aria-label={`Go to page ${pageNum}${currentPage === pageNum ? ' (current page)' : ''}`}
+                      title={`Go to page ${pageNum}${currentPage === pageNum ? ' (current page)' : ''}`}
                         className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md ${
                           currentPage === pageNum
                            ? 'bg-primary-600 dark:bg-primary-500 text-white'
@@ -1922,6 +1969,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
               <button
                 onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
+                aria-label="Go to next page"
+                title="Go to next page"
                 className="inline-flex items-center px-3 py-1.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
@@ -1950,6 +1999,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                 <Button 
                   variant="primary" 
                   onClick={handleSimulateSelection}
+                  aria-label="Run pricing analysis to get recommendations for your Discogs inventory"
+                  title="Run pricing analysis to get recommendations for your Discogs inventory"
                 >
                   Run Pricing Analysis
                 </Button>
