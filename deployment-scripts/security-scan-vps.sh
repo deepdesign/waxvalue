@@ -5,15 +5,16 @@
 
 echo "🔒 VPS Security Scan Starting..."
 echo "=================================="
-echo "Scanning ALL directories and apps on your VPS..."
-echo "Directories being scanned:"
+echo "Scanning ALL directories and apps on your VPS from root..."
+echo "Comprehensive scan of:"
 echo "  - /var/www (all web apps)"
-echo "  - /home/*/public_html (user web directories)"
-echo "  - /home/*/www (user web directories)"
+echo "  - /home (all users and their web directories)"
+echo "  - /root (root files)"
 echo "  - /opt (optional apps)"
 echo "  - /srv (service data)"
-echo "  - /root (root files)"
-echo "  - /home (all user directories)"
+echo "  - /usr/local (local installations)"
+echo "  - /tmp (temporary files)"
+echo "  - All other directories (excluding system dirs: /proc, /sys, /dev, /run, /boot)"
 echo ""
 
 # Colors for output
@@ -24,9 +25,12 @@ NC='\033[0m' # No Color
 
 ISSUES_FOUND=0
 
-# Define directories to scan (all your apps/sites)
-WEB_DIRS="/var/www /home/*/public_html /home/*/www /opt /srv /usr/local/www"
-APP_DIRS="/var/www /home /root /opt /srv /usr/local/www"
+# Define directories to scan (ALL directories from root, excluding system dirs)
+# Web/app directories (common locations - will be scanned comprehensively)
+WEB_DIRS="/var/www /home/*/public_html /home/*/www /opt /srv /usr/local/www /usr/share/nginx /etc/nginx"
+
+# All user and application directories (comprehensive scan)
+APP_DIRS="/var/www /home /root /opt /srv /usr/local /var /tmp /usr/share"
 
 # 1. Check for suspicious processes
 echo "1️⃣  Checking for suspicious processes..."
@@ -127,59 +131,42 @@ else
 fi
 echo ""
 
-# 7. Check for PHP shells and backdoors (scan ALL web/app directories)
+# 7. Check for PHP shells and backdoors (scan ALL directories from root)
 echo "7️⃣  Scanning for PHP shells and backdoors..."
 echo "----------------------------------------"
-# Scan multiple common web/app directories
-WEB_DIRS="/var/www /home/*/public_html /home/*/www /opt /srv /usr/local/www"
-PHP_SHELLS=""
-for dir in $WEB_DIRS; do
-    if [ -d "$dir" ]; then
-        FOUND=$(find "$dir" -name "*.php" -type f 2>/dev/null | xargs grep -l "eval\|base64_decode\|system\|exec\|shell_exec\|passthru" 2>/dev/null 2>/dev/null | head -20)
-        if [ ! -z "$FOUND" ]; then
-            PHP_SHELLS="$PHP_SHELLS\n$FOUND"
-        fi
-    fi
-done
+# Scan from root, excluding system directories
+PHP_SHELLS=$(find / -type f -name "*.php" \( -path /proc -o -path /sys -o -path /dev -o -path /run -o -path /boot -o -path /lost+found \) -prune -o -type f -name "*.php" -print 2>/dev/null | xargs grep -l "eval\|base64_decode\|system\|exec\|shell_exec\|passthru" 2>/dev/null | head -30)
 if [ ! -z "$PHP_SHELLS" ]; then
     echo -e "${YELLOW}⚠️  PHP files with suspicious functions (review manually):${NC}"
-    echo -e "$PHP_SHELLS"
+    echo "$PHP_SHELLS"
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
 else
     echo -e "${GREEN}✓ No obvious PHP shells found${NC}"
 fi
 echo ""
 
-# 8. Check for suspicious scripts in ALL app directories
+# 8. Check for suspicious scripts (scan ALL directories from root)
 echo "8️⃣  Checking for suspicious scripts..."
 echo "----------------------------------------"
-# Scan all common app/web directories
-APP_DIRS="/var/www /home /root /opt /srv /usr/local/www"
-SUSPICIOUS_SCRIPTS=""
-for dir in $APP_DIRS; do
-    if [ -d "$dir" ]; then
-        FOUND=$(find "$dir" -type f \( -name "*.sh" -o -name "*.py" -o -name "*.js" \) 2>/dev/null | xargs grep -l "curl.*bash\|wget.*bash\|base64.*decode\|eval\|system(" 2>/dev/null | head -20)
-        if [ ! -z "$FOUND" ]; then
-            SUSPICIOUS_SCRIPTS="$SUSPICIOUS_SCRIPTS\n$FOUND"
-        fi
-    fi
-done
+# Scan from root, excluding system directories
+SUSPICIOUS_SCRIPTS=$(find / -type f \( -name "*.sh" -o -name "*.py" -o -name "*.js" \) \( -path /proc -o -path /sys -o -path /dev -o -path /run -o -path /boot -o -path /lost+found \) -prune -o -type f \( -name "*.sh" -o -name "*.py" -o -name "*.js" \) -print 2>/dev/null | xargs grep -l "curl.*bash\|wget.*bash\|base64.*decode\|eval\|system(" 2>/dev/null | head -30)
 if [ ! -z "$SUSPICIOUS_SCRIPTS" ]; then
     echo -e "${YELLOW}⚠️  Scripts with suspicious patterns (review manually):${NC}"
-    echo -e "$SUSPICIOUS_SCRIPTS"
+    echo "$SUSPICIOUS_SCRIPTS"
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
 else
     echo -e "${GREEN}✓ No obvious malicious scripts found${NC}"
 fi
 echo ""
 
-# 9. Check file permissions (ALL web/app directories)
+# 9. Check file permissions (scan ALL web/app directories from root)
 echo "9️⃣  Checking for world-writable files in web directories..."
 echo "----------------------------------------"
+# Focus on web/app directories but scan comprehensively
 WW_FILES=""
-for dir in $WEB_DIRS; do
+for dir in $WEB_DIRS /home /opt /srv; do
     if [ -d "$dir" ]; then
-        FOUND=$(find "$dir" -type f -perm -002 2>/dev/null | head -20)
+        FOUND=$(find "$dir" -type f -perm -002 2>/dev/null | head -30)
         if [ ! -z "$FOUND" ]; then
             WW_FILES="$WW_FILES\n$FOUND"
         fi
@@ -194,13 +181,14 @@ else
 fi
 echo ""
 
-# 10. Check for hidden files in ALL web/app directories
-echo "🔟 Checking for hidden files in web directories..."
+# 10. Check for hidden files (scan ALL directories from root)
+echo "🔟 Checking for hidden files in web/app directories..."
 echo "----------------------------------------"
+# Scan all web/app directories comprehensively
 HIDDEN_FILES=""
-for dir in $WEB_DIRS; do
+for dir in $WEB_DIRS /home /opt /srv /root; do
     if [ -d "$dir" ]; then
-        FOUND=$(find "$dir" -name ".*" -type f 2>/dev/null | grep -v ".git" | head -20)
+        FOUND=$(find "$dir" -name ".*" -type f 2>/dev/null | grep -vE "\.(git|svn|cvs)" | head -30)
         if [ ! -z "$FOUND" ]; then
             HIDDEN_FILES="$HIDDEN_FILES\n$FOUND"
         fi
@@ -215,21 +203,14 @@ else
 fi
 echo ""
 
-# 11. Check for suspicious file modifications (recent) - ALL directories
+# 11. Check for suspicious file modifications (recent) - scan from root
 echo "1️⃣1️⃣  Checking for recently modified suspicious files..."
 echo "----------------------------------------"
-RECENT_SUSPICIOUS=""
-for dir in $APP_DIRS; do
-    if [ -d "$dir" ]; then
-        FOUND=$(find "$dir" -type f -mtime -7 \( -name "*.php" -o -name "*.sh" -o -name "*.py" -o -name "*.js" \) 2>/dev/null | head -20)
-        if [ ! -z "$FOUND" ]; then
-            RECENT_SUSPICIOUS="$RECENT_SUSPICIOUS\n$FOUND"
-        fi
-    fi
-done
+# Scan from root, excluding system directories
+RECENT_SUSPICIOUS=$(find / -type f -mtime -7 \( -name "*.php" -o -name "*.sh" -o -name "*.py" -o -name "*.js" \) \( -path /proc -o -path /sys -o -path /dev -o -path /run -o -path /boot -o -path /lost+found \) -prune -o -type f -mtime -7 \( -name "*.php" -o -name "*.sh" -o -name "*.py" -o -name "*.js" \) -print 2>/dev/null | head -50)
 if [ ! -z "$RECENT_SUSPICIOUS" ]; then
     echo -e "${YELLOW}📋 Recently modified files (last 7 days - review manually):${NC}"
-    echo -e "$RECENT_SUSPICIOUS"
+    echo "$RECENT_SUSPICIOUS"
 fi
 echo ""
 
