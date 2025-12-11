@@ -59,8 +59,6 @@ echo "3️⃣  Checking for known malware directories..."
 echo "----------------------------------------"
 SUSPICIOUS_DIRS=(
     "/root/.local/share/.r0qsv8h1"
-    "/tmp/.X11-unix"
-    "/tmp/.ICE-unix"
     "/var/tmp/.systemhelper"
     "/root/.systemhelper"
     "/tmp/miner"
