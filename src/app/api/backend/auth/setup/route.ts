@@ -5,7 +5,17 @@ import { withSecurity } from '@/lib/api-security'
 async function handleSetup(request: NextRequest) {
   try {
     console.log('Frontend API: Proxying to backend /auth/setup')
-    const backendUrl = buildBackendUrl('auth/setup')
+    
+    // Get session_id from query parameters if provided
+    const { searchParams } = new URL(request.url)
+    const sessionId = searchParams.get('session_id')
+    
+    // Build backend URL with session_id if provided
+    let backendUrl = buildBackendUrl('auth/setup')
+    if (sessionId) {
+      backendUrl += `?session_id=${sessionId}`
+    }
+    
     console.log('Backend URL:', backendUrl)
     
     // Proxy to backend

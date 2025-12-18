@@ -1427,7 +1427,7 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                     </svg>
                   </button>
                 </th>
-                <th className="w-20 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <th className="w-16 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   <button
                     onClick={() => handleSort('condition')}
                     aria-label={`Sort by condition ${sortConfig.key === 'condition' ? (sortConfig.direction === 'asc' ? '(ascending)' : '(descending)') : ''}`}
@@ -1494,7 +1494,7 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                   </div>
                 </th>
                 <th className="w-24 px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  ACTIONS
+                  Apply suggested
                 </th>
               </tr>
             </thead>
@@ -1524,13 +1524,13 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                   </td>
                   <td className="w-64 px-6 py-4">
                     <div className="flex items-start space-x-3">
-                      <div className="flex-shrink-0 h-16 w-16">
+                      <div className="flex-shrink-0 h-[76px] w-[76px]">
                         <Image
-                          className="h-16 w-16 rounded object-cover border border-gray-200 dark:border-gray-700"
+                          className="h-[76px] w-[76px] rounded object-cover border border-gray-200 dark:border-gray-700"
                           src={suggestion.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'}
                           alt={suggestion.release?.title || 'Album cover'}
-                          width={64}
-                          height={64}
+                          width={76}
+                          height={76}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
@@ -1562,7 +1562,7 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                       </div>
                     </div>
                   </td>
-                  <td className="w-20 px-6 py-4 whitespace-nowrap">
+                  <td className="w-16 px-6 py-4 whitespace-nowrap">
                     <div className="text-xs space-y-0.5">
                       {suggestion.condition.split(', ').map((part, index) => (
                         <div key={index} className="leading-tight">
@@ -1727,11 +1727,11 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                 />
                 <div className="flex gap-2 flex-1 min-w-0 pr-8">
                   <Image
-                    className="h-14 w-14 rounded object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
+                    className="h-[68px] w-[68px] rounded object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
                     src={suggestion.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'}
                     alt={suggestion.release?.title || 'Album cover'}
-                    width={56}
-                    height={56}
+                    width={68}
+                    height={68}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAxNkMyMC42ODYzIDE2IDE4IDE4LjY4NjMgMTggMjJDMjggMjUuMzEzNyAyMC42ODYzIDI4IDE4IDI4QzI4IDMxLjMxMzcgMjAuNjg2MyAzNCAyNCAzNEMyNy4zMTM3IDM0IDMwIDMxLjMxMzcgMzAgMjhDMzAgMjUuMzEzNyAyNy4zMTM3IDI4IDMwIDI4QzMwIDI0LjY4NjMgMjcuMzEzNyAyMiAyNCAyMkMyNy4zMTM3IDIyIDMwIDE5LjMxMzcgMzAgMTZDMzAgMTIuNjg2MyAyNy4zMTM3IDEwIDI0IDEwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
@@ -1767,7 +1767,7 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                <div className="flex items-center gap-1 mb-3">
                  <div className="w-4"></div> {/* Spacer for checkbox */}
                  <div className="w-2"></div> {/* Spacer for gap-3 */}
-                 <div className="w-14"></div> {/* Spacer for thumbnail */}
+                 <div className="w-[68px]"></div> {/* Spacer for thumbnail */}
                  <div className="w-2"></div> {/* Spacer for gap-2 */}
                  <div className="text-xs space-x-2">
                    {suggestion.condition.split(', ').map((part, index) => (

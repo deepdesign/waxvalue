@@ -271,8 +271,8 @@ async def login(credentials: dict, session_id: str = None):
     }
 
 @app.post("/auth/setup")
-async def setup_auth():
-    """Initialize OAuth flow with Discogs - no session required"""
+async def setup_auth(setup_data: dict = None, session_id: str = None):
+    """Initialize OAuth flow with Discogs - optionally stores tokens in session if session_id provided"""
     consumer_key = os.getenv("DISCOGS_CONSUMER_KEY")
     consumer_secret = os.getenv("DISCOGS_CONSUMER_SECRET")
     
@@ -285,6 +285,37 @@ async def setup_auth():
         callback_url = f"{frontend_url}/auth/callback"
         request_token, request_token_secret = oauth.get_request_token(callback_url)
         auth_url = oauth.get_authorize_url(request_token)
+        
+        # If session_id is provided, store tokens in session for later retrieval
+        if session_id:
+            # Create or get session
+            if not session_manager.has_session(session_id):
+                session_manager.set_session(session_id, {
+                    "user": {
+                        "id": secrets.token_urlsafe(16),
+                        "username": None,
+                        "email": None,
+                        "discogsUserId": None,
+                        "accessToken": None,
+                        "accessTokenSecret": None
+                    },
+                    "settings": {
+                        "automationEnabled": True,
+                        "dailySchedule": "09:00",
+                        "priceChangeThreshold": 10.0,
+                        "maxPriceIncrease": 50.0,
+                        "minPriceDecrease": -25.0
+                    },
+                    "logs": [],
+                    "suggestions": []
+                })
+            
+            # Store OAuth request tokens in session for verification
+            session = session_manager.get_session(session_id)
+            session["_oauth_request_token"] = request_token
+            session["_oauth_request_token_secret"] = request_token_secret
+            session_manager.set_session(session_id, session)  # Save to file
+            logger.info(f"Stored OAuth tokens in session {session_id[:10]}...")
         
         logger.info(f"OAuth setup complete, returning auth URL")
         
@@ -319,8 +350,30 @@ async def verify_auth(verification: dict, session_id: str = None):
     verifier_code = verification.get("verifierCode") or verification.get("oauthVerifier")
     request_token_secret = verification.get("requestTokenSecret")
     
-    if not request_token or not verifier_code or not request_token_secret:
-        raise HTTPException(status_code=400, detail="Missing required OAuth parameters")
+    # If tokens are missing from request, try to retrieve from session
+    if (not request_token or not request_token_secret) and session_id:
+        session = session_manager.get_session(session_id)
+        if session:
+            if not request_token and session.get("_oauth_request_token"):
+                request_token = session.get("_oauth_request_token")
+                logger.info(f"Retrieved request_token from session {session_id[:10]}...")
+            if not request_token_secret and session.get("_oauth_request_token_secret"):
+                request_token_secret = session.get("_oauth_request_token_secret")
+                logger.info(f"Retrieved request_token_secret from session {session_id[:10]}...")
+    
+    # Provide more specific error message about what's missing
+    missing_params = []
+    if not request_token:
+        missing_params.append("requestToken")
+    if not verifier_code:
+        missing_params.append("verifierCode")
+    if not request_token_secret:
+        missing_params.append("requestTokenSecret")
+    
+    if missing_params:
+        detail_msg = f"Missing required OAuth parameters: {', '.join(missing_params)}"
+        logger.warning(f"OAuth verification failed: {detail_msg}")
+        raise HTTPException(status_code=400, detail=detail_msg)
     
     try:
         oauth = DiscogsOAuth(consumer_key, consumer_secret)
@@ -367,6 +420,12 @@ async def verify_auth(verification: dict, session_id: str = None):
         session = session_manager.get_session(session_id)
         user_data = session["user"]
         
+        # Clean up temporary OAuth request tokens from session
+        if "_oauth_request_token" in session:
+            del session["_oauth_request_token"]
+        if "_oauth_request_token_secret" in session:
+            del session["_oauth_request_token_secret"]
+        
         # Update user with Discogs info
         user_data.update({
             "discogsUserId": user_info["id"],
@@ -378,6 +437,9 @@ async def verify_auth(verification: dict, session_id: str = None):
             "accessToken": access_token,
             "accessTokenSecret": access_token_secret
         })
+        
+        # Save session with cleaned up tokens
+        session_manager.set_session(session_id, session)
         
         # Save updated session data
         session_manager.update_session_data(session_id, "user", user_data)

@@ -46,8 +46,11 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
         throw new Error('No session found. Please login first.')
       }
       
-      // Get the authorization URL from the backend (no session required for OAuth setup)
-      const response = await fetch('/api/backend/auth/setup', {
+      // Get the authorization URL from the backend, include session_id to store tokens
+      const setupUrl = sessionId 
+        ? `/api/backend/auth/setup?session_id=${sessionId}`
+        : '/api/backend/auth/setup'
+      const response = await fetch(setupUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

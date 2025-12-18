@@ -25,10 +25,28 @@ async function handleVerify(request: NextRequest) {
       body: JSON.stringify(body),
     })
 
-    const data = await response.json()
+    // Try to parse response as JSON, but handle non-JSON responses
+    let data
+    try {
+      const text = await response.text()
+      data = text ? JSON.parse(text) : {}
+    } catch (parseError) {
+      // If response isn't JSON, create a structured error
+      data = {
+        detail: `Backend returned ${response.status}: ${response.statusText}`,
+        error: 'Invalid response from backend'
+      }
+    }
 
     if (!response.ok) {
-      return NextResponse.json(data, { status: response.status })
+      // Ensure we return a proper error structure
+      return NextResponse.json(
+        {
+          detail: data.detail || data.error || `Verification failed with status ${response.status}`,
+          ...data
+        },
+        { status: response.status }
+      )
     }
 
     return NextResponse.json(data)

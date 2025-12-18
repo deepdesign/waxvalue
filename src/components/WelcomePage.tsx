@@ -14,8 +14,22 @@ export function WelcomePage() {
     setIsConnecting(true)
     
     try {
-      // Initiate Discogs OAuth flow
-      const response = await fetch('/api/backend/auth/setup', {
+      // Get or create session ID for storing OAuth tokens
+      let sessionId = localStorage.getItem('waxvalue_session_id')
+      if (!sessionId || sessionId === 'undefined') {
+        // Generate a URL-safe random string for session ID
+        const randomBytes = new Uint8Array(32)
+        crypto.getRandomValues(randomBytes)
+        sessionId = btoa(String.fromCharCode(...randomBytes))
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_')
+          .replace(/=/g, '')
+        localStorage.setItem('waxvalue_session_id', sessionId)
+      }
+      
+      // Initiate Discogs OAuth flow, include session_id to store tokens
+      const setupUrl = `/api/backend/auth/setup?session_id=${sessionId}`
+      const response = await fetch(setupUrl, {
         method: 'POST',
       })
       

@@ -129,11 +129,23 @@ function AuthCallbackContent() {
         })
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}))
+          // Try to parse error response, with better error handling
+          let errorData: any = {}
+          try {
+            const text = await response.text()
+            errorData = text ? JSON.parse(text) : {}
+          } catch (parseError) {
+            console.error('Failed to parse error response:', parseError)
+            errorData = { detail: `Server returned ${response.status}: ${response.statusText}` }
+          }
+          
           console.error('Verification failed:', response.status, errorData)
           
+          // Provide more specific error message
+          const errorMessage = errorData.detail || errorData.error || `Failed to verify authorisation: ${response.status}`
+          
           // If error is about missing tokens but we have oauth_token, try one more time
-          if ((!requestToken || !requestTokenSecret) && oauthToken && errorData.detail?.includes('token')) {
+          if ((!requestToken || !requestTokenSecret) && oauthToken && errorMessage.includes('token')) {
             console.log('Retrying with oauth_token from URL...')
             const retryResponse = await fetch(`/api/backend/auth/verify?session_id=${sessionId}`, {
               method: 'POST',
@@ -153,9 +165,18 @@ function AuthCallbackContent() {
               handleSuccess(result)
               return
             }
+            
+            // If retry also failed, get the error message
+            try {
+              const retryText = await retryResponse.text()
+              const retryError = retryText ? JSON.parse(retryText) : {}
+              throw new Error(retryError.detail || retryError.error || errorMessage)
+            } catch (retryParseError) {
+              throw new Error(errorMessage)
+            }
           }
           
-          throw new Error(errorData.detail || `Failed to verify authorisation: ${response.status}`)
+          throw new Error(errorMessage)
         }
 
         const result = await response.json()
