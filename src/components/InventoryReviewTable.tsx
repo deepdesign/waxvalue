@@ -428,6 +428,10 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                     localStorage.setItem('waxvalue_has_data', 'true')
                   // Clear progress from localStorage as analysis is complete
                   localStorage.removeItem('waxvalue_analysis_progress')
+                  // Update last run date after successful data retrieval (with small delay to ensure backend has saved)
+                  setTimeout(() => {
+                    fetchLastRunDate()
+                  }, 500)
                   break
                   
                 case 'error':
@@ -448,6 +452,8 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                             setSuggestions(cachedData.suggestions)
                         setRepriceResults(cachedData.repriceResults || [])
                             console.info(`Loaded ${cachedData.suggestions.length} cached suggestions while analysis continues`)
+                            // Update last run date when cached data is loaded
+                            fetchLastRunDate()
                           }
                       }
                     } catch (cacheError) {

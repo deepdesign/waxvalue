@@ -977,6 +977,21 @@ async def get_suggestions_stream(session_id: str = None):
             session_manager.update_session_data(session_id, "analysis_complete", True)
             logger.info(f"Saved {len(suggestions)} suggestions to session")
             
+            # Add log entry for this run
+            from datetime import datetime
+            log_entry = {
+                "runDate": datetime.now().isoformat(),
+                "suggestionsFound": len(suggestions),
+                "totalListings": total_items,
+                "status": "completed"
+            }
+            session = session_manager.get_session(session_id)
+            if session:
+                logs = session.get("logs", [])
+                logs.append(log_entry)
+                session_manager.update_session_data(session_id, "logs", logs)
+                logger.info(f"Added log entry for run completed at {log_entry['runDate']}")
+            
             # Send completion
             yield f"data: {json.dumps({'type': 'complete', 'suggestions': [s.dict() for s in suggestions], 'totalItems': total_items})}\n\n"
             
