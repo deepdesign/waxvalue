@@ -1402,7 +1402,7 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
           <table className="min-w-full">
           <thead className="bg-gray-50 dark:bg-gray-800">
               <tr className="border-gray-200 border-y dark:border-gray-700">
-                <th className="w-12 px-6 py-3 text-left">
+                <th className="w-8 px-3 py-3 text-left">
                   <input
                     type="checkbox"
                     checked={isSelectAll && paginatedSuggestions.length > 0}
@@ -1512,7 +1512,7 @@ export const InventoryReviewTable = memo(forwardRef<InventoryReviewTableRef, Inv
                         : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                   >
-                  <td className="w-12 px-6 py-4">
+                  <td className="w-8 px-3 py-4">
                     <input
                       type="checkbox"
                       checked={selectedItems.has(suggestion.listingId)}
