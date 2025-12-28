@@ -89,9 +89,8 @@ echo -e "${YELLOW}🚀 Step 6/7: Starting services in production mode...${NC}"
 # Start backend (Python/FastAPI on port 8000)
 echo "  Starting backend on port 8000..."
 cd backend
-pm2 start "source venv/bin/activate && uvicorn main:app --host 127.0.0.1 --port 8000" \
+pm2 start "venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000" \
     --name waxvalue-backend \
-    --interpreter bash \
     --max-memory-restart 500M \
     --log /var/log/waxvalue-backend.log \
     --error /var/log/waxvalue-backend-error.log \
