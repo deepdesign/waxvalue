@@ -361,12 +361,15 @@ async def verify_auth(verification: dict, session_id: str = None):
     if (not request_token or not request_token_secret) and session_id:
         session = session_manager.get_session(session_id)
         if session:
+            logger.info(f"Session found for {session_id[:10]}..., checking for OAuth tokens")
             if not request_token and session.get("_oauth_request_token"):
                 request_token = session.get("_oauth_request_token")
                 logger.info(f"Retrieved request_token from session {session_id[:10]}...")
             if not request_token_secret and session.get("_oauth_request_token_secret"):
                 request_token_secret = session.get("_oauth_request_token_secret")
                 logger.info(f"Retrieved request_token_secret from session {session_id[:10]}...")
+        else:
+            logger.warning(f"Session {session_id[:10]}... not found in session manager. Available sessions: {list(session_manager.sessions.keys())[:5]}")
     
     # Provide more specific error message about what's missing
     missing_params = []

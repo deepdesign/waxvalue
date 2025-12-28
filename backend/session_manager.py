@@ -6,7 +6,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 class SessionManager:
-    def __init__(self, sessions_file: str = "sessions.json"):
+    def __init__(self, sessions_file: str = None):
+        # Use absolute path - default to backend directory
+        if sessions_file is None:
+            # Get the directory where this file is located (backend/)
+            backend_dir = os.path.dirname(os.path.abspath(__file__))
+            sessions_file = os.path.join(backend_dir, "sessions.json")
+        elif not os.path.isabs(sessions_file):
+            # If relative path provided, make it relative to backend directory
+            backend_dir = os.path.dirname(os.path.abspath(__file__))
+            sessions_file = os.path.join(backend_dir, sessions_file)
+        
         self.sessions_file = sessions_file
         self.sessions: Dict[str, Dict[str, Any]] = {}
         self.load_sessions()
@@ -20,9 +30,11 @@ class SessionManager:
                 logger.info(f"Loaded {len(self.sessions)} sessions from {self.sessions_file}")
             else:
                 logger.info(f"No sessions file found at {self.sessions_file}, starting with empty sessions")
+                # Ensure directory exists
+                os.makedirs(os.path.dirname(self.sessions_file), exist_ok=True)
                 self.sessions = {}
         except Exception as e:
-            logger.error(f"Error loading sessions: {e}")
+            logger.error(f"Error loading sessions from {self.sessions_file}: {e}")
             self.sessions = {}
     
     def save_sessions(self):
