@@ -80,6 +80,7 @@ echo ""
 echo -e "${YELLOW}🛑 Step 5/7: Stopping existing services...${NC}"
 pm2 delete waxvalue-backend 2>/dev/null || echo "  No existing backend process"
 pm2 delete waxvalue-frontend 2>/dev/null || echo "  No existing frontend process"
+pm2 delete waxvalue 2>/dev/null || echo "  No existing 'waxvalue' process (old name)"
 sleep 2  # Give PM2 time to clean up
 
 # Step 6: Start services with PM2 (PRODUCTION MODE)
@@ -89,8 +90,22 @@ echo -e "${YELLOW}🚀 Step 6/7: Starting services in production mode...${NC}"
 # Start backend (Python/FastAPI on port 8000)
 echo "  Starting backend on port 8000..."
 cd backend
-pm2 start "venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000" \
+
+# Create a startup script for PM2 to use
+cat > start-backend.sh << 'EOF'
+#!/bin/bash
+cd "$(dirname "$0")"
+source venv/bin/activate
+exec uvicorn main:app --host 127.0.0.1 --port 8000
+EOF
+chmod +x start-backend.sh
+
+pm2 delete waxvalue-backend 2>/dev/null || true
+sleep 1
+
+pm2 start ./start-backend.sh \
     --name waxvalue-backend \
+    --interpreter bash \
     --max-memory-restart 500M \
     --log /var/log/waxvalue-backend.log \
     --error /var/log/waxvalue-backend-error.log \
