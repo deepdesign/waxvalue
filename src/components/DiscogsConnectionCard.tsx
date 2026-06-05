@@ -13,6 +13,8 @@ import {
   LinkSlashIcon,
 } from '@heroicons/react/24/outline'
 import { Button } from '@/components/ui/Button'
+import { startDiscogsOAuth } from '@/lib/discogsAuth'
+import toast from 'react-hot-toast'
 
 interface DiscogsConnectionCardProps {
   user?: any
@@ -40,73 +42,11 @@ export function DiscogsConnectionCard({ user }: DiscogsConnectionCardProps) {
   const handleConnectToDiscogs = async () => {
     setIsConnecting(true)
     try {
-      // Check if user is logged in
-      const sessionId = localStorage.getItem('waxvalue_session_id')
-      if (!sessionId) {
-        throw new Error('No session found. Please login first.')
-      }
-      
-      // Get the authorization URL from the backend, include session_id to store tokens
-      const setupUrl = sessionId 
-        ? `/api/backend/auth/setup?session_id=${sessionId}`
-        : '/api/backend/auth/setup'
-      const response = await fetch(setupUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({}),
-      })
-      
-      // Handle non-OK responses
-      if (!response.ok) {
-        let errorMessage = `HTTP error: ${response.status}`
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.detail || errorData.error || errorData.message || errorMessage
-        } catch (jsonError) {
-          // Response is not JSON, try to get text
-          try {
-            const text = await response.text()
-            errorMessage = text || errorMessage
-          } catch (textError) {
-            // Can't read response at all
-            console.error('Failed to read error response:', textError)
-          }
-        }
-        throw new Error(errorMessage)
-      }
-
-      // Parse response
-      let result
-      try {
-        result = await response.json()
-      } catch (jsonError) {
-        throw new Error('Invalid response from server. Please try again.')
-      }
-      
-      // Validate response has required fields
-      if (!result.authUrl || !result.requestToken || !result.requestTokenSecret) {
-        throw new Error('Invalid response from server. Missing required data.')
-      }
-      
-      // Store the request token and secret for later verification
-      // Store in both localStorage and sessionStorage for reliability
-      localStorage.setItem('discogs_request_token', result.requestToken)
-      localStorage.setItem('discogs_request_token_secret', result.requestTokenSecret)
-      sessionStorage.setItem('discogs_request_token', result.requestToken)
-      sessionStorage.setItem('discogs_request_token_secret', result.requestTokenSecret)
-      
-      // Redirect to Discogs authorization page in the same window
-      window.location.href = result.authUrl
-      
-      // Note: We don't set isConnecting to false here because we're navigating away
-      // The finally block will still run, but that's okay since we're leaving the page
-      
-    } catch (error: any) {
+      await startDiscogsOAuth()
+    } catch (error: unknown) {
       console.error('Connection error:', error)
-      const errorMessage = error?.message || 'Unknown error occurred'
-      alert(`Failed to connect to Discogs: ${errorMessage}\n\nPlease check:\n- Your internet connection\n- That the backend server is running\n- Your browser console for more details`)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      toast.error(`Failed to connect to Discogs: ${errorMessage}`)
       setIsConnecting(false)
     }
   }

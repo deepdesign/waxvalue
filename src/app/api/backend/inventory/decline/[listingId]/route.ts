@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildBackendUrl } from '@/lib/api-config'
-import { withSecurity } from '@/lib/api-security'
+import { withSecurity, type RouteContext } from '@/lib/api-security'
 
-async function handleDeclineListing(
-  request: NextRequest,
-  { params }: { params: Promise<{ listingId: string }> }
-) {
+async function handleDeclineListing(request: NextRequest, context: RouteContext) {
   try {
     const { searchParams } = new URL(request.url)
     const sessionId = searchParams.get('session_id')
-    const { listingId } = await params
+    const { listingId } = await context.params
+    if (!listingId) {
+      return NextResponse.json({ error: 'Listing ID required' }, { status: 400 })
+    }
     
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 })

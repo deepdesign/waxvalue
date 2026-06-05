@@ -85,17 +85,30 @@ export function validateRequestBody(body: any): { valid: boolean; error?: string
   return { valid: true }
 }
 
+/** Next.js 15 route context (dynamic segments). */
+export type RouteContext = {
+  params: Promise<Record<string, string>>
+}
+
+export type SecureRouteHandler = (
+  request: NextRequest,
+  context: RouteContext
+) => Promise<NextResponse>
+
 /**
  * Security middleware wrapper
  */
 export function withSecurity(
-  handler: (request: NextRequest) => Promise<NextResponse>,
+  handler: SecureRouteHandler,
   options: {
     requireAuth?: boolean
     allowPublic?: boolean
   } = {}
 ) {
-  return async (request: NextRequest): Promise<NextResponse> => {
+  return async (
+    request: NextRequest,
+    context: RouteContext
+  ): Promise<NextResponse> => {
     // Rate limiting
     const ip = getClientIP(request)
     if (!rateLimit(ip)) {
@@ -105,10 +118,10 @@ export function withSecurity(
       )
     }
 
-    // Validate request body for POST/PUT/PATCH
+    // Validate request body for POST/PUT/PATCH (clone so handlers can still read the body)
     if (['POST', 'PUT', 'PATCH'].includes(request.method)) {
       try {
-        const body = await request.json().catch(() => null)
+        const body = await request.clone().json().catch(() => null)
         if (body) {
           const validation = validateRequestBody(body)
           if (!validation.valid) {
@@ -134,7 +147,7 @@ export function withSecurity(
       }
     }
 
-    return handler(request)
+    return handler(request, context)
   }
 }
 

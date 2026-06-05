@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildBackendUrl } from '@/lib/api-config'
-import { withSecurity } from '@/lib/api-security'
+import { withSecurity, type RouteContext } from '@/lib/api-security'
 
-async function handleApplyListing(
-  request: NextRequest,
-  { params }: { params: Promise<{ listingId: string }> }
-) {
-  const { listingId } = await params
+async function handleApplyListing(request: NextRequest, context: RouteContext) {
+  const { listingId } = await context.params
+  if (!listingId) {
+    return NextResponse.json({ error: 'Listing ID required' }, { status: 400 })
+  }
   try {
     const { searchParams } = new URL(request.url)
     const sessionId = searchParams.get('session_id')

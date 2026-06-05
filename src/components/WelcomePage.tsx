@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { ArrowRightIcon, ShieldCheckIcon, ChartBarIcon, CogIcon } from '@heroicons/react/24/outline'
 import { Button } from '@/components/ui/Button'
 import { Logo } from '@/components/Logo'
+import toast from 'react-hot-toast'
+import { startDiscogsOAuth } from '@/lib/discogsAuth'
 
 export function WelcomePage() {
   const [isConnecting, setIsConnecting] = useState(false)
@@ -12,45 +14,12 @@ export function WelcomePage() {
 
   const handleConnectDiscogs = async () => {
     setIsConnecting(true)
-    
     try {
-      // Get or create session ID for storing OAuth tokens
-      let sessionId = localStorage.getItem('waxvalue_session_id')
-      if (!sessionId || sessionId === 'undefined') {
-        // Generate a URL-safe random string for session ID
-        const randomBytes = new Uint8Array(32)
-        crypto.getRandomValues(randomBytes)
-        sessionId = btoa(String.fromCharCode(...randomBytes))
-          .replace(/\+/g, '-')
-          .replace(/\//g, '_')
-          .replace(/=/g, '')
-        localStorage.setItem('waxvalue_session_id', sessionId)
-      }
-      
-      // Initiate Discogs OAuth flow, include session_id to store tokens
-      const setupUrl = `/api/backend/auth/setup?session_id=${sessionId}`
-      const response = await fetch(setupUrl, {
-        method: 'POST',
-      })
-      
-      const data = await response.json()
-      
-      if (data.authUrl) {
-        // Store OAuth tokens for callback (session will be created after auth)
-        // Store in both localStorage and sessionStorage for reliability
-        localStorage.setItem('discogs_request_token', data.requestToken)
-        localStorage.setItem('discogs_request_token_secret', data.requestTokenSecret)
-        sessionStorage.setItem('discogs_request_token', data.requestToken)
-        sessionStorage.setItem('discogs_request_token_secret', data.requestTokenSecret)
-        
-        // Redirect to Discogs authorization
-        window.location.href = data.authUrl
-      } else {
-        console.error('No auth URL received:', data)
-        setIsConnecting(false)
-      }
+      await startDiscogsOAuth()
     } catch (error) {
       console.error('Failed to start OAuth:', error)
+      const message = error instanceof Error ? error.message : 'Could not start Discogs authorization'
+      toast.error(message)
       setIsConnecting(false)
     }
   }

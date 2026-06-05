@@ -14,7 +14,8 @@ const nextConfig = {
   devIndicators: false,
   // Allow build to succeed with warnings
   eslint: {
-    ignoreDuringBuilds: false, // Still run ESLint but don't fail build
+    // Hostinger/production installs omit devDependencies (eslint is dev-only)
+    ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: false,

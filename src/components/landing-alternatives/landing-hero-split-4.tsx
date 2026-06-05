@@ -3,6 +3,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { ArrowRightIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
+import toast from 'react-hot-toast'
+import { startDiscogsOAuth } from '@/lib/discogsAuth'
 
 export function LandingHeroSplit4() {
   const [isConnecting, setIsConnecting] = useState(false)
@@ -40,18 +42,11 @@ export function LandingHeroSplit4() {
   const handleConnectDiscogs = async () => {
     setIsConnecting(true)
     try {
-      const response = await fetch('/api/backend/auth/setup', { method: 'POST' })
-      const data = await response.json()
-      if (data.authUrl) {
-        // Store in both localStorage and sessionStorage for reliability
-        localStorage.setItem('discogs_request_token', data.requestToken)
-        localStorage.setItem('discogs_request_token_secret', data.requestTokenSecret)
-        sessionStorage.setItem('discogs_request_token', data.requestToken)
-        sessionStorage.setItem('discogs_request_token_secret', data.requestTokenSecret)
-        window.location.href = data.authUrl
-      }
+      await startDiscogsOAuth()
     } catch (error) {
       console.error('Failed to start OAuth:', error)
+      const message = error instanceof Error ? error.message : 'Could not start Discogs authorization'
+      toast.error(message)
       setIsConnecting(false)
     }
   }

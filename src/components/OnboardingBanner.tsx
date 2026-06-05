@@ -1,21 +1,31 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { 
   ExclamationTriangleIcon, 
   ArrowRightIcon
 } from '@heroicons/react/24/outline'
+import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
+import toast from 'react-hot-toast'
+import { startDiscogsOAuth } from '@/lib/discogsAuth'
 
 interface OnboardingBannerProps {
   onDismiss?: () => void
 }
 
 export function OnboardingBanner({ onDismiss }: OnboardingBannerProps) {
-  const router = useRouter()
+  const [isConnecting, setIsConnecting] = useState(false)
 
-  const handleConnect = () => {
-    router.push('/settings')
+  const handleConnect = async () => {
+    setIsConnecting(true)
+    try {
+      await startDiscogsOAuth()
+    } catch (error) {
+      console.error('Failed to start OAuth:', error)
+      const message = error instanceof Error ? error.message : 'Could not start Discogs authorization'
+      toast.error(message)
+      setIsConnecting(false)
+    }
   }
 
   return (
@@ -37,6 +47,9 @@ export function OnboardingBanner({ onDismiss }: OnboardingBannerProps) {
               onClick={handleConnect}
               size="sm"
               className="inline-flex items-center"
+              loading={isConnecting}
+              loadingText="Connecting..."
+              disabled={isConnecting}
               aria-label="Connect your Discogs account to get started"
             >
               Connect Discogs
